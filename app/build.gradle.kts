@@ -25,7 +25,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://66e7-2405-201-ac02-d151-2179-1e40-1f07-59c0.ngrok-free.app\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://411c-2405-201-ac02-d151-a228-5ca7-9c7-5b05.ngrok-free.app\""
+            )
         }
         release {
             isMinifyEnabled = false
@@ -33,7 +37,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://66e7-2405-201-ac02-d151-2179-1e40-1f07-59c0.ngrok-free.app\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://411c-2405-201-ac02-d151-a228-5ca7-9c7-5b05.ngrok-free.app\""
+            )
         }
     }
     compileOptions {
@@ -103,9 +111,11 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
 
     // Paging Compose
-    implementation (libs.accompanist.pager)
-    implementation (libs.accompanist.pager.indicators)
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
 
+    //country code picker
+    implementation(libs.countrycodepickercompose)
 
 
 }

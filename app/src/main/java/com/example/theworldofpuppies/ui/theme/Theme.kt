@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -8,11 +7,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 
 private val lightScheme = lightColorScheme(
@@ -129,6 +126,43 @@ private val mediumContrastLightColorScheme = lightColorScheme(
     surfaceContainerHighest = surfaceContainerHighestLightMediumContrast,
 )
 
+private val highContrastLightColorScheme = lightColorScheme(
+    primary = primaryLightHighContrast,
+    onPrimary = onPrimaryLightHighContrast,
+    primaryContainer = primaryContainerLightHighContrast,
+    onPrimaryContainer = onPrimaryContainerLightHighContrast,
+    secondary = secondaryLightHighContrast,
+    onSecondary = onSecondaryLightHighContrast,
+    secondaryContainer = secondaryContainerLightHighContrast,
+    onSecondaryContainer = onSecondaryContainerLightHighContrast,
+    tertiary = tertiaryLightHighContrast,
+    onTertiary = onTertiaryLightHighContrast,
+    tertiaryContainer = tertiaryContainerLightHighContrast,
+    onTertiaryContainer = onTertiaryContainerLightHighContrast,
+    error = errorLightHighContrast,
+    onError = onErrorLightHighContrast,
+    errorContainer = errorContainerLightHighContrast,
+    onErrorContainer = onErrorContainerLightHighContrast,
+    background = backgroundLightHighContrast,
+    onBackground = onBackgroundLightHighContrast,
+    surface = surfaceLightHighContrast,
+    onSurface = onSurfaceLightHighContrast,
+    surfaceVariant = surfaceVariantLightHighContrast,
+    onSurfaceVariant = onSurfaceVariantLightHighContrast,
+    outline = outlineLightHighContrast,
+    outlineVariant = outlineVariantLightHighContrast,
+    scrim = scrimLightHighContrast,
+    inverseSurface = inverseSurfaceLightHighContrast,
+    inverseOnSurface = inverseOnSurfaceLightHighContrast,
+    inversePrimary = inversePrimaryLightHighContrast,
+    surfaceDim = surfaceDimLightHighContrast,
+    surfaceBright = surfaceBrightLightHighContrast,
+    surfaceContainerLowest = surfaceContainerLowestLightHighContrast,
+    surfaceContainerLow = surfaceContainerLowLightHighContrast,
+    surfaceContainer = surfaceContainerLightHighContrast,
+    surfaceContainerHigh = surfaceContainerHighLightHighContrast,
+    surfaceContainerHighest = surfaceContainerHighestLightHighContrast,
+)
 
 private val mediumContrastDarkColorScheme = darkColorScheme(
     primary = primaryDarkMediumContrast,
@@ -206,45 +240,6 @@ private val highContrastDarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
 )
 
-private val highContrastLightColorScheme = lightColorScheme(
-    primary = primaryLightHighContrast,
-    onPrimary = onPrimaryLightHighContrast,
-    primaryContainer = primaryContainerLightHighContrast,
-    onPrimaryContainer = onPrimaryContainerLightHighContrast,
-    secondary = secondaryLightHighContrast,
-    onSecondary = onSecondaryLightHighContrast,
-    secondaryContainer = secondaryContainerLightHighContrast,
-    onSecondaryContainer = onSecondaryContainerLightHighContrast,
-    tertiary = tertiaryLightHighContrast,
-    onTertiary = onTertiaryLightHighContrast,
-    tertiaryContainer = tertiaryContainerLightHighContrast,
-    onTertiaryContainer = onTertiaryContainerLightHighContrast,
-    error = errorLightHighContrast,
-    onError = onErrorLightHighContrast,
-    errorContainer = errorContainerLightHighContrast,
-    onErrorContainer = onErrorContainerLightHighContrast,
-    background = backgroundLightHighContrast,
-    onBackground = onBackgroundLightHighContrast,
-    surface = surfaceLightHighContrast,
-    onSurface = onSurfaceLightHighContrast,
-    surfaceVariant = surfaceVariantLightHighContrast,
-    onSurfaceVariant = onSurfaceVariantLightHighContrast,
-    outline = outlineLightHighContrast,
-    outlineVariant = outlineVariantLightHighContrast,
-    scrim = scrimLightHighContrast,
-    inverseSurface = inverseSurfaceLightHighContrast,
-    inverseOnSurface = inverseOnSurfaceLightHighContrast,
-    inversePrimary = inversePrimaryLightHighContrast,
-    surfaceDim = surfaceDimLightHighContrast,
-    surfaceBright = surfaceBrightLightHighContrast,
-    surfaceContainerLowest = surfaceContainerLowestLightHighContrast,
-    surfaceContainerLow = surfaceContainerLowLightHighContrast,
-    surfaceContainer = surfaceContainerLightHighContrast,
-    surfaceContainerHigh = surfaceContainerHighLightHighContrast,
-    surfaceContainerHighest = surfaceContainerHighestLightHighContrast,
-)
-
-
 @Immutable
 data class ColorFamily(
     val color: Color,
@@ -265,10 +260,10 @@ fun AppTheme(
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
-/*        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }*/
+//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+//            val context = LocalContext.current
+//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+//        }
 
         darkTheme -> highContrastDarkColorScheme
         else -> highContrastLightColorScheme
