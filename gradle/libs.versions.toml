@@ -4,6 +4,7 @@ accompanistPagerIndicators = "0.13.0"
 accompanistSystemuicontroller = "0.33.0-alpha"
 agp = "8.5.2"
 coilCompose = "2.2.2"
+countrycodepickercompose = "0.1"
 kotlin = "2.0.20"
 koin = "3.5.6"
 ktor = "2.3.12"
@@ -38,6 +39,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomPaging" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomPaging" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+countrycodepickercompose = { module = "com.github.ahmmedrejowan:CountryCodePickerCompose", version.ref = "countrycodepickercompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
