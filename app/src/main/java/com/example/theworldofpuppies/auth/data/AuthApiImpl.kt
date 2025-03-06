@@ -40,7 +40,7 @@ class AuthApiImpl(
         }
     }
 
-    override suspend fun loginRequest(loginRequest: LoginRequest)
+    override suspend fun loginUser(loginRequest: LoginRequest)
             : Result<ApiResponse<Unit>, NetworkError> {
         return safeCall {
             httpClient.post(
