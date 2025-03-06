@@ -1,28 +1,24 @@
-package com.example.theworldofpuppies.auth.presentation.register
+package com.example.theworldofpuppies.auth.presentation.login
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.theworldofpuppies.auth.data.request.LoginRequest
 import com.example.theworldofpuppies.auth.data.request.OtpRequest
-import com.example.theworldofpuppies.auth.data.request.RegistrationRequest
 import com.example.theworldofpuppies.auth.domain.AuthApi
-import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
-import com.example.theworldofpuppies.auth.presentation.login.LoginUiState
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.onError
 import com.example.theworldofpuppies.core.domain.util.onSuccess
 import com.example.theworldofpuppies.core.presentation.util.Event
-import com.example.theworldofpuppies.core.presentation.util.toString
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
-data class RegistrationUiState(
+data class LoginUiState(
     val phoneNumber: String = "",
     val otp: String = "",
     val isOtpSent: Boolean = false,
@@ -32,41 +28,42 @@ data class RegistrationUiState(
     val errorMessage: String? = null
 )
 
-class RegistrationViewModel(
-    private val authEventManager: AuthEventManager,
+class LoginViewModel(
     private val userRepository: UserRepository,
-    private val authApi: AuthApi
+    private val authApi: AuthApi,
+    private val authEventManager: AuthEventManager
 ) : ViewModel() {
 
-    private val _registrationUiState = MutableStateFlow(RegistrationUiState())
-    val registrationUiState = _registrationUiState.asStateFlow()
+    private val _loginUiState = MutableStateFlow(LoginUiState())
+    val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
+
 
     private val _events = Channel<Event>()
     val events = _events.receiveAsFlow()
 
     fun resentState() {
         viewModelScope.launch {
-            _registrationUiState.value = RegistrationUiState()
+            _loginUiState.value = LoginUiState()
         }
     }
-
 
     fun toggleOtpSentState() {
         viewModelScope.launch {
-            _registrationUiState.update { it.copy(isOtpSent = !_registrationUiState.value.isOtpSent) }
-            Log.i("toggle", "isOtpSent: ${_registrationUiState.value.isOtpSent}")
+            _loginUiState.update { it.copy(isOtpSent = !_loginUiState.value.isOtpSent) }
+            Log.i("toggle", "isOtpSent: ${_loginUiState.value.isOtpSent}")
 
         }
     }
 
-    fun registerUser(username: String, email: String, phoneNumber: String) {
+
+    fun loginUser(phoneNumber: String) {
         viewModelScope.launch {
-            _registrationUiState.update { it.copy(isLoading = true) }
+            _loginUiState.update { it.copy(isLoading = true) }
             Log.i("toggle", "started")
-            val result = authApi.registerUser(RegistrationRequest(phoneNumber, email, username))
+            val result = authApi.loginUser(LoginRequest(phoneNumber))
             Log.i("toggle", "result came: ${result.onSuccess { it.success.toString() }}")
             result.onSuccess { apiResponse ->
-                _registrationUiState.update {
+                _loginUiState.update {
                     if (apiResponse.success) {
                         it.copy(
                             phoneNumber = phoneNumber,
@@ -82,7 +79,7 @@ class RegistrationViewModel(
                     }
                 }
             }.onError { error ->
-                _registrationUiState.update {
+                _loginUiState.update {
                     it.copy(
                         isLoading = false,
                         errorMessage = error.toString()
@@ -93,13 +90,12 @@ class RegistrationViewModel(
         }
     }
 
-
-    fun verifyRegistration(phoneNumber: String, otp: String) {
+    fun verifyLogin(phoneNumber: String, otp: String) {
         viewModelScope.launch {
-            _registrationUiState.update { it.copy(isLoading = true) }
+            _loginUiState.update { it.copy(isLoading = true) }
             val result = authApi.verifyRegistration(OtpRequest(phoneNumber, otp))
             result.onSuccess { apiResponse ->
-                _registrationUiState.update {
+                _loginUiState.update {
                     if (apiResponse.success) {
                         apiResponse.data?.let { userResponse ->
                             val token = userResponse.token
@@ -139,7 +135,7 @@ class RegistrationViewModel(
                     }
                 }
             }.onError { error ->
-                _registrationUiState.update {
+                _loginUiState.update {
                     it.copy(
                         isLoading = false,
                         errorMessage = error.toString()
@@ -150,6 +146,7 @@ class RegistrationViewModel(
             }
         }
     }
+
 
 
 }

@@ -11,6 +11,6 @@ import com.example.theworldofpuppies.core.domain.util.Result
 interface AuthApi {
     suspend fun registerUser(registrationRequest: RegistrationRequest): Result<ApiResponse<Unit>, NetworkError>
     suspend fun verifyRegistration(otpRequest: OtpRequest): Result<ApiResponse<UserResponse>, NetworkError>
-    suspend fun loginRequest(loginRequest: LoginRequest): Result<ApiResponse<Unit>, NetworkError>
+    suspend fun loginUser(loginRequest: LoginRequest): Result<ApiResponse<Unit>, NetworkError>
     suspend fun verifyLogin(otpRequest: OtpRequest): Result<ApiResponse<UserResponse>, NetworkError>
 }

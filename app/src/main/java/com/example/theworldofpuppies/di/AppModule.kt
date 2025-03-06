@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.theworldofpuppies.auth.data.AuthApiImpl
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.auth.domain.AuthApi
+import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
@@ -43,4 +44,5 @@ val appModule = module {
 //    viewModelOf(::ProductViewModel)
 //    viewModelOf(::CartViewModel)
     viewModelOf(::RegistrationViewModel)
+    viewModelOf(::LoginViewModel)
 }

@@ -20,6 +20,8 @@ class MainActivity : ComponentActivity() {
             AppTheme {
                 val navController = rememberNavController()
                 AppNavigation(navController = navController)
+//
+//                TutorialBottomSheetScreen()
             }
         }
     }

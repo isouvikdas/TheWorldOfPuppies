@@ -6,12 +6,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
+import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
-    data object RegistrationPage : Screen("RegistrationPage")
+    data object RegistrationScreen : Screen("RegistrationScreen")
+    data object LoginScreen: Screen("LoginScreen")
     data object ProductList : Screen("ProductList")
     data object ProductDetail : Screen("ProductDetail")
     data object AccountDetail : Screen("AccountDetail")
@@ -29,14 +32,24 @@ fun AppNavigation(
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
     val registrationUiState by registrationViewModel.registrationUiState.collectAsStateWithLifecycle()
 
+    val loginViewModel = koinViewModel<LoginViewModel>()
+    val loginUiState by loginViewModel.loginUiState.collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
-        startDestination = Screen.RegistrationPage.route
+        startDestination = Screen.RegistrationScreen.route
     ) {
-        composable(route = Screen.RegistrationPage.route) {
+        composable(route = Screen.RegistrationScreen.route) {
             RegisterScreen(
                 registrationViewModel = registrationViewModel,
                 registrationUiState = registrationUiState
+            )
+        }
+
+        composable(route = Screen.LoginScreen.route) {
+            LoginScreen(
+                loginUiState = loginUiState,
+                loginViewModel = loginViewModel
             )
         }
     }
