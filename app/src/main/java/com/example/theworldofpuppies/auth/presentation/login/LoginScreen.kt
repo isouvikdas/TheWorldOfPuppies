@@ -1,8 +1,10 @@
 package com.example.theworldofpuppies.auth.presentation.login
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,32 +17,47 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.auth.presentation.component.PhoneNumberField
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.rejowan.ccpc.Country
 
 @Composable
 fun LoginScreen(
     loginUiState: LoginUiState,
-    loginViewModel: LoginViewModel? = null
+    loginViewModel: LoginViewModel? = null,
+    onRegisterClick: () -> Unit,
+    onVerify: () -> Unit
 ) {
 
     val showModalBottomSheet = rememberSaveable { mutableStateOf(false) }
 
-    if (!loginUiState.isLoading && loginUiState.isOtpSent) {
-        showModalBottomSheet.value = !showModalBottomSheet.value
+
+    LaunchedEffect(loginUiState.isOtpSent) {
+        if (!loginUiState.isLoading && loginUiState.isOtpSent) {
+            showModalBottomSheet.value = !showModalBottomSheet.value
+        }
+    }
+
+    LaunchedEffect(loginUiState.loginSuccess) {
+        if (!loginUiState.isLoading && loginUiState.loginSuccess) {
+            onVerify()
+        }
     }
 
     var phoneNumber by rememberSaveable {
@@ -50,25 +67,6 @@ fun LoginScreen(
     var selectedCountry by rememberSaveable {
         mutableStateOf(Country.India)
     }
-
-    var name by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    var email by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    val isValidEmail = remember(email) {
-        val gmailPattern = Regex("^[A-Za-z0-9._%+-]+@gmail\\.com\$")
-        gmailPattern.matches(email) && !loginUiState.isLoading
-    }
-
-    VerifyLoginSheet(
-        showModalBottomSheet = showModalBottomSheet,
-        loginViewModel = loginViewModel,
-        loginUiState = loginUiState
-    )
 
     Surface(
         modifier = Modifier
@@ -86,16 +84,34 @@ fun LoginScreen(
                     .fillMaxHeight(0.18f)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Bottom
             ) {
+                Text(
+                    text = "Let's sign you in",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 27.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 30.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Welcome Back!",
+                    fontWeight = FontWeight.W400,
+                    fontSize = 23.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(vertical = 10.dp),
+                    color = Color.Black
+                )
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.6f),
+                    .fillMaxHeight(0.4f),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
+                verticalArrangement = Arrangement.Center
             ) {
 
                 PhoneNumberField(
@@ -118,7 +134,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Top
             ) {
 
                 Button(
@@ -128,12 +144,12 @@ fun LoginScreen(
                         )
 
                     },
-                    enabled = phoneNumber.length == 10
-                            && isValidEmail && name.length >= 2,
+                    enabled = phoneNumber.length == 10,
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                         .fillMaxWidth()
-                        .size(50.dp),
+                        .size(50.dp)
+                        .bounceClick(),
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -149,23 +165,46 @@ fun LoginScreen(
                         )
                     } else {
                         Text(
-                            text = "Register",
+                            text = "Login",
                             fontSize = 17.sp,
                             modifier = Modifier.padding(4.dp)
                         )
                     }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Don't have an account, let's ")
+                    Text(
+                        text = "Register",
+                        textDecoration = TextDecoration.Underline,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable { onRegisterClick() }
+                    )
+
                 }
 
             }
         }
 
     }
+
+    VerifyLoginSheet(
+        showModalBottomSheet = showModalBottomSheet,
+        loginViewModel = loginViewModel,
+        loginUiState = loginUiState,
+    )
 }
 
 @Preview
 @Composable
 private fun LoginScreenPreview() {
     AppTheme {
-        LoginScreen(loginUiState = LoginUiState())
+        LoginScreen(loginUiState = LoginUiState(), onRegisterClick = {}, onVerify = {})
     }
 }

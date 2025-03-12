@@ -44,7 +44,7 @@ class RegistrationViewModel(
     private val _events = Channel<Event>()
     val events = _events.receiveAsFlow()
 
-    fun resentState() {
+    fun resetState() {
         viewModelScope.launch {
             _registrationUiState.value = RegistrationUiState()
         }
