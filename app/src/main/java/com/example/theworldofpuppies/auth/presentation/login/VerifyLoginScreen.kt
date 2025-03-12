@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.auth.presentation.component.OtpInputField
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -51,7 +52,7 @@ import kotlinx.coroutines.launch
 fun VerifyLoginSheet(
     showModalBottomSheet: MutableState<Boolean>,
     loginUiState: LoginUiState,
-    loginViewModel: LoginViewModel? = null
+    loginViewModel: LoginViewModel? = null,
 ) {
 
     val scope = rememberCoroutineScope()
@@ -74,7 +75,7 @@ fun VerifyLoginSheet(
                 loginViewModel = loginViewModel,
                 scope = scope,
                 bottomSheetState = bottomSheetState,
-                showModalBottomSheet = showModalBottomSheet
+                showModalBottomSheet = showModalBottomSheet,
             )
 
         }
@@ -89,7 +90,7 @@ fun VerifyLoginScreen(
     loginViewModel: LoginViewModel? = null,
     scope: CoroutineScope,
     bottomSheetState: SheetState,
-    showModalBottomSheet: MutableState<Boolean>
+    showModalBottomSheet: MutableState<Boolean>,
 ) {
     val otp = rememberSaveable { mutableStateOf(loginUiState.otp) }
 
@@ -126,7 +127,9 @@ fun VerifyLoginScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = null,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier
+                            .size(22.dp)
+                            .bounceClick()
                     )
                 }
 
@@ -150,7 +153,9 @@ fun VerifyLoginScreen(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = null,
-                        modifier = Modifier.size(25.dp)
+                        modifier = Modifier
+                            .size(25.dp)
+                            .bounceClick()
                     )
                 }
 
@@ -208,7 +213,8 @@ fun VerifyLoginScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(20.dp)
+                    .bounceClick(),
                 enabled = otp.value.length == 6 && !loginUiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

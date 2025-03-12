@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.auth.presentation.component.OtpInputField
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -127,7 +128,9 @@ fun VerifyRegScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBackIos,
                         contentDescription = null,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier
+                            .size(22.dp)
+                            .bounceClick()
                     )
                 }
 
@@ -151,7 +154,9 @@ fun VerifyRegScreen(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = null,
-                        modifier = Modifier.size(25.dp)
+                        modifier = Modifier
+                            .size(25.dp)
+                            .bounceClick()
                     )
                 }
 
@@ -209,7 +214,8 @@ fun VerifyRegScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(20.dp)
+                    .bounceClick(),
                 enabled = otp.value.length == 6 && !registrationUiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

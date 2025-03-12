@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.auth.presentation.register
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,19 +33,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.auth.presentation.component.PhoneNumberField
 import com.example.theworldofpuppies.auth.presentation.component.TextTextField
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.rejowan.ccpc.Country
 
 @Composable
 fun RegisterScreen(
     registrationUiState: RegistrationUiState,
-    registrationViewModel: RegistrationViewModel? = null
+    registrationViewModel: RegistrationViewModel? = null,
+    onVerify: () -> Unit
 ) {
 
     val showModalBottomSheet = rememberSaveable { mutableStateOf(false) }
 
-    if (!registrationUiState.isLoading && registrationUiState.isOtpSent) {
-        showModalBottomSheet.value = !showModalBottomSheet.value
+
+    LaunchedEffect(registrationUiState.isOtpSent) {
+        if (!registrationUiState.isLoading && registrationUiState.isOtpSent) {
+            showModalBottomSheet.value = !showModalBottomSheet.value
+        }
+
+    }
+
+    LaunchedEffect(registrationUiState.registrationSuccess) {
+        if (!registrationUiState.isLoading && registrationUiState.registrationSuccess) {
+            onVerify()
+        }
     }
 
     var phoneNumber by rememberSaveable {
@@ -66,11 +80,6 @@ fun RegisterScreen(
         val gmailPattern = Regex("^[A-Za-z0-9._%+-]+@gmail\\.com\$")
         gmailPattern.matches(email) && !registrationUiState.isLoading
     }
-
-    VerifyRegSheet(
-        showModalBottomSheet = showModalBottomSheet,
-        registrationUiState = registrationUiState
-    )
 
     Surface(
         modifier = Modifier
@@ -156,7 +165,7 @@ fun RegisterScreen(
                     number = phoneNumber,
                     onNumberChange = { phoneNumber = it },
                     onCountryChange = { selectedCountry = it },
-                    isVisible = phoneNumber.isNotEmpty()
+                    isVisible = phoneNumber.isNotEmpty(),
                 )
 
             }
@@ -189,7 +198,8 @@ fun RegisterScreen(
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                         .fillMaxWidth()
-                        .size(50.dp),
+                        .size(50.dp)
+                        .bounceClick(),
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -215,7 +225,15 @@ fun RegisterScreen(
             }
         }
 
+
     }
+
+
+    VerifyRegSheet(
+        showModalBottomSheet = showModalBottomSheet,
+        registrationUiState = registrationUiState,
+        registrationViewModel = registrationViewModel
+    )
 }
 
 
@@ -223,6 +241,6 @@ fun RegisterScreen(
 @Composable
 private fun RegisterScreenPreview() {
     AppTheme {
-        RegisterScreen(registrationUiState = RegistrationUiState())
+        RegisterScreen(registrationUiState = RegistrationUiState(), onVerify = {})
     }
 }

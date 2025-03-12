@@ -22,7 +22,7 @@ data class LoginUiState(
     val phoneNumber: String = "",
     val otp: String = "",
     val isOtpSent: Boolean = false,
-    val registrationSuccess: Boolean = false,
+    val loginSuccess: Boolean = false,
     val isOtpVerified: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null
@@ -41,7 +41,7 @@ class LoginViewModel(
     private val _events = Channel<Event>()
     val events = _events.receiveAsFlow()
 
-    fun resentState() {
+    fun resetState() {
         viewModelScope.launch {
             _loginUiState.value = LoginUiState()
         }
@@ -93,7 +93,7 @@ class LoginViewModel(
     fun verifyLogin(phoneNumber: String, otp: String) {
         viewModelScope.launch {
             _loginUiState.update { it.copy(isLoading = true) }
-            val result = authApi.verifyRegistration(OtpRequest(phoneNumber, otp))
+            val result = authApi.verifyLogin(OtpRequest(phoneNumber, otp))
             result.onSuccess { apiResponse ->
                 _loginUiState.update {
                     if (apiResponse.success) {
@@ -124,7 +124,7 @@ class LoginViewModel(
                             errorMessage = null,
                             isOtpVerified = true,
                             isLoading = false,
-                            registrationSuccess = true
+                            loginSuccess = true
                         )
 
                     } else {

@@ -32,7 +32,7 @@ class AuthViewModel(
         }
     }
 
-    fun logout() {
+    fun signOut() {
         viewModelScope.launch {
             val result = userRepository.clearUserData()
             if (result.isSuccess) {
