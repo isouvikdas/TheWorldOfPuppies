@@ -28,7 +28,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://205d-2405-201-ac02-d091-badf-d876-4da2-76f7.ngrok-free.app\""
+                "\"https://cc8a-2405-201-ac02-d091-c9de-e378-ed87-c4e3.ngrok-free.app\""
             )
         }
         release {
@@ -40,7 +40,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://205d-2405-201-ac02-d091-badf-d876-4da2-76f7.ngrok-free.app\""
+                "\"https://cc8a-2405-201-ac02-d091-c9de-e378-ed87-c4e3.ngrok-free.app\""
             )
         }
     }
@@ -117,5 +117,7 @@ dependencies {
     //country code picker
     implementation(libs.countrycodepickercompose)
 
+    //bottom nav bar animation
+    implementation(libs.animated.navigation.bar)
 
 }

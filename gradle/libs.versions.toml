@@ -3,6 +3,7 @@ accompanistPager = "0.13.0"
 accompanistPagerIndicators = "0.13.0"
 accompanistSystemuicontroller = "0.33.0-alpha"
 agp = "8.5.2"
+animatedNavigationBar = "1.0.0"
 coilCompose = "2.2.2"
 countrycodepickercompose = "0.1"
 kotlin = "2.0.20"
@@ -38,6 +39,7 @@ androidx-paging-runtime-ktx = { module = "androidx.paging:paging-runtime-ktx", v
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomPaging" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomPaging" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomPaging" }
+animated-navigation-bar = { module = "com.exyte:animated-navigation-bar", version.ref = "animatedNavigationBar" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 countrycodepickercompose = { module = "com.github.ahmmedrejowan:CountryCodePickerCompose", version.ref = "countrycodepickercompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
