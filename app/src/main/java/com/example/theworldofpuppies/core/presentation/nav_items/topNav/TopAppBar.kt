@@ -49,7 +49,7 @@ fun TopAppbar(
 ) {
     Box(
         modifier = modifier
-            .fillMaxHeight(0.08f)
+            .fillMaxHeight(0.074f)
             .shadow(1.dp, shape = RoundedCornerShape(0.dp)) // Add elevation here
     ) {
         NavigationBar(

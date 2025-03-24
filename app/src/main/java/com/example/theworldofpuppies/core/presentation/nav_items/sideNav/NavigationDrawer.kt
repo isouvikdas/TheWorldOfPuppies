@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
+import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavBar
 import com.example.theworldofpuppies.core.presentation.nav_items.topNav.TopAppbar
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
@@ -80,6 +81,7 @@ fun NavigationDrawer(
             bottomBar = {
                 if (bottomBarVisible) {
                     BottomAppbar(navController = navController)
+//                    BottomNavBar()
                 }
             },
             containerColor = Color.White

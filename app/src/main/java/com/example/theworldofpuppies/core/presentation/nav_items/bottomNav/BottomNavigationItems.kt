@@ -7,11 +7,13 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.Notes
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Textsms
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.BookOnline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Textsms
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -35,6 +37,14 @@ sealed class BottomNavigationItems(
         selectedIcon = Icons.AutoMirrored.Filled.MenuBook,
         unselectedIcon = Icons.AutoMirrored.Outlined.MenuBook
     )
+
+    data object Shop: BottomNavigationItems(
+        route = "Shop",
+        title = "Shop",
+        selectedIcon = Icons.Filled.ShoppingCart,
+        unselectedIcon = Icons.Outlined.ShoppingCart
+    )
+
 
     data object Messages: BottomNavigationItems(
         route = "Messages",

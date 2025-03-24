@@ -24,6 +24,7 @@ import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.CompositionServiceKey
+import com.example.theworldofpuppies.shop.presentation.ShopHomeScreen
 
 sealed class Screen(val route: String) {
     data object RegistrationScreen : Screen("RegistrationScreen")
@@ -59,8 +60,6 @@ fun AppNavigation(
     val loginViewModel = koinViewModel<LoginViewModel>()
     val loginUiState by loginViewModel.loginUiState.collectAsStateWithLifecycle()
     loginViewModel.resetState()
-
-
 
     val startingRoute = when {
         isLoggedIn -> BottomNavigationItems.Home.route
@@ -135,6 +134,14 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             onGesturesChanged(true)
             BookingScreen()
+        }
+
+        composable(route = BottomNavigationItems.Shop.route) {
+            onBottomBarVisibilityChanged(true)
+            onProfileButtonVisibilityChanged(true)
+            onTopBarVisibilityChanged(true)
+            onGesturesChanged(true)
+            ShopHomeScreen()
         }
 
         composable(route = BottomNavigationItems.Messages.route) {
