@@ -1,16 +1,20 @@
 package com.example.theworldofpuppies.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.app.Activity
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import com.example.theworldofpuppies.MainActivity
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -252,11 +256,13 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun AppTheme(
     darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
+    activity: Activity = LocalContext.current as MainActivity,
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
@@ -269,9 +275,45 @@ fun AppTheme(
         else -> highContrastLightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    val window: WindowSizeClass = calculateWindowSizeClass(activity = activity)
+    val config = LocalConfiguration.current
+
+    var typography = CompactTypography
+    var appDimens = CompactDimens
+
+    when (window.widthSizeClass) {
+        WindowWidthSizeClass.Compact -> {
+            if (config.screenWidthDp <= 360) {
+                appDimens = CompactSmallDimens
+                typography = CompactSmallTypography
+            } else if (config.screenWidthDp < 599) {
+                appDimens = CompactMediumDimens
+                typography = CompactMediumTypography
+            } else {
+                appDimens = CompactDimens
+                typography = CompactTypography
+            }
+        }
+
+        WindowWidthSizeClass.Medium -> {
+            appDimens = MediumDimens
+            typography = MediumTypography
+        }
+
+        else -> {
+            appDimens = ExpandedDimens
+            typography = ExpandedTypography
+        }
+    }
+
+    AppUtils(appDimens = appDimens) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography,
+            content = content
+        )
+    }
 }
+
+val MaterialTheme.dimens
+    @Composable get() = LocalAppDimens.current

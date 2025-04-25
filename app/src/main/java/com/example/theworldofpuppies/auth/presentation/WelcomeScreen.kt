@@ -36,8 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.R
-import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.ui.theme.AppTheme
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import kotlinx.coroutines.launch
 
 @Composable

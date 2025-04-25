@@ -28,7 +28,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://cc8a-2405-201-ac02-d091-c9de-e378-ed87-c4e3.ngrok-free.app\""
+                "\"https://e37b-152-58-171-113.ngrok-free.app\""
             )
         }
         release {
@@ -40,7 +40,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://cc8a-2405-201-ac02-d091-c9de-e378-ed87-c4e3.ngrok-free.app\""
+                "\"https://e37b-152-58-171-113.ngrok-free.app\""
             )
         }
     }
@@ -119,5 +119,9 @@ dependencies {
 
     //bottom nav bar animation
     implementation(libs.animated.navigation.bar)
+
+    //WindowSizeClass
+//    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
+    implementation("androidx.compose.material3:material3-window-size-class")
 
 }

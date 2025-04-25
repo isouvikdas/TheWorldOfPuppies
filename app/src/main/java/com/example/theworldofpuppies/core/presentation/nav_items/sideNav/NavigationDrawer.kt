@@ -7,14 +7,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -22,26 +21,24 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
-import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavBar
 import com.example.theworldofpuppies.core.presentation.nav_items.topNav.TopAppbar
-import com.example.theworldofpuppies.ui.theme.AppTheme
+import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.internal.wait
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(
     scope: CoroutineScope,
@@ -52,21 +49,32 @@ fun NavigationDrawer(
     profileButtonVisible: Boolean,
     onSignOutClick: () -> Unit,
     topBarVisibility: Boolean,
-    gesturesEnabled: Boolean
+    gesturesEnabled: Boolean,
+    modifier: Modifier = Modifier,
+    scrollBehavior: TopAppBarScrollBehavior,
+    searchIconVisibility: Boolean,
+    onBottomBarVisibilityChanged: (Boolean) -> Unit
+
 ) {
     ModalNavigationDrawer(
+        modifier = Modifier,
         gesturesEnabled = gesturesEnabled,
         drawerContent = {
             DrawerContent(
                 navController = navController,
-                onSignOutClick = onSignOutClick
+                onSignOutClick = onSignOutClick,
+                drawerState = drawerState,
+                scope = scope
             )
         },
         drawerState = drawerState,
         scrimColor = Color.Transparent.copy(0.5f)
     ) {
+
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
             topBar = {
                 if (topBarVisibility) {
                     TopAppbar(
@@ -74,14 +82,16 @@ fun NavigationDrawer(
                         modifier = Modifier,
                         profileButtonVisibility = profileButtonVisible,
                         scope = scope,
-                        drawerState = drawerState
+                        drawerState = drawerState,
+                        scrollBehavior = scrollBehavior,
+                        searchIconVisibility = searchIconVisibility,
+                        onBottomBarVisibilityChange = onBottomBarVisibilityChanged
                     )
                 }
             },
             bottomBar = {
                 if (bottomBarVisible) {
                     BottomAppbar(navController = navController)
-//                    BottomNavBar()
                 }
             },
             containerColor = Color.White
@@ -97,103 +107,151 @@ fun NavigationDrawer(
     }
 }
 
+
 @Composable
 fun DrawerContent(
     navController: NavHostController,
     onSignOutClick: () -> Unit,
+    drawerState: DrawerState,
+    scope: CoroutineScope
 ) {
     val drawerItems = listOf(
-        DrawerItems.Refer,
-        DrawerItems.Support,
         DrawerItems.Shop,
         DrawerItems.Insurance,
         DrawerItems.Training,
         DrawerItems.PrivacyPolicy,
         DrawerItems.TermsConditions,
+        DrawerItems.Refer,
         DrawerItems.RateUs,
-        DrawerItems.SignOut(onSignOutClick)
+        DrawerItems.Support
     )
 
     ModalDrawerSheet(
-        drawerContainerColor = Color.White,
+        drawerContainerColor = MaterialTheme.colorScheme.secondary,
+        drawerShape = RectangleShape,
         modifier = Modifier
-            .fillMaxWidth(0.75f)
+            .fillMaxWidth(0.65f)
             .fillMaxHeight()
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            DrawerHeader()
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                DrawerHeader()
 
-            drawerItems.forEach { drawerItem ->
-                DrawerItem(
-                    title = drawerItem.title,
-                    icon = drawerItem.icon,
-                    onClick = {
-                        when (drawerItem) {
-                            is DrawerItems.SignOut -> drawerItem.onSignOutClick()
-                            else -> navController.navigate(drawerItem.route)
+                drawerItems.forEach { drawerItem ->
+                    DrawerItem(
+                        title = drawerItem.title,
+                        icon = {
+                            drawerItem.icon(
+                                Modifier.size(MaterialTheme.dimens.small2),
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            )
+                        },
+                        onClick = {
+                            navController.navigate(drawerItem.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            scope.launch {
+                                drawerState.close()
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
+
+            DrawerItem(
+                title = "Sign Out",
+                icon = {
+                    DrawerItems.SignOut(onSignOutClick).icon(
+                        Modifier.size(24.dp),
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                },
+                onClick = { onSignOutClick() },
+                modifier = Modifier.padding(bottom = 16.dp),
+                selected = true
+            )
         }
     }
 }
 
 @Composable
 fun DrawerHeader() {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.2f)
-            .background(Color.LightGray.copy(0.4f)),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxHeight(0.2f),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary.copy(0.2f))
     ) {
-        Text(text = "Pet Care", color = Color.Black)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "Pet Care", color = Color.Black)
+        }
     }
 }
 
 @Composable
-fun DrawerItem(title: String, icon: ImageVector?, onClick: () -> Unit) {
+fun DrawerItem(
+    title: String,
+    icon: @Composable () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false
+) {
     NavigationDrawerItem(
-        label = { Text(text = title, fontSize = 15.sp) },
-        selected = false,
+        label = {
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.tertiaryContainer
+            )
+        },
+        selected = selected,
         icon = {
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = title,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            icon()
         },
         onClick = onClick,
         colors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = MaterialTheme.colorScheme.primary,
-            unselectedContainerColor = Color.White
-        )
+            selectedContainerColor = MaterialTheme.colorScheme.surface.copy(0.3f),
+            unselectedContainerColor = MaterialTheme.colorScheme.secondary
+        ),
+        modifier = modifier
     )
 }
 
-@Preview
-@Composable
-private fun Preview() {
-    AppTheme {
-        NavigationDrawer(
-            scope = rememberCoroutineScope(),
-            drawerState = DrawerState(initialValue = DrawerValue.Open),
-            content = {},
-            bottomBarVisible = true,
-            navController = rememberNavController(),
-            profileButtonVisible = true,
-            onSignOutClick = {},
-            topBarVisibility = true,
-            gesturesEnabled = true
-        )
-    }
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Preview
+//@Composable
+//private fun Preview() {
+//    AppTheme {
+//        NavigationDrawer(
+//            scope = rememberCoroutineScope(),
+//            drawerState = DrawerState(initialValue = DrawerValue.Open),
+//            content = {},
+//            bottomBarVisible = true,
+//            navController = rememberNavController(),
+//            profileButtonVisible = true,
+//            onSignOutClick = {},
+//            topBarVisibility = true,
+//            gesturesEnabled = true,
+//            scrollBehavior = TopAppBarState()
+//        )
+//    }
+//}
