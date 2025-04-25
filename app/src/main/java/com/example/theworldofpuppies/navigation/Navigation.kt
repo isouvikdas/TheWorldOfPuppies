@@ -1,30 +1,25 @@
 package com.example.theworldofpuppies.navigation
 
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.key
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.theworldofpuppies.booking.presentation.BookingScreen
 import com.example.theworldofpuppies.auth.presentation.WelcomeScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
-import com.example.theworldofpuppies.auth.presentation.signOut.SignOutDialog
+import com.example.theworldofpuppies.booking.presentation.BookingScreen
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
+import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.runtime.CompositionServiceKey
-import com.example.theworldofpuppies.shop.presentation.ShopHomeScreen
 
 sealed class Screen(val route: String) {
     data object RegistrationScreen : Screen("RegistrationScreen")
@@ -50,7 +45,8 @@ fun AppNavigation(
     onTopBarVisibilityChanged: (Boolean) -> Unit,
     authViewModel: AuthViewModel,
     isLoggedIn: Boolean,
-    onGesturesChanged: (Boolean) -> Unit
+    onGesturesChanged: (Boolean) -> Unit,
+    searchIconVisibilityChanged: (Boolean) -> Unit
 ) {
 
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
@@ -68,13 +64,15 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = startingRoute
+        startDestination = startingRoute,
+        enterTransition = { slideInHorizontally { it } }
     ) {
 
         composable(route = Screen.WelcomeScreen.route) {
             onBottomBarVisibilityChanged(false)
             onTopBarVisibilityChanged(false)
             onGesturesChanged(false)
+            searchIconVisibilityChanged(false)
             WelcomeScreen(
                 onLoginClick = { navController.navigate(Screen.LoginScreen.route) },
                 onRegisterClick = { navController.navigate(Screen.RegistrationScreen.route) }
@@ -85,6 +83,7 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(false)
             onTopBarVisibilityChanged(false)
             onGesturesChanged(false)
+            searchIconVisibilityChanged(false)
             RegisterScreen(
                 registrationViewModel = registrationViewModel,
                 registrationUiState = registrationUiState,
@@ -101,6 +100,7 @@ fun AppNavigation(
         composable(route = Screen.LoginScreen.route) {
             onBottomBarVisibilityChanged(false)
             onTopBarVisibilityChanged(false)
+            searchIconVisibilityChanged(false)
             onGesturesChanged(false)
             LoginScreen(
                 loginUiState = loginUiState,
@@ -124,6 +124,7 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(false)
             onGesturesChanged(true)
             HomeScreen()
         }
@@ -132,6 +133,7 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(false)
             onGesturesChanged(true)
             BookingScreen()
         }
@@ -140,6 +142,7 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(true)
             onGesturesChanged(true)
             ShopHomeScreen()
         }
@@ -148,6 +151,7 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(false)
             onGesturesChanged(true)
             MessageScreen()
         }
@@ -156,6 +160,7 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(false)
             onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(false)
             onGesturesChanged(true)
             ProfileScreen()
         }

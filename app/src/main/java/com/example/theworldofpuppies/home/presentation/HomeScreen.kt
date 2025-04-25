@@ -1,12 +1,7 @@
 package com.example.theworldofpuppies.home.presentation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,21 +15,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,25 +42,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.domain.Plan
 import com.example.theworldofpuppies.core.domain.Service
 import com.example.theworldofpuppies.ui.theme.AppTheme
+import com.example.theworldofpuppies.ui.theme.dimens
 
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
 
-    val lazyGridState = rememberLazyGridState()
     val imageList = List(10) { painterResource(id = R.drawable.flag_india) }
 
     Surface(
@@ -81,22 +72,193 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             ScrollableBanner(imageList = imageList)
             Spacer(modifier = Modifier.fillMaxHeight(0.05f))
             CategorySection(serviceList = serviceList)
+            Spacer(modifier = Modifier.fillMaxHeight(0.12f))
+            Column(
+                modifier = Modifier
+                    .height(MaterialTheme.dimens.extraLarge3)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(horizontal = MaterialTheme.dimens.small1),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Nearby Veterinary",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Text(
+                        text = "See all",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.W500,
+                        modifier = Modifier.clickable { }
+                    )
+                }
+
+                Spacer(modifier = Modifier.fillMaxHeight(.04f))
+
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
+                    contentPadding = PaddingValues(MaterialTheme.dimens.small1),
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+                ) {
+                    items(serviceList.take(4)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                                .clip(shape = RoundedCornerShape(MaterialTheme.dimens.small2))
+                                .background(MaterialTheme.colorScheme.secondary.copy(0.2f)),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(MaterialTheme.dimens.large2),
+                                    shape = RoundedCornerShape(MaterialTheme.dimens.small2),
+                                    colors = CardDefaults.cardColors(
+                                        MaterialTheme.colorScheme.primary.copy(0.9f)
+                                    )
+                                ) {
+                                }
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.8f)
+                                        .padding(horizontal = MaterialTheme.dimens.small1)
+                                        .fillMaxHeight(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column(
+                                        modifier
+                                            .fillMaxHeight(0.5f)
+                                            .fillMaxWidth(),
+                                        verticalArrangement = Arrangement.SpaceEvenly,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = "Dr. Kevin Julio",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.headlineSmall
+                                        )
+                                        Text(
+                                            text = "Veterinary Dentist",
+                                            fontWeight = FontWeight.W400,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = Color.Gray,
+                                        )
+
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.5f)
+                                                .fillMaxHeight(),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Star,
+                                                contentDescription = "Ratings",
+                                                tint = Color(0xFFFFDE3F),
+                                                modifier = Modifier.size(MaterialTheme.dimens.small2)
+                                            )
+                                            Text(
+                                                text = "4.7 ",
+                                                fontWeight = FontWeight.SemiBold,
+                                                style = MaterialTheme.typography.headlineSmall
+                                            )
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxSize(),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.LocationOn,
+                                                contentDescription = "Ratings",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(MaterialTheme.dimens.small2)
+                                            )
+                                            Text(
+                                                text = "1.5 km",
+                                                fontWeight = FontWeight.SemiBold,
+                                                style = MaterialTheme.typography.titleSmall
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(MaterialTheme.dimens.small3)
+                                            .clip(CircleShape)
+                                            .clickable { }
+                                            .background(MaterialTheme.colorScheme.secondary),
+                                        contentAlignment = Alignment.Center
+
+                                    ) {
+                                        Icon(
+                                            Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(MaterialTheme.dimens.small1),
+                                            tint = Color.White
+                                        )
+
+
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
 
         }
     }
 }
 
 @Composable
-fun CategorySection(modifier: Modifier = Modifier, serviceList: List<Service>) {
+fun PetExpertSection(modifier: Modifier = Modifier, screenWidth: Dp) {
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val cardSize = (screenWidth / 5).coerceAtMost(100.dp)
-    val verticalPadding = (cardSize * 0.1f).coerceAtLeast(4.dp)
+
+}
+
+
+@Composable
+fun CategorySection(modifier: Modifier = Modifier, serviceList: List<Service>) {
 
     Column(
         modifier = modifier
-            .fillMaxHeight(0.4f)
+            .height(MaterialTheme.dimens.large3)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Top
     ) {
@@ -104,13 +266,13 @@ fun CategorySection(modifier: Modifier = Modifier, serviceList: List<Service>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = MaterialTheme.dimens.small1),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "Categories",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold
             )
 
             Text(
@@ -127,42 +289,39 @@ fun CategorySection(modifier: Modifier = Modifier, serviceList: List<Service>) {
             items(serviceList) { service ->
                 val isVisible = remember { mutableStateOf(false) }
                 LaunchedEffect(true) { isVisible.value = true }
-
-                AnimatedVisibility(
-                    visible = isVisible.value,
-                    enter = fadeIn() + expandVertically()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Box(
+                        modifier = Modifier
+                            .padding(
+                                start = MaterialTheme.dimens.small1,
+                                end = if (service == serviceList.last()) MaterialTheme.dimens.small1 else 0.dp
+                            )
+
                     ) {
-                        Box(
+                        Card(
                             modifier = Modifier
-                                .padding(start = 20.dp)
-                                .padding(end = if (service == serviceList.last()) 20.dp else 0.dp)
+                                .size(MaterialTheme.dimens.medium3)
+                                .clip(CircleShape),
+                            colors = CardColors(
+                                containerColor = MaterialTheme.colorScheme.secondary.copy(0.2f),
+                                contentColor = Color.White,
+                                disabledContentColor = Color.Gray,
+                                disabledContainerColor = Color.White
+                            )
                         ) {
-                            Card(
-                                modifier = Modifier
-                                    .size(cardSize)
-                                    .clip(CircleShape),
-                                colors = CardColors(
-                                    containerColor = Color.LightGray.copy(0.4f),
-                                    contentColor = Color.White,
-                                    disabledContentColor = Color.Gray,
-                                    disabledContainerColor = Color.White
-                                )
-                            ) {
 
-                            }
                         }
-
-                        Spacer(modifier = Modifier.height(verticalPadding))
-
-                        Text(
-                            text = service.name,
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(start = 20.dp)
-                        )
                     }
+
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
+
+                    Text(
+                        text = service.name,
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
+                    )
                 }
             }
         }
@@ -177,7 +336,7 @@ fun ScrollableBanner(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.27f),
+            .height(MaterialTheme.dimens.extraLarge2),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -187,10 +346,10 @@ fun ScrollableBanner(
                 contentDescription = null,
                 modifier = Modifier
                     .padding(
-                        start = 20.dp,
-                        end = if (image == imageList.last()) 20.dp else 0.dp
+                        start = MaterialTheme.dimens.small1,
+                        end = if (image == imageList.last()) MaterialTheme.dimens.small1 else 0.dp
                     )
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(MaterialTheme.dimens.small2))
                     .shadow(elevation = 10.dp)
                     .clickable {}
             )
@@ -198,86 +357,6 @@ fun ScrollableBanner(
     }
 }
 
-@Composable
-fun StaticBanner(modifier: Modifier = Modifier, image: Painter) {
-    Image(
-        painter = image,
-        contentDescription = null,
-        modifier = modifier
-            .padding(horizontal = 20.dp)
-            .fillMaxWidth()
-            .fillMaxHeight(0.24f)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { },
-        contentScale = ContentScale.Crop
-    )
-}
-
-
-@Composable
-fun ServiceSection(
-    modifier: Modifier = Modifier,
-    lazyGridState: LazyGridState,
-    serviceList: List<Service>
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        Text(
-            text = "Services",
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            fontSize = 19.sp,
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-        )
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            state = lazyGridState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(5.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            items(serviceList) { service ->
-                ServiceItem(service = service) {
-
-                }
-            }
-        }
-    }
-}
-
-//@Preview
-//@Composable
-//private fun ServiceSectionPreview() {
-//    AppTheme {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .background(Color.Gray)
-//        ) {
-//            Spacer(
-//                modifier = Modifier
-//                    .fillMaxHeight(0.025f)
-//                    .background(Color.White)
-//            )
-//            ServiceSection(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .fillMaxHeight(0.5f)
-//                    .background(
-//                        Color.White
-//                    ),
-//                lazyGridState = rememberLazyGridState(),
-//                serviceList = List<Service>
-//            )
-//
-//        }
-//    }
-//}
 
 @Preview
 @Composable
