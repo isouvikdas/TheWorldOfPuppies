@@ -28,7 +28,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://e37b-152-58-171-113.ngrok-free.app\""
+                "\"https://026f-2405-201-ac02-d151-3412-4063-2be3-ade.ngrok-free.app\""
             )
         }
         release {
@@ -40,7 +40,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://e37b-152-58-171-113.ngrok-free.app\""
+                "\"https://026f-2405-201-ac02-d151-3412-4063-2be3-ade.ngrok-free.app\""
             )
         }
     }
