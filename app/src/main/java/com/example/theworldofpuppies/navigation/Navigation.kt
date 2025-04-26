@@ -18,6 +18,7 @@ import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.Botto
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
+import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -61,6 +62,9 @@ fun AppNavigation(
         isLoggedIn -> BottomNavigationItems.Home.route
         else -> Screen.WelcomeScreen.route
     }
+
+    val productViewModel = koinViewModel<ProductViewModel>()
+    val productListState by productViewModel.productListState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -144,7 +148,11 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(true)
             onGesturesChanged(true)
-            ShopHomeScreen()
+            ShopHomeScreen(
+                productListState = productListState,
+                productViewModel = productViewModel,
+                onProductSelect = {}
+            )
         }
 
         composable(route = BottomNavigationItems.Messages.route) {

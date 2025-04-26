@@ -1,7 +1,9 @@
-package com.example.theworldofpuppies.shop.product.domain
+package com.example.theworldofpuppies.shop.product.data.remote.dto
 
-data class Product(
-    val localId: Long,
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ProductDto(
     val id: String,
     val name: String,
     val description: String,
@@ -10,5 +12,4 @@ data class Product(
     val categoryName: String,
     val imageIds: List<String> = ArrayList(),
     val firstImageId: String? = null,
-    val firstImageUri: String? = null
 )
