@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.navigation
 
+import android.content.Context
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -65,6 +66,8 @@ fun AppNavigation(
 
     val productViewModel = koinViewModel<ProductViewModel>()
     val productListState by productViewModel.productListState.collectAsStateWithLifecycle()
+    val categoryListState by productViewModel.categoryListState.collectAsStateWithLifecycle()
+    val featuredProductListState by productViewModel.featuredProductListState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -150,8 +153,13 @@ fun AppNavigation(
             onGesturesChanged(true)
             ShopHomeScreen(
                 productListState = productListState,
+                categoryListState = categoryListState,
+                featuredProductListState = featuredProductListState,
                 productViewModel = productViewModel,
-                onProductSelect = {}
+                onProductSelect = {},
+                getCategories = { productViewModel.fetchCategories() },
+                getProducts = { productViewModel.fetchNextPage() },
+                getFeaturedProducts = { productViewModel.fetchFeaturedProducts() }
             )
         }
 

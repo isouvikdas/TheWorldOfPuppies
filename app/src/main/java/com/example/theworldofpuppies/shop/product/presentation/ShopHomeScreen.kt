@@ -1,7 +1,7 @@
 package com.example.theworldofpuppies.shop.product.presentation
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,10 +20,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
@@ -35,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,12 +42,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.ui.theme.dimens
 
@@ -56,11 +60,22 @@ import com.example.theworldofpuppies.ui.theme.dimens
 fun ShopHomeScreen(
     modifier: Modifier = Modifier,
     productListState: ProductListState,
-    categoryListState: CategoryListState? = null,
+    categoryListState: CategoryListState,
+    featuredProductListState: FeaturedProductListState,
     productViewModel: ProductViewModel? = null,
-    onProductSelect: () -> Unit
+    onProductSelect: () -> Unit,
+    getCategories: () -> Unit,
+    getProducts: () -> Unit,
+    getFeaturedProducts: () -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
     val imageList = List(10) { painterResource(id = R.drawable.flag_india) }
+    val productList =
+        remember(productListState.productList) { productListState.productList.take(4) }
+    val categoryList =
+        remember(categoryListState.categoryList) { categoryListState.categoryList.take(6) }
+    val featuredProductList =
+        remember(featuredProductListState.productList) { featuredProductListState.productList.take(4) }
 
     Surface(
         modifier = modifier
@@ -68,7 +83,7 @@ fun ShopHomeScreen(
             .background(Color.White),
         color = Color.Transparent
     ) {
-        when (productListState.isLoading) {
+        when (productListState.isLoading == true && categoryListState.isLoading == true && featuredProductListState.isLoading == true) {
             true -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -78,7 +93,8 @@ fun ShopHomeScreen(
 
             false -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                state = lazyListState
             ) {
                 item {
                     Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
@@ -89,18 +105,16 @@ fun ShopHomeScreen(
                 }
 
                 item {
-                    ProductCategorySection(modifier = Modifier)
-                }
-
-                item {
                     Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
                 }
 
                 item {
-                    ProductRowSection(
+                    ProductCategorySection(
                         modifier = Modifier,
-                        productListType = "Featured Products",
-                        products = productListState.productList
+                        categories = categoryList,
+                        isLoading = categoryListState.isLoading,
+                        getCategories = { getCategories() },
+                        errorMessage = categoryListState.errorMessage ?: ""
                     )
                 }
 
@@ -111,8 +125,11 @@ fun ShopHomeScreen(
                 item {
                     ProductRowSection(
                         modifier = Modifier,
-                        productListType = "Popular Products",
-                        products = productListState.productList
+                        productListType = "Featured Products",
+                        products = featuredProductList,
+                        isLoading = featuredProductListState.isLoading,
+                        errorMessage = featuredProductListState.errorMessage ?: "",
+                        getProducts = { getFeaturedProducts() }
                     )
                 }
 
@@ -124,7 +141,25 @@ fun ShopHomeScreen(
                     ProductRowSection(
                         modifier = Modifier,
                         productListType = "New Launches",
-                        products = productListState.productList
+                        products = productList,
+                        isLoading = productListState.isLoading,
+                        getProducts = { getProducts() },
+                        errorMessage = productListState.errorMessage ?: ""
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                }
+
+                item {
+                    ProductRowSection(
+                        modifier = Modifier,
+                        productListType = "Popular Products",
+                        products = productList,
+                        isLoading = productListState.isLoading,
+                        getProducts = { getProducts() },
+                        errorMessage = productListState.errorMessage ?: ""
                     )
                 }
 
@@ -137,7 +172,14 @@ fun ShopHomeScreen(
 }
 
 @Composable
-fun ProductRowSection(modifier: Modifier = Modifier, productListType: String, products: List<Product>) {
+fun ProductRowSection(
+    modifier: Modifier = Modifier,
+    productListType: String,
+    products: List<Product>,
+    isLoading: Boolean? = false,
+    errorMessage: String? = null,
+    getProducts: () -> Unit,
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -164,15 +206,44 @@ fun ProductRowSection(modifier: Modifier = Modifier, productListType: String, pr
             )
         }
 
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            items(products.take(4)) { product->
-                ProductItem(modifier = Modifier, product = product)
+            when {
+                isLoading == true -> {
+                    CircularProgressIndicator()
+                }
+
+                !errorMessage.isNullOrBlank() -> {
+                    ErrorSection(
+                        modifier = Modifier.fillMaxSize(),
+                        errorMessage = errorMessage
+                    ) {
+                        getProducts()
+                    }
+                }
+
+                products.isNotEmpty() -> {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                    ) {
+                        items(products, key = { it.id }) { product ->
+                            ProductItem(
+                                modifier = Modifier.padding(
+                                    start = MaterialTheme.dimens.small1,
+                                    end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
+                                ), product = product
+                            )
+                        }
+                    }
+
+                }
             }
         }
+
 
     }
 
@@ -182,11 +253,10 @@ fun ProductRowSection(modifier: Modifier = Modifier, productListType: String, pr
 fun ProductItem(modifier: Modifier = Modifier, product: Product) {
     ElevatedCard(
         modifier = modifier
-            .width(MaterialTheme.dimens.extraLarge3)
+            .width(MaterialTheme.dimens.extraLarge1)
             .fillMaxHeight()
             .padding(vertical = MaterialTheme.dimens.small1)
-            .padding(horizontal = MaterialTheme.dimens.small1 / 2)
-            .clickable{},
+            .clickable {},
         shape = RoundedCornerShape(MaterialTheme.dimens.small1),
         elevation = CardDefaults.elevatedCardElevation(3.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
@@ -206,21 +276,17 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product) {
                 ),
                 colors = CardDefaults.cardColors(Color.LightGray.copy(0.2f))
             ) {
-                if (product.firstImageUri == null) {
-                    Image(
-                        painter = painterResource(id = R.drawable.login),
-                        contentDescription = "Product Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
-                    )
-                } else {
-                    AsyncImage(
-                        model = product.firstImageUri,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(product.firstImageUri)
+                        .crossfade(true)
+                        .error(R.drawable.login)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+
             }
             Text(
                 text = product.name,
@@ -302,36 +368,134 @@ fun ProductBannerSection(modifier: Modifier = Modifier, imageList: List<Painter>
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProductCategorySection(modifier: Modifier = Modifier) {
-    LazyRow(
+fun ProductCategorySection(
+    modifier: Modifier = Modifier,
+    categories: List<Category>,
+    getCategories: () -> Unit,
+    isLoading: Boolean? = false,
+    errorMessage: String? = null
+) {
+    Column(
         modifier = modifier
-            .height(MaterialTheme.dimens.large1)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+            .fillMaxWidth()
+            .height(MaterialTheme.dimens.large2 + MaterialTheme.dimens.small2),
     ) {
-        items(10) { item ->
-            Box(
-                modifier = Modifier
-                    .padding(
-                        start = MaterialTheme.dimens.small1,
-                    )
-            ) {
-                Card(
-                    modifier = Modifier
-                        .size(MaterialTheme.dimens.medium2)
-                        .clip(CircleShape),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondary.copy(0.2f)
-                    )
-                ) {
-
-                }
-
-            }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(horizontal = MaterialTheme.dimens.small1),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Categories",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "See all",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.Gray,
+                fontWeight = FontWeight.W500,
+                modifier = Modifier.clickable {}
+            )
 
         }
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                categories.isEmpty() && isLoading == true -> {
+                    CircularProgressIndicator()
+                }
+
+                categories.isEmpty() && !errorMessage.isNullOrBlank() -> {
+                    ErrorSection(modifier = Modifier.fillMaxSize(), errorMessage = errorMessage) {
+                        getCategories()
+                    }
+                }
+
+                categories.isNotEmpty() -> {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        items(categories) { category ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        start = MaterialTheme.dimens.small1,
+                                        end = if (category == categories.last()) MaterialTheme.dimens.small1 else 0.dp
+                                    ),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Card(
+                                    modifier = Modifier
+                                        .size(MaterialTheme.dimens.medium2)
+                                        .clip(CircleShape),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary.copy(
+                                            0.2f
+                                        )
+                                    )
+                                ) {
+                                    // Put your Image/Icon here
+                                }
+
+                                Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
+
+                                Text(
+                                    text = category.name,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.W500
+                                )
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
     }
 
 }
+
+
+@Composable
+fun ErrorSection(
+    modifier: Modifier = Modifier,
+    errorMessage: String,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = errorMessage,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
+        Text(
+            text = "Retry",
+            style = MaterialTheme.typography.titleMedium,
+            textDecoration = TextDecoration.Underline,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onRetry() }
+        )
+    }
+}
+

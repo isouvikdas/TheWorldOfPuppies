@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
@@ -32,6 +33,13 @@ interface ProductDao {
 
     @Query("SELECT * FROM products WHERE id IN (:productIds)")
     suspend fun getProductsByIds(productIds: List<String>): List<ProductEntity>
+
+    @Query("SELECT id FROM products WHERE isFeatured = 1")
+    suspend fun getFeaturedProductIds(): List<String>
+
+    @Query("SELECT * FROM products WHERE isFeatured = 1 ORDER BY localId ASC")
+    suspend fun getFeaturedProducts(): List<ProductEntity>
+
 
 
 }

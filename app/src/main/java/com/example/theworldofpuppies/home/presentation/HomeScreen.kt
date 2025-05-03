@@ -71,7 +71,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.fillMaxHeight(0.03f))
             ScrollableBanner(imageList = imageList)
             Spacer(modifier = Modifier.fillMaxHeight(0.05f))
-            CategorySection(serviceList = serviceList)
+            ServiceSection(serviceList = serviceList)
             Spacer(modifier = Modifier.fillMaxHeight(0.12f))
             Column(
                 modifier = Modifier
@@ -254,7 +254,7 @@ fun PetExpertSection(modifier: Modifier = Modifier, screenWidth: Dp) {
 
 
 @Composable
-fun CategorySection(modifier: Modifier = Modifier, serviceList: List<Service>) {
+fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
 
     Column(
         modifier = modifier
@@ -270,7 +270,7 @@ fun CategorySection(modifier: Modifier = Modifier, serviceList: List<Service>) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Categories",
+                text = "Services",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )

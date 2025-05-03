@@ -3,6 +3,7 @@ package com.example.theworldofpuppies.shop.product.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.mappers.toCategory
 import com.example.theworldofpuppies.shop.product.data.mappers.toProduct
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
@@ -26,6 +27,9 @@ class ProductViewModel(
     private val _categoryListState = MutableStateFlow(CategoryListState())
     val categoryListState: StateFlow<CategoryListState> = _categoryListState.asStateFlow()
 
+    private val _featuredProductListState = MutableStateFlow(FeaturedProductListState())
+    val featuredProductListState: StateFlow<FeaturedProductListState> = _featuredProductListState.asStateFlow()
+
 //    private val _productDetailState = MutableStateFlow(ProductDetailState())
 //    val productDetailState: StateFlow<ProductDetailState> = _productDetailState.asStateFlow()
 
@@ -33,6 +37,7 @@ class ProductViewModel(
         clearCachedData()
         fetchCategories()
         fetchNextPage()
+        fetchFeaturedProducts()
     }
 
 //    fun setProduct(product: Product) {
@@ -98,6 +103,34 @@ class ProductViewModel(
 //            }
 //        }
 //    }
+
+    fun fetchFeaturedProducts() {
+        if (_featuredProductListState.value.isLoading) return
+        viewModelScope.launch {
+            try {
+                _featuredProductListState.update { it.copy(isLoading = true, errorMessage = null) }
+
+                when (val result = productRepository.fetchAndStoreFeaturedProducts()) {
+                    is Result.Success -> {
+                        val productList =
+                            productRepository.getAllFeaturedProducts().map { it.toProduct() }
+                        if (productList.isNullOrEmpty()) {
+                            Log.e("toggle", "empty")
+                        } else {
+                            productList.forEach { Log.i("toggle", it.toString()) }
+                        }
+                        _featuredProductListState.update { it.copy(productList = productList) }
+                    }
+
+                    is Result.Error -> _featuredProductListState.update { it.copy(errorMessage = result.error.toString()) }
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error fetching Featured Products.")
+            } finally {
+                _featuredProductListState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
 
 
     fun fetchCategories() {

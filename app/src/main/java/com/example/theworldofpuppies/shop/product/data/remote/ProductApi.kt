@@ -8,6 +8,7 @@ import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.remote.dto.CategoryDto
 import com.example.theworldofpuppies.shop.product.data.remote.dto.PagedData
 import com.example.theworldofpuppies.shop.product.data.remote.dto.ProductDto
+import com.example.theworldofpuppies.shop.product.domain.Product
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -23,6 +24,14 @@ class ProductApi(
             ) {
                 parameter("cursor", cursor)
             }
+        }
+    }
+
+    suspend fun getAllFeaturedProducts() : Result<ApiResponse<List<ProductDto>>, NetworkError> {
+        return safeCall {
+            httpClient.get(
+                urlString = constructUrl("products/featured")
+            )
         }
     }
 
