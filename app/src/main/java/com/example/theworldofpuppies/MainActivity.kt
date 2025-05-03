@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                     var searchIconVisibility by remember {
                         mutableStateOf(false)
                     }
-                    var searchScreenVisibilty by remember {
+                    var searchScreenVisibility by remember {
                         mutableStateOf(false)
                     }
                     var openSignOutDialog by remember { mutableStateOf(false) }

@@ -1,8 +1,11 @@
 package com.example.theworldofpuppies.shop.product.data.remote
 
 import android.content.Context
+import android.util.Log
 import androidx.room.withTransaction
 import com.example.theworldofpuppies.core.data.local.Database
+import com.example.theworldofpuppies.core.domain.util.NetworkError
+import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.domain.util.onError
 import com.example.theworldofpuppies.core.domain.util.onSuccess
 import com.example.theworldofpuppies.shop.product.data.local.ProductEntity
@@ -22,6 +25,50 @@ class ProductRepositoryImpl(
     private val db: Database,
     private val context: Context
 ) : ProductRepository {
+
+    override suspend fun getAllFeaturedProducts(): List<ProductEntity> {
+        var products = emptyList<ProductEntity>()
+        withContext(Dispatchers.IO) {
+            products = db.productDao.getFeaturedProducts()
+            if (products.isNotEmpty()) {
+                products.forEach { Log.i("toggle", it.toString()) }
+            } else {
+                Log.i("toggle", "List is empty")
+            }
+        }
+        return products
+    }
+
+    override suspend fun fetchAndStoreFeaturedProducts(): Result<Boolean, NetworkError> {
+        return withContext(Dispatchers.IO) {
+            when (val result = productApi.getAllFeaturedProducts()) {
+                is Result.Success -> {
+                    val response = result.data
+                    if (!response.success) {
+                        Result.Error(NetworkError.SERVER_ERROR)
+                    } else {
+                        val products = response.data ?: emptyList()
+                        val existingFeaturedProductIds = db.productDao.getFeaturedProductIds()
+                        val newProducts = products.filter { it.id !in existingFeaturedProductIds }
+                        if (newProducts.isNullOrEmpty()) {
+                            newProducts.forEach { Log.e("toggle", "newProduct is empty") }
+                        } else {
+                            newProducts.forEach { Log.e("toggle", it.toString()) }
+                        }
+                        if (newProducts.isNotEmpty()) {
+                            storeProductsWithCaching(newProducts.map { it.toProductEntity() })
+                            Result.Success(true)
+                        } else {
+                            Result.Error(NetworkError.UNKNOWN)
+                        }
+                    }
+                }
+
+                is Result.Error -> Result.Error(NetworkError.UNKNOWN)
+            }
+        }
+    }
+
 
     override suspend fun getProductDetails(productId: String): ProductEntity? {
         var productEntity: ProductEntity?
@@ -51,10 +98,9 @@ class ProductRepositoryImpl(
         return image
     }
 
-    override suspend fun fetchLastFetchedPage(localCursor: Long): List<ProductEntity> =
-        withContext(Dispatchers.IO) {
-            db.productDao.getProductsAfterCursor(localCursor)
-        }
+    override suspend fun fetchLastFetchedPage(localCursor: Long) = withContext(Dispatchers.IO) {
+        db.productDao.getProductsAfterCursor(localCursor)
+    }
 
     override suspend fun fetchAndStoreProducts(cursor: String?): String? {
         try {

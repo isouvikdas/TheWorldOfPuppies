@@ -1,6 +1,8 @@
 package com.example.theworldofpuppies.shop.product.domain
 
 import android.content.Context
+import com.example.theworldofpuppies.core.domain.util.NetworkError
+import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.local.ProductEntity
 
 interface ProductRepository {
@@ -10,4 +12,6 @@ interface ProductRepository {
     suspend fun getProductDetails(productId: String): ProductEntity?
     suspend fun getProductImages(imageId: String): ByteArray?
     suspend fun cacheFirstImage(productEntity: ProductEntity, context: Context): String
+    suspend fun fetchAndStoreFeaturedProducts(): Result<Boolean, NetworkError>
+    suspend fun getAllFeaturedProducts(): List<ProductEntity>
 }

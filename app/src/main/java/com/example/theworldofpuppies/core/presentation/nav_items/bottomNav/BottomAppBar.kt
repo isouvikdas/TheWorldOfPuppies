@@ -55,7 +55,7 @@ fun BottomAppbar(
 
     AnimatedNavigationBar(
         selectedIndex = selectedIndex,
-        modifier = Modifier
+        modifier = modifier
             .height(MaterialTheme.dimens.medium3)
             .padding(horizontal = MaterialTheme.dimens.small1)
             .padding(bottom = MaterialTheme.dimens.extraSmall),

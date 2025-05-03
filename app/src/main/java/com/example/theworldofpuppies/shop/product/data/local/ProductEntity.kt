@@ -15,5 +15,6 @@ data class ProductEntity(
     val categoryName: String,
     val imageIds: List<String> = ArrayList(),
     val firstImageId: String? = null,
-    var firstImageUri: String? = null
+    var firstImageUri: String? = null,
+    val isFeatured: Boolean? = false
 )

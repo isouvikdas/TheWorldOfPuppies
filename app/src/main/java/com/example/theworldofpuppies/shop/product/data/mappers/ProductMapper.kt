@@ -1,7 +1,7 @@
 package com.example.theworldofpuppies.shop.product.data.mappers
 
-import com.example.theworldofpuppies.shop.product.data.remote.dto.ProductDto
 import com.example.theworldofpuppies.shop.product.data.local.ProductEntity
+import com.example.theworldofpuppies.shop.product.data.remote.dto.ProductDto
 import com.example.theworldofpuppies.shop.product.domain.Product
 
 fun ProductDto.toProductEntity(): ProductEntity {
@@ -13,7 +13,8 @@ fun ProductDto.toProductEntity(): ProductEntity {
         categoryName = categoryName,
         inventory = inventory,
         firstImageId = firstImageId,
-        imageIds = imageIds
+        imageIds = imageIds,
+        isFeatured = isFeatured
     )
 }
 
@@ -28,6 +29,7 @@ fun ProductEntity.toProduct(): Product {
         inventory = inventory,
         firstImageId = firstImageId,
         imageIds = imageIds,
-        firstImageUri = this.firstImageUri
+        firstImageUri = this.firstImageUri,
+        isFeatured = isFeatured
     )
 }

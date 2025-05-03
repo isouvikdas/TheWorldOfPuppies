@@ -10,5 +10,6 @@ data class Product(
     val categoryName: String,
     val imageIds: List<String> = ArrayList(),
     val firstImageId: String? = null,
-    val firstImageUri: String? = null
+    val firstImageUri: String? = "",
+    val isFeatured: Boolean? = false
 )
