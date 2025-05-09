@@ -25,9 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -61,7 +58,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.Transparent
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -124,14 +121,13 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Card(
+                                Surface(
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .width(MaterialTheme.dimens.large2),
                                     shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                                    colors = CardDefaults.cardColors(
-                                        MaterialTheme.colorScheme.primary.copy(0.9f)
-                                    )
+                                    color = MaterialTheme.colorScheme.primary.copy(0.9f)
+
                                 ) {
                                 }
 
@@ -300,16 +296,11 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                             )
 
                     ) {
-                        Card(
+                        Surface(
                             modifier = Modifier
                                 .size(MaterialTheme.dimens.medium3)
                                 .clip(CircleShape),
-                            colors = CardColors(
-                                containerColor = MaterialTheme.colorScheme.secondary.copy(0.2f),
-                                contentColor = Color.White,
-                                disabledContentColor = Color.Gray,
-                                disabledContainerColor = Color.White
-                            )
+                            color = Color.Gray.copy(0.3f),
                         ) {
 
                         }

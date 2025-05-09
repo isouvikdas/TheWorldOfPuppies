@@ -5,4 +5,5 @@
     <string name="error_no_internet">Couldn\'t connect to server, please check your internet connection.</string>
     <string name="error_unknown">Something went wrong. Please try again later.</string>
     <string name="error_serialization">Couldn\'t serialize or deserialize data.</string>
+    <string name="product_description">Keep your pet clean and happy with our gentle, natural shampoo. Made with aloe vera and oatmeal, it soothes itchy skin and leaves coats soft, shiny, and fresh—without harsh chemicals. Perfect for all breeds and ages. Keep your pet clean and happy with our gentle, natural shampoo. Made with aloe vera and oatmeal, it soothes itchy skin and leaves coats soft, shiny, and fresh—without harsh chemicals. Perfect for all breeds and ages</string>
 </resources>

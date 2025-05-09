@@ -80,7 +80,7 @@ fun ShopHomeScreen(
     Surface(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)),
         color = Color.Transparent
     ) {
         when (productListState.isLoading == true && categoryListState.isLoading == true && featuredProductListState.isLoading == true) {
@@ -129,7 +129,8 @@ fun ShopHomeScreen(
                         products = featuredProductList,
                         isLoading = featuredProductListState.isLoading,
                         errorMessage = featuredProductListState.errorMessage ?: "",
-                        getProducts = { getFeaturedProducts() }
+                        getProducts = { getFeaturedProducts() },
+                        onProductSelect = { onProductSelect() }
                     )
                 }
 
@@ -144,7 +145,8 @@ fun ShopHomeScreen(
                         products = productList,
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: ""
+                        errorMessage = productListState.errorMessage ?: "",
+                        onProductSelect = { onProductSelect() }
                     )
                 }
 
@@ -159,7 +161,8 @@ fun ShopHomeScreen(
                         products = productList,
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: ""
+                        errorMessage = productListState.errorMessage ?: "",
+                        onProductSelect = { onProductSelect() }
                     )
                 }
 
@@ -179,6 +182,7 @@ fun ProductRowSection(
     isLoading: Boolean? = false,
     errorMessage: String? = null,
     getProducts: () -> Unit,
+    onProductSelect: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -235,7 +239,7 @@ fun ProductRowSection(
                                 modifier = Modifier.padding(
                                     start = MaterialTheme.dimens.small1,
                                     end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
-                                ), product = product
+                                ), product = product, onProductSelect = { onProductSelect() }
                             )
                         }
                     }
@@ -250,23 +254,23 @@ fun ProductRowSection(
 }
 
 @Composable
-fun ProductItem(modifier: Modifier = Modifier, product: Product) {
-    ElevatedCard(
+fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect: () -> Unit) {
+    Surface(
         modifier = modifier
             .width(MaterialTheme.dimens.extraLarge1)
             .fillMaxHeight()
             .padding(vertical = MaterialTheme.dimens.small1)
-            .clickable {},
+            .clickable { onProductSelect() },
         shape = RoundedCornerShape(MaterialTheme.dimens.small1),
-        elevation = CardDefaults.elevatedCardElevation(3.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+        shadowElevation = 10.dp,
+        color = Color.White
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Transparent)
         ) {
-            Card(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.dimens.extraLarge3),
@@ -274,7 +278,7 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product) {
                     topStart = MaterialTheme.dimens.small1,
                     topEnd = MaterialTheme.dimens.small1
                 ),
-                colors = CardDefaults.cardColors(Color.LightGray.copy(0.2f))
+                color = Color.LightGray.copy(0.4f)
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -321,7 +325,7 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product) {
                     shape = RoundedCornerShape(13.dp),
                     colors = ButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.secondary,
                         disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
                             0.3f
                         ),
@@ -439,15 +443,12 @@ fun ProductCategorySection(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Card(
+                                Surface(
                                     modifier = Modifier
                                         .size(MaterialTheme.dimens.medium2)
                                         .clip(CircleShape),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary.copy(
-                                            0.2f
-                                        )
-                                    )
+                                    color = Color.Gray.copy(0.3f)
+
                                 ) {
                                     // Put your Image/Icon here
                                 }

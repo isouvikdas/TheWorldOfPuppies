@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,6 +57,7 @@ fun BottomAppbar(
     AnimatedNavigationBar(
         selectedIndex = selectedIndex,
         modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f))
             .height(MaterialTheme.dimens.medium3)
             .padding(horizontal = MaterialTheme.dimens.small1)
             .padding(bottom = MaterialTheme.dimens.extraSmall),
@@ -63,8 +65,8 @@ fun BottomAppbar(
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
         barColor = MaterialTheme.colorScheme.secondary
-            .copy(0.8f),
-        ballColor = MaterialTheme.colorScheme.tertiaryContainer
+            .copy(0.4f),
+        ballColor = LocalContentColor.current
     ) {
         screens.forEachIndexed { index, screen ->
             Box(
@@ -87,18 +89,15 @@ fun BottomAppbar(
                     if (currentRoute == screen.route) {
                         screen.selectedIcon(
                             Modifier.size(MaterialTheme.dimens.small2),
-                            MaterialTheme.colorScheme.tertiaryContainer
                         )
                     } else {
                         screen.unselectedIcon(
                             Modifier.size(MaterialTheme.dimens.small2),
-                            MaterialTheme.colorScheme.tertiaryContainer
                         )
                     }
                     screen.title?.let {
                         Text(
                             text = it,
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.labelLarge

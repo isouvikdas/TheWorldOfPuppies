@@ -29,6 +29,7 @@ import com.example.theworldofpuppies.auth.presentation.signOut.SignOutDialog
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.sideNav.NavigationDrawer
 import com.example.theworldofpuppies.navigation.AppNavigation
+import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
@@ -51,7 +52,6 @@ class MainActivity : ComponentActivity() {
             }
 
             AppTheme {
-
                 val authViewModel = koinViewModel<AuthViewModel>()
                 val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
                 val resetKey by authViewModel.resetKey.collectAsStateWithLifecycle()
@@ -130,18 +130,12 @@ class MainActivity : ComponentActivity() {
                                             }
                                         })
                                 }
-
                             }
                         },
                         scrollBehavior = scrollBehavior
                     )
-
-
                 }
-
-
             }
-
         }
     }
 }

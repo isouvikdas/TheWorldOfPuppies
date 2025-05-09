@@ -94,15 +94,9 @@ fun NavigationDrawer(
                     BottomAppbar(navController = navController)
                 }
             },
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
         ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) {
-                content(innerPadding)
-            }
+            content(innerPadding)
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.navigation
 
-import android.content.Context
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,12 +20,14 @@ import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
+import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
     data object RegistrationScreen : Screen("RegistrationScreen")
     data object LoginScreen : Screen("LoginScreen")
     data object WelcomeScreen : Screen("WelcomeScreen")
+    data object ProductDetailScreen: Screen("ProductDetailScreen")
     data object HomeScreen : Screen("HomeScreen")
     data object ProductList : Screen("ProductList")
     data object ProductDetail : Screen("ProductDetail")
@@ -156,7 +157,9 @@ fun AppNavigation(
                 categoryListState = categoryListState,
                 featuredProductListState = featuredProductListState,
                 productViewModel = productViewModel,
-                onProductSelect = {},
+                onProductSelect = {
+                    navController.navigate(Screen.ProductDetailScreen.route)
+                },
                 getCategories = { productViewModel.fetchCategories() },
                 getProducts = { productViewModel.fetchNextPage() },
                 getFeaturedProducts = { productViewModel.fetchFeaturedProducts() }
@@ -179,6 +182,14 @@ fun AppNavigation(
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
             ProfileScreen()
+        }
+        composable(route = Screen.ProductDetailScreen.route) {
+            onBottomBarVisibilityChanged(false)
+            onProfileButtonVisibilityChanged(false)
+            onTopBarVisibilityChanged(false)
+            searchIconVisibilityChanged(false)
+            onGesturesChanged(false)
+            ProductDetailScreen()
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.example.theworldofpuppies.core.presentation.nav_items.topNav
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -8,7 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,8 +62,8 @@ fun TopAppbar(
     if (isSearchActive) {
         SearchBar(
             colors = SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.secondary.copy(0f),
-                dividerColor = Color.LightGray
+                containerColor = MaterialTheme.colorScheme.secondary.copy(0.6f),
+                dividerColor = Color.Transparent
             ),
             query = searchQuery,
             onQueryChange = { searchQuery = it },
@@ -69,7 +72,7 @@ fun TopAppbar(
             onActiveChange = {
                 isSearchActive = it
             },
-            placeholder = { Text("Search products", color = Color.Gray) },
+            placeholder = { Text("Search products", color = Color.Black.copy(0.9f)) },
             leadingIcon = {
                 IconButton(onClick = {
                     isSearchActive = false
@@ -91,27 +94,34 @@ fun TopAppbar(
                 .fillMaxWidth()
 
         ) {
-            Text(
-                "Suggestion 1",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(
-                    horizontal = MaterialTheme.dimens.small2,
-                    vertical = MaterialTheme.dimens.small1
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
+            ) {
+                Text(
+                    "Suggestion 1",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(
+                        horizontal = MaterialTheme.dimens.small2,
+                        vertical = MaterialTheme.dimens.small1
+                    )
                 )
-            )
-            Text(
-                "Suggestion 2",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(
-                    horizontal = MaterialTheme.dimens.small2,
-                    vertical = MaterialTheme.dimens.small1
+                Text(
+                    "Suggestion 2",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(
+                        horizontal = MaterialTheme.dimens.small2,
+                        vertical = MaterialTheme.dimens.small1
+                    )
                 )
-            )
+
+            }
         }
     } else {
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.secondary.copy(0.6f),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
             ),
             modifier = modifier,
             navigationIcon = {
@@ -125,7 +135,6 @@ fun TopAppbar(
                     Icon(
                         Icons.AutoMirrored.Default.Sort,
                         contentDescription = "Menu",
-                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             },
@@ -145,15 +154,13 @@ fun TopAppbar(
                         Icon(
                             Icons.Default.Search,
                             contentDescription = "Search",
-                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
                 IconButton(onClick = { /* Bag action */ }) {
                     Icon(
-                        Icons.Default.ShoppingBag,
+                        Icons.Outlined.ShoppingBag,
                         contentDescription = "Bag",
-                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (profileButtonVisibility) {
@@ -172,9 +179,8 @@ fun TopAppbar(
                                 }
                             }
                         }) {
-                            it.selectedIcon(
+                            it.unselectedIcon(
                                 Modifier.size(MaterialTheme.dimens.small2),
-                                MaterialTheme.colorScheme.tertiaryContainer
                             )
                         }
                     }
@@ -183,28 +189,3 @@ fun TopAppbar(
         )
     }
 }
-
-
-//@Preview
-//@Composable
-//fun TopAppBarPreview() {
-//    AppTheme {
-//        val topBarVisible by remember { mutableStateOf(true) }
-//        val navController: NavHostController = rememberNavController()
-//        Scaffold(
-//            topBar = {
-//                if (topBarVisible) {
-//                    TopAppbar(
-//                        navController,
-//                        modifier = Modifier,
-//                        profileButtonVisibility = true,
-//                        scope = rememberCoroutineScope(),
-//                        drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-//                    )
-//                }
-//            }
-//        ) { paddingValues ->
-//            Box(modifier = Modifier.padding(paddingValues))
-//        }
-//    }
-//}

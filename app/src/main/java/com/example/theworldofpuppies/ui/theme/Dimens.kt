@@ -47,7 +47,7 @@ val CompactMediumDimens = Dimens(
     extraLarge1 = 160.dp,
     extraLarge2 = 180.dp,
     extraLarge3 = 200.dp,
-    buttonHeight = 44.dp,
+    buttonHeight = 55.dp,
     logoSize = 56.dp
 )
 
