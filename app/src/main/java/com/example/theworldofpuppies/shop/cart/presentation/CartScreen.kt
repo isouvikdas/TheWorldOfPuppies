@@ -1,0 +1,398 @@
+package com.example.theworldofpuppies.shop.cart.presentation
+
+import android.util.Base64
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.ui.theme.dimens
+
+@Composable
+fun CartScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
+        topBar = {
+            CartHeader(onBack = {
+                onBack()
+            })
+        },
+        bottomBar = {
+            CartBottomSection()
+        }
+    ) { innerPadding ->
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = Color.Transparent
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1.div(4))
+            ) {
+                items(10) {
+                    CartItemSection()
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
+        navigationIcon = {
+            IconButton(
+                onClick = { onBack() },
+                modifier = Modifier
+                    .size(
+                        MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(3)
+                            .div(2)
+                    )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier
+                        .size(MaterialTheme.dimens.small2)
+                )
+
+            }
+        },
+        title = {
+            Text(
+                text = "Cart",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.W500,
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = { /* Bag action */ },
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+            ) {
+                Icon(
+                    Icons.Outlined.ShoppingBag,
+                    contentDescription = "Bag",
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun CartItemSection() {
+    val base64Image = ""
+    val byteArray = Base64.decode(base64Image, Base64.DEFAULT)
+    var isSelected by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(MaterialTheme.dimens.medium2 + MaterialTheme.dimens.extraSmall)
+            .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1.div(4))
+            .padding(top = MaterialTheme.dimens.small1)
+            .background(Color.Gray),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        /*Cart selector button*/
+        IconButton(
+            onClick = {
+                isSelected = !isSelected
+            },
+            modifier = Modifier.padding(end = MaterialTheme.dimens.extraSmall.times(2))
+        ) {
+            if (isSelected) {
+                Icon(
+                    Icons.Default.RadioButtonChecked,
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+
+            } else {
+                Icon(
+                    Icons.Default.RadioButtonUnchecked,
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+
+            }
+        }
+        /*Cart image Section*/
+        Surface(
+            modifier = Modifier
+                .size(MaterialTheme.dimens.medium2 + MaterialTheme.dimens.extraSmall),
+            color = Color.LightGray.copy(0.2f),
+            shape = RoundedCornerShape(MaterialTheme.dimens.small1)
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(byteArray)
+                    .crossfade(true)
+                    .error(R.drawable.login)
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Fit
+            )
+        }
+        /*Cart name and price section*/
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(0.6f)
+                .padding(
+                    horizontal = MaterialTheme.dimens.extraSmall.times(4),
+                    vertical = MaterialTheme.dimens.extraSmall.div(3)
+                ),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "B2 Lounge Chair",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "$298.00",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.W500,
+                color = Color.Gray
+            )
+
+        }
+
+        /*Cart quantity section*/
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                Icons.Outlined.Delete,
+                contentDescription = "Delete cart",
+                tint = MaterialTheme.colorScheme.errorContainer,
+                modifier = Modifier
+                    .padding(end = MaterialTheme.dimens.extraSmall)
+                    .size(MaterialTheme.dimens.small2)
+                    .clickable {}
+            )
+            CartQuantitySection(modifier = Modifier.fillMaxWidth())
+        }
+    }
+
+}
+
+@Composable
+fun CartQuantitySection(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(MaterialTheme.dimens.small1.times(3) / 2)
+                .clip(CircleShape)
+                .clickable {}
+                .background(Color.White.copy(0.6f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Remove,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(MaterialTheme.dimens.small1.times(5) / 4),
+                tint = Color.Black
+            )
+
+        }
+
+        Text(
+            text = "02",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Box(
+            modifier = Modifier
+                .size(MaterialTheme.dimens.small1.times(3) / 2)
+                .clip(CircleShape)
+                .clickable {}
+                .background(Color.White.copy(0.6f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(MaterialTheme.dimens.small1.times(5) / 4)
+            )
+
+        }
+    }
+
+}
+
+
+@Composable
+fun CartBottomSection(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(MaterialTheme.dimens.extraLarge1)
+            .clip(
+                RoundedCornerShape(
+                    topStart = MaterialTheme.dimens.small3,
+                    topEnd = MaterialTheme.dimens.small3
+                )
+            ),
+        color = Color.White,
+        shadowElevation = 5.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.LightGray.copy(0.55f))
+                .padding(
+                    start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
+                    end = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
+                    top = MaterialTheme.dimens.small2,
+                    bottom = MaterialTheme.dimens.small1
+                ),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier
+                        .wrapContentHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+
+                    Text(
+                        text = "Selected Items",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.W500
+                    )
+                    Text(
+                        text = "(2)",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.W500
+                    )
+
+                }
+
+                Row(
+                    modifier = Modifier
+                        .wrapContentHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text = "Total :",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.W500
+                    )
+                    Text(
+                        text = "$298.00",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+            }
+
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(MaterialTheme.dimens.buttonHeight),
+                shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    disabledContainerColor = Color.LightGray,
+                    disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                ),
+            ) {
+                Text(
+                    text = "Checkout",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}

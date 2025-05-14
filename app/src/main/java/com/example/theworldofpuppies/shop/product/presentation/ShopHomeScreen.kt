@@ -25,10 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -130,7 +127,8 @@ fun ShopHomeScreen(
                         isLoading = featuredProductListState.isLoading,
                         errorMessage = featuredProductListState.errorMessage ?: "",
                         getProducts = { getFeaturedProducts() },
-                        onProductSelect = { onProductSelect() }
+                        onProductSelect = { onProductSelect() },
+                        productViewModel = productViewModel
                     )
                 }
 
@@ -146,7 +144,8 @@ fun ShopHomeScreen(
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
                         errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() }
+                        onProductSelect = { onProductSelect() },
+                        productViewModel = productViewModel
                     )
                 }
 
@@ -162,7 +161,8 @@ fun ShopHomeScreen(
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
                         errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() }
+                        onProductSelect = { onProductSelect() },
+                        productViewModel = productViewModel
                     )
                 }
 
@@ -182,7 +182,8 @@ fun ProductRowSection(
     isLoading: Boolean? = false,
     errorMessage: String? = null,
     getProducts: () -> Unit,
-    onProductSelect: () -> Unit
+    onProductSelect: () -> Unit,
+    productViewModel: ProductViewModel? = null
 ) {
     Column(
         modifier = modifier
@@ -239,7 +240,10 @@ fun ProductRowSection(
                                 modifier = Modifier.padding(
                                     start = MaterialTheme.dimens.small1,
                                     end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
-                                ), product = product, onProductSelect = { onProductSelect() }
+                                ), product = product, onProductSelect = {
+                                    onProductSelect()
+                                    productViewModel?.setProduct(product)
+                                }
                             )
                         }
                     }
@@ -262,7 +266,7 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect
             .padding(vertical = MaterialTheme.dimens.small1)
             .clickable { onProductSelect() },
         shape = RoundedCornerShape(MaterialTheme.dimens.small1),
-        shadowElevation = 10.dp,
+        shadowElevation = 5.dp,
         color = Color.White
     ) {
         Column(
@@ -292,54 +296,61 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect
                 )
 
             }
-            Text(
-                text = product.name,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall),
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.size(MaterialTheme.dimens.small1))
-
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp)
-                    .padding(horizontal = MaterialTheme.dimens.extraSmall),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f))
             ) {
                 Text(
-                    text = "$${product.price}",
+                    text = product.name,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier,
-                    fontWeight = FontWeight.SemiBold
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall),
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-
-                Button(
-                    onClick = { /*TODO*/ },
+                Spacer(modifier = Modifier.size(MaterialTheme.dimens.small1))
+                Row(
                     modifier = Modifier
-                        .height(35.dp)
-                        .width(80.dp),
-                    shape = RoundedCornerShape(13.dp),
-                    colors = ButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.secondary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
-                            0.3f
-                        ),
-                        disabledContentColor = Color.White
-                    )
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp)
+                        .padding(horizontal = MaterialTheme.dimens.extraSmall),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Add",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.W600
+                        text = "$${product.price}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier,
+                        fontWeight = FontWeight.SemiBold
                     )
+
+                    Button(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .height(35.dp)
+                            .width(80.dp),
+                        shape = RoundedCornerShape(13.dp),
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.secondary,
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
+                                0.3f
+                            ),
+                            disabledContentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = "Add",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.W600
+                        )
+                    }
+
                 }
 
             }
+
         }
     }
 

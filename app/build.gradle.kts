@@ -28,7 +28,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://2f94-2405-201-ac02-d151-7048-29d-fb61-44c3.ngrok-free.app\""
+                "\"192.168.29.5\""
             )
         }
         release {
@@ -40,8 +40,9 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://2f94-2405-201-ac02-d151-7048-29d-fb61-44c3.ngrok-free.app\""
+                "\"https://88c2-2405-201-ac02-d151-7a8a-8d66-aeb7-7d71.ngrok-free.app\""
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

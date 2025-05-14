@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -65,7 +66,7 @@ fun BottomAppbar(
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
         barColor = MaterialTheme.colorScheme.secondary
-            .copy(0.4f),
+            .copy(0.5f),
         ballColor = LocalContentColor.current
     ) {
         screens.forEachIndexed { index, screen ->

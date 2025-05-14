@@ -34,6 +34,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ fun TopAppbar(
     drawerState: DrawerState,
     scrollBehavior: TopAppBarScrollBehavior,
     searchIconVisibility: Boolean,
-    onBottomBarVisibilityChange: (Boolean) -> Unit
+    onBottomBarVisibilityChange: (Boolean) -> Unit,
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -62,7 +63,7 @@ fun TopAppbar(
     if (isSearchActive) {
         SearchBar(
             colors = SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.secondary.copy(0.6f),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.4f),
                 dividerColor = Color.Transparent
             ),
             query = searchQuery,
@@ -97,7 +98,7 @@ fun TopAppbar(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White),
+                    .background(Color.Transparent),
             ) {
                 Text(
                     "Suggestion 1",
@@ -157,7 +158,7 @@ fun TopAppbar(
                         )
                     }
                 }
-                IconButton(onClick = { /* Bag action */ }) {
+                IconButton(onClick = { navController.navigate(Screen.CartScreen.route) }) {
                     Icon(
                         Icons.Outlined.ShoppingBag,
                         contentDescription = "Bag",

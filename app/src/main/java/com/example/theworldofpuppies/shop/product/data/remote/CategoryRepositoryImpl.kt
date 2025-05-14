@@ -14,12 +14,11 @@ import java.io.IOException
 
 class CategoryRepositoryImpl(
     private val db: Database,
-    private val productApi: ProductApi
+    private val productApi: DummyApi
 ) : CategoryRepository {
 
     override suspend fun fetchAllCategories(): List<CategoryEntity> = withContext(Dispatchers.IO) {
         db.categoryDao.getCategories()
-
     }
 
 
@@ -43,7 +42,6 @@ class CategoryRepositoryImpl(
                 }
             }.onError { error ->
                 throw IOException("Api Error: $error")
-
             }
         } catch (e: IOException) {
             Timber.e(e, "Network or API error occurred.")

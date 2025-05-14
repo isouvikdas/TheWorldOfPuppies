@@ -21,7 +21,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 class ProductRepositoryImpl(
-    private val productApi: ProductApi,
+    private val productApi: DummyApi,
     private val db: Database,
     private val context: Context
 ) : ProductRepository {

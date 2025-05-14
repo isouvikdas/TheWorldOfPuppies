@@ -30,16 +30,15 @@ import com.example.theworldofpuppies.R
 sealed class DrawerItems(
     val route: String,
     val title: String,
-    val icon: @Composable (Modifier, Color) -> Unit
+    val icon: @Composable (Modifier) -> Unit
 ) {
     data object Refer : DrawerItems(
         route = "Refer",
         title = "Refer & Earn",
-        icon = { modifier, tint ->
+        icon = { modifier ->
             Icon(
                 painterResource(id = R.drawable.credit_card_health),
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -48,11 +47,10 @@ sealed class DrawerItems(
     data object Support : DrawerItems(
         route = "Support",
         title = "Support",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.Outlined.Phone,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -61,11 +59,10 @@ sealed class DrawerItems(
     data object Shop : DrawerItems(
         route = "Shop",
         title = "Shop",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.Filled.Store,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -74,11 +71,10 @@ sealed class DrawerItems(
     data object Insurance : DrawerItems(
         route = "Pet insurance",
         title = "Pet Insurance",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.Outlined.Pets,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -87,11 +83,10 @@ sealed class DrawerItems(
     data object Training : DrawerItems(
         route = "Training",
         title = "Dog Training",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 painterResource(id = R.drawable.sound_detection_dog_barking),
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -100,11 +95,10 @@ sealed class DrawerItems(
     data object PrivacyPolicy : DrawerItems(
         route = "PrivacyPolicy",
         title = "Privacy & Policy",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.AutoMirrored.Outlined.EventNote,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -113,11 +107,10 @@ sealed class DrawerItems(
     data object TermsConditions : DrawerItems(
         route = "TermsConditions",
         title = "T&C",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.Outlined.Description,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -126,11 +119,10 @@ sealed class DrawerItems(
     data object RateUs : DrawerItems(
         route = "Rate Us",
         title = "Rate Us",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.Outlined.StarOutline,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -139,11 +131,10 @@ sealed class DrawerItems(
     data class SignOut(val onSignOutClick: () -> Unit) : DrawerItems(
         route = "SignOut",
         title = "Sign Out",
-        icon = { modifier, tint ->
+        icon = { modifier->
             Icon(
                 Icons.AutoMirrored.Outlined.Logout,
                 contentDescription = null,
-                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }

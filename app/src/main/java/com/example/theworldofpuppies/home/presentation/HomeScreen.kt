@@ -42,7 +42,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.domain.Plan
@@ -50,14 +49,13 @@ import com.example.theworldofpuppies.core.domain.Service
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.example.theworldofpuppies.ui.theme.dimens
 
-
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
 
     val imageList = List(10) { painterResource(id = R.drawable.flag_india) }
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
     ) {
         Column(
@@ -70,181 +68,186 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.fillMaxHeight(0.05f))
             ServiceSection(serviceList = serviceList)
             Spacer(modifier = Modifier.fillMaxHeight(0.12f))
-            Column(
-                modifier = Modifier
-                    .height(MaterialTheme.dimens.extraLarge3)
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(horizontal = MaterialTheme.dimens.small1),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Nearby Veterinary",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Text(
-                        text = "See all",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.W500,
-                        modifier = Modifier.clickable { }
-                    )
-                }
-
-                Spacer(modifier = Modifier.fillMaxHeight(.04f))
-
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                    contentPadding = PaddingValues(MaterialTheme.dimens.small1),
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
-                ) {
-                    items(serviceList.take(4)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .clip(shape = RoundedCornerShape(MaterialTheme.dimens.small2))
-                                .background(MaterialTheme.colorScheme.secondary.copy(0.2f)),
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Surface(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .width(MaterialTheme.dimens.large2),
-                                    shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                                    color = MaterialTheme.colorScheme.primary.copy(0.9f)
-
-                                ) {
-                                }
-
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.8f)
-                                        .padding(horizontal = MaterialTheme.dimens.small1)
-                                        .fillMaxHeight(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Column(
-                                        modifier
-                                            .fillMaxHeight(0.5f)
-                                            .fillMaxWidth(),
-                                        verticalArrangement = Arrangement.SpaceEvenly,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = "Dr. Kevin Julio",
-                                            fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.headlineSmall
-                                        )
-                                        Text(
-                                            text = "Veterinary Dentist",
-                                            fontWeight = FontWeight.W400,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = Color.Gray,
-                                        )
-
-                                    }
-                                    Row(
-                                        modifier = Modifier.fillMaxSize(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth(0.5f)
-                                                .fillMaxHeight(),
-                                            horizontalArrangement = Arrangement.Center,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Star,
-                                                contentDescription = "Ratings",
-                                                tint = Color(0xFFFFDE3F),
-                                                modifier = Modifier.size(MaterialTheme.dimens.small2)
-                                            )
-                                            Text(
-                                                text = "4.7 ",
-                                                fontWeight = FontWeight.SemiBold,
-                                                style = MaterialTheme.typography.headlineSmall
-                                            )
-                                        }
-
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxSize(),
-                                            horizontalArrangement = Arrangement.Center,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.LocationOn,
-                                                contentDescription = "Ratings",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(MaterialTheme.dimens.small2)
-                                            )
-                                            Text(
-                                                text = "1.5 km",
-                                                fontWeight = FontWeight.SemiBold,
-                                                style = MaterialTheme.typography.titleSmall
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(MaterialTheme.dimens.small3)
-                                            .clip(CircleShape)
-                                            .clickable { }
-                                            .background(MaterialTheme.colorScheme.secondary),
-                                        contentAlignment = Alignment.Center
-
-                                    ) {
-                                        Icon(
-                                            Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(MaterialTheme.dimens.small1),
-                                            tint = Color.White
-                                        )
-
-
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-
-                }
-
-            }
-
+            PetExpertSection()
         }
     }
 }
 
 @Composable
-fun PetExpertSection(modifier: Modifier = Modifier, screenWidth: Dp) {
+fun PetExpertSection(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .height(MaterialTheme.dimens.extraLarge3)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(horizontal = MaterialTheme.dimens.small1),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Nearby Veterinary",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
 
+            Text(
+                text = "See all",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.Gray,
+                fontWeight = FontWeight.W500,
+                modifier = Modifier.clickable { }
+            )
+        }
+
+        Spacer(modifier = Modifier.fillMaxHeight(.04f))
+
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            contentPadding = PaddingValues(MaterialTheme.dimens.small1),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+        ) {
+            items(serviceList.take(4)) {
+                PetExpertItem()
+            }
+
+        }
+
+    }
+
+}
+
+
+@Composable
+fun PetExpertItem(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
+        shape = RoundedCornerShape(MaterialTheme.dimens.small2),
+        color = Color.White,
+        shadowElevation = 5.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.secondary.copy(0.3f))
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(MaterialTheme.dimens.large2),
+                shape = RoundedCornerShape(MaterialTheme.dimens.small2),
+                color = MaterialTheme.colorScheme.primary.copy(0.9f)
+
+            ) {
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .padding(horizontal = MaterialTheme.dimens.small1)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier
+                        .fillMaxHeight(0.5f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Dr. Kevin Julio",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = "Veterinary Dentist",
+                        fontWeight = FontWeight.W400,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Gray,
+                    )
+
+                }
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Ratings",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(MaterialTheme.dimens.small2)
+                        )
+                        Text(
+                            text = "4.7 ",
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "Location",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(MaterialTheme.dimens.small2)
+                        )
+                        Text(
+                            text = "1.5 km",
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(MaterialTheme.dimens.small3)
+                        .clip(CircleShape)
+                        .clickable { }
+                        .background(MaterialTheme.colorScheme.secondary),
+                    contentAlignment = Alignment.Center
+
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(MaterialTheme.dimens.small1),
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+    }
 
 }
 

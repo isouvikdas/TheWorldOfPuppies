@@ -5,36 +5,27 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.SignalWifiStatusbarNull
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,18 +47,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
+import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
 import com.example.theworldofpuppies.ui.theme.dimens
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -77,16 +66,24 @@ import com.google.accompanist.pager.rememberPagerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductDetailScreen(modifier: Modifier = Modifier) {
-
-    val navController: NavHostController = rememberNavController()
-    val productDetailState = ProductDetailState()
+fun ProductDetailScreen(
+    modifier: Modifier = Modifier,
+    productDetailState: ProductDetailState,
+    onBack: () -> Unit,
+    onCartClick: () -> Unit
+) {
+    val discount = 25
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
         topBar = {
-            ProductHeader(modifier = Modifier)
+            ProductHeader(
+                modifier = Modifier,
+                onBack = { onBack() },
+                onCartClick = { onCartClick() })
         },
         bottomBar = {
             ProductBottomSection(modifier = Modifier)
@@ -99,20 +96,29 @@ fun ProductDetailScreen(modifier: Modifier = Modifier) {
                 .padding(innerPadding),
             color = Color.Transparent
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                ProductImageSection(
-                    productDetailState = productDetailState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(MaterialTheme.dimens.large3.times(2))
-                        .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4)
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
-                ProductDetailSection(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4)
-                )
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item {
+                    ProductImageSection(
+                        productDetailState = productDetailState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(MaterialTheme.dimens.large3.times(2))
+                            .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4)
+                    )
+                }
+                item {
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+                }
+                item {
+                    ProductDetailSection(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
+                        product = productDetailState.product,
+                        discount = discount
+                    )
+
+                }
             }
         }
     }
@@ -120,8 +126,11 @@ fun ProductDetailScreen(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductHeader(modifier: Modifier = Modifier) {
-    var isLiked by remember { mutableStateOf(false) }
+fun ProductHeader(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    onCartClick: () -> Unit
+) {
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -129,42 +138,38 @@ fun ProductHeader(modifier: Modifier = Modifier) {
         ),
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
+            .padding(start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1.div(4)),
         navigationIcon = {
-
-            Icon(
-                Icons.AutoMirrored.Default.ArrowBackIos,
-                contentDescription = "Menu",
+            IconButton(
+                onClick = { onBack() },
                 modifier = Modifier
-                    .size(MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall)
-                    .clickable {}
-            )
+                    .size(
+                        MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(3)
+                            .div(2)
+                    )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "Menu",
+                    modifier = Modifier
+                        .size(MaterialTheme.dimens.small2)
+                )
+
+            }
         },
         title = {
             Text(
-                text = "Product Detail",
+                text = "Product",
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.W500
+                fontWeight = FontWeight.W500,
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
             )
         },
         actions = {
             IconButton(
-                onClick = { isLiked = !isLiked }
+                onClick = { onCartClick() },
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
             ) {
-                when (isLiked) {
-                    true -> Icon(
-                        imageVector = Icons.Filled.Favorite,
-                        contentDescription = "Liked",
-                        tint = Color.Red,
-                    )
-
-                    false -> Icon(
-                        imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Liked",
-                    )
-                }
-            }
-            IconButton(onClick = { /* Bag action */ }) {
                 Icon(
                     Icons.Outlined.ShoppingBag,
                     contentDescription = "Bag",
@@ -192,7 +197,7 @@ fun ProductImageSection(productDetailState: ProductDetailState, modifier: Modifi
                         .fillMaxSize()
                         .padding(top = MaterialTheme.dimens.small1),
                     shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                    shadowElevation = 20.dp
+                    shadowElevation = 5.dp
                 ) {
                     HorizontalPager(
                         state = pagerState,
@@ -216,7 +221,8 @@ fun ProductImageSection(productDetailState: ProductDetailState, modifier: Modifi
                     .fillMaxSize()
                     .padding(top = MaterialTheme.dimens.small1),
                 shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                shadowElevation = 20.dp
+                shadowElevation = 5.dp,
+                color = Color.White
             ) {
                 PlaceholderForEmptyImages()
             }
@@ -230,7 +236,7 @@ fun PlaceholderForEmptyImages() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray.copy(0.2f)),
+            .background(Color.LightGray.copy(0.4f)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -250,7 +256,10 @@ fun PlaceholderForEmptyImages() {
 
 
 @Composable
-fun ProductDetailSection(modifier: Modifier = Modifier) {
+fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, discount: Int) {
+
+    val discountedPrice = product?.price?.times(100 - discount)?.div(100)
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.extraSmall.times(3) / 2)
@@ -263,28 +272,27 @@ fun ProductDetailSection(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Pet Shampoo",
+                text = product?.name.toString(),
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
                     .fillMaxWidth(0.65f),
                 fontWeight = FontWeight.W600
             )
             /*Discount Card*/
-            Card(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(MaterialTheme.dimens.extraSmall)),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
+            Surface(
+                modifier = Modifier.wrapContentSize(),
+                shape = RoundedCornerShape(MaterialTheme.dimens.extraSmall.times(3).div(2)),
+                color = MaterialTheme.colorScheme.tertiary,
+                shadowElevation = 1.dp
             ) {
 
                 Text(
-                    text = "25% off",
+                    text = "$discount% Off",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
                     fontWeight = FontWeight.W500,
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -305,16 +313,15 @@ fun ProductDetailSection(modifier: Modifier = Modifier) {
             )
             /*without discounted price*/
             Text(
-                text = "$199.00",
+                text = "$${product?.price.toString()}",
                 style = MaterialTheme.typography.headlineLarge,
                 textDecoration = TextDecoration.LineThrough,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.W500,
+                fontWeight = FontWeight.SemiBold,
                 color = Color.Gray
             )
             /*discounted price*/
             Text(
-                text = "$149.00",
+                text = "$${discountedPrice.toString()}",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -354,7 +361,7 @@ fun ProductDetailSection(modifier: Modifier = Modifier) {
             }
             var isExpanded by remember { mutableStateOf(false) }
             Text(
-                text = stringResource(R.string.product_description),
+                text = product?.description.toString(),
                 modifier = Modifier
                     .padding(
                         vertical = MaterialTheme.dimens.extraSmall
@@ -402,7 +409,7 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge3)
+            .height(MaterialTheme.dimens.extraLarge1)
             .clip(
                 RoundedCornerShape(
                     topStart = MaterialTheme.dimens.small3,
@@ -410,20 +417,17 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
                 )
             ),
         color = Color.White,
-        shadowElevation = 20.dp
+        shadowElevation = 5.dp
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black.copy(0.2f))
+                .fillMaxSize()
+                .background(Color.LightGray.copy(0.55f))
                 .padding(
                     start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
                     end = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
                     top = MaterialTheme.dimens.small2,
                     bottom = MaterialTheme.dimens.small1
-                )
-                .padding(
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -434,55 +438,11 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
+                CartQuantitySection(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .wrapContentHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(MaterialTheme.dimens.small1.times(3) / 2)
-                            .clip(CircleShape)
-                            .clickable {}
-                            .background(Color.White),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Remove,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(MaterialTheme.dimens.small1.times(5) / 4),
-                            tint = Color.Black
-                        )
-
-                    }
-
-                    Text(
-                        text = "02",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.W500
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .size(MaterialTheme.dimens.small1.times(3) / 2)
-                            .clip(CircleShape)
-                            .clickable {}
-                            .background(Color.White),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(MaterialTheme.dimens.small1.times(5) / 4)
-                        )
-
-                    }
-                }
-
+                        .wrapContentHeight()
+                )
                 Row(
                     modifier = Modifier
                         .wrapContentHeight(),

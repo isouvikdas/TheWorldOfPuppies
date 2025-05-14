@@ -13,6 +13,7 @@ import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.shop.product.data.remote.CategoryRepositoryImpl
+import com.example.theworldofpuppies.shop.product.data.remote.DummyApi
 import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
 import com.example.theworldofpuppies.shop.product.data.remote.ProductRepositoryImpl
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
@@ -39,6 +40,7 @@ val appModule = module {
     single { get<Database>().productDao }
     single { get<Database>().categoryDao }
     singleOf(::ProductApi)
+    singleOf(::DummyApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::ProductRepositoryImpl).bind<ProductRepository>()
