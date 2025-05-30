@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -36,9 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,7 +53,7 @@ import com.example.theworldofpuppies.ui.theme.dimens
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
 
-    val imageList = List(10) { painterResource(id = R.drawable.flag_india) }
+    val imageList = List(6) { painterResource(id = R.drawable.pet_banner) }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -63,11 +64,11 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.03f))
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             ScrollableBanner(imageList = imageList)
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             ServiceSection(serviceList = serviceList)
-            Spacer(modifier = Modifier.fillMaxHeight(0.12f))
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             PetExpertSection()
         }
     }
@@ -254,26 +255,24 @@ fun PetExpertItem(modifier: Modifier = Modifier) {
 
 @Composable
 fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
-
     Column(
         modifier = modifier
             .height(MaterialTheme.dimens.large3)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.Top
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(horizontal = MaterialTheme.dimens.small1),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Services",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-
             Text(
                 text = "See all",
                 style = MaterialTheme.typography.titleSmall,
@@ -282,43 +281,53 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                 modifier = Modifier.clickable { }
             )
         }
-        Spacer(modifier = Modifier.fillMaxHeight(0.07f))
-
-        LazyRow {
-            items(serviceList) { service ->
-                val isVisible = remember { mutableStateOf(false) }
-                LaunchedEffect(true) { isVisible.value = true }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                items(serviceList) { service ->
+                    val isVisible = remember { mutableStateOf(false) }
+                    LaunchedEffect(true) { isVisible.value = true }
+                    Column(
                         modifier = Modifier
+                            .fillMaxSize()
                             .padding(
                                 start = MaterialTheme.dimens.small1,
                                 end = if (service == serviceList.last()) MaterialTheme.dimens.small1 else 0.dp
-                            )
-
+                            ),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Surface(
                             modifier = Modifier
-                                .size(MaterialTheme.dimens.medium3)
+                                .size(MaterialTheme.dimens.medium2)
                                 .clip(CircleShape),
-                            color = Color.Gray.copy(0.3f),
+                            color = Color.Gray.copy(0.3f)
+
                         ) {
-
+                            // Put your Image/Icon here
                         }
+
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
+
+                        Text(
+                            text = service.name,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.W500
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
-
-                    Text(
-                        text = service.name,
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
-                    )
                 }
             }
+
         }
+
     }
 }
 
@@ -330,23 +339,31 @@ fun ScrollableBanner(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge2),
+            .height(MaterialTheme.dimens.extraLarge2)
+            .background(Color.Transparent),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
         items(imageList) { image ->
-            Image(
-                painter = image,
-                contentDescription = null,
+            Surface(
                 modifier = Modifier
+                    .fillMaxHeight()
+                    .wrapContentWidth()
                     .padding(
                         start = MaterialTheme.dimens.small1,
                         end = if (image == imageList.last()) MaterialTheme.dimens.small1 else 0.dp
                     )
-                    .clip(RoundedCornerShape(MaterialTheme.dimens.small2))
-                    .shadow(elevation = 10.dp)
-                    .clickable {}
-            )
+                    .clickable {},
+                color = Color.White,
+                shape = RoundedCornerShape(MaterialTheme.dimens.small2)
+            ) {
+                Image(
+                    painter = image,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+
+            }
         }
     }
 }

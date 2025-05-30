@@ -11,6 +11,8 @@ data class ProductEntity(
     val name: String,
     val description: String,
     val price: Double,
+    val discountedPrice: Double,
+    val discount: Int,
     val inventory: Int,
     val categoryName: String,
     val imageIds: List<String> = ArrayList(),

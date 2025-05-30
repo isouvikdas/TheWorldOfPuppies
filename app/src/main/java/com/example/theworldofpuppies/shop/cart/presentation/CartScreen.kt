@@ -14,9 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,10 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,10 +53,19 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @Composable
-fun CartScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun CartScreen(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    cartUiState: CartUiState,
+    cartViewModel: CartViewModel? = null
+) {
+    val cartItems = remember(cartUiState.cartItems) { cartUiState.cartItems as List<CartItem> }
+    val lazyListSTate = rememberLazyListState()
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -70,7 +77,10 @@ fun CartScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
             })
         },
         bottomBar = {
-            CartBottomSection()
+            CartBottomSection(
+                totalCartPrice = cartUiState.cartTotal,
+                totalSelectedItems = cartUiState.totalSelectedItems
+            )
         }
     ) { innerPadding ->
         Surface(
@@ -79,13 +89,24 @@ fun CartScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
                 .padding(innerPadding),
             color = Color.Transparent
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1.div(4))
-            ) {
-                items(10) {
-                    CartItemSection()
+            when {
+                cartItems.isNotEmpty() -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(
+                            MaterialTheme.dimens.small1.div(4).times(5)
+                        ),
+                        state = lazyListSTate
+                    ) {
+                        items(cartItems, key = { it.id }) { cartItem ->
+                            CartItemSection(
+                                cartItem = cartItem,
+                                cartViewModel = cartViewModel
+                            )
+                        }
+                    }
                 }
+
             }
         }
     }
@@ -121,7 +142,7 @@ fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
         },
         title = {
             Text(
-                text = "Cart",
+                text = "My Cart",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
@@ -142,29 +163,29 @@ fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
 }
 
 @Composable
-fun CartItemSection() {
+fun CartItemSection(cartItem: CartItem, cartViewModel: CartViewModel? = null) {
     val base64Image = ""
     val byteArray = Base64.decode(base64Image, Base64.DEFAULT)
-    var isSelected by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(MaterialTheme.dimens.medium2 + MaterialTheme.dimens.extraSmall)
             .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1.div(4))
-            .padding(top = MaterialTheme.dimens.small1)
-            .background(Color.Gray),
+            .padding(top = MaterialTheme.dimens.small1),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         /*Cart selector button*/
         IconButton(
             onClick = {
-                isSelected = !isSelected
+                cartViewModel?.updateItemSelection(
+                    cartItemId = cartItem.id,
+                    isSelected = !cartItem.isSelected
+                )
             },
             modifier = Modifier.padding(end = MaterialTheme.dimens.extraSmall.times(2))
         ) {
-            if (isSelected) {
+            if (cartItem.isSelected) {
                 Icon(
                     Icons.Default.RadioButtonChecked,
                     contentDescription = null,
@@ -211,23 +232,20 @@ fun CartItemSection() {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "B2 Lounge Chair",
+                text = cartItem.product?.name ?: "",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "$298.00",
+                text = cartItem.totalPrice.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.W500,
                 color = Color.Gray
             )
-
         }
-
         /*Cart quantity section*/
-
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.End,
@@ -301,7 +319,11 @@ fun CartQuantitySection(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun CartBottomSection(modifier: Modifier = Modifier) {
+fun CartBottomSection(
+    modifier: Modifier = Modifier,
+    totalSelectedItems: Int,
+    totalCartPrice: Double
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -347,7 +369,7 @@ fun CartBottomSection(modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "(2)",
+                        text = "(${totalSelectedItems})",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.W500
                     )
@@ -361,12 +383,12 @@ fun CartBottomSection(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Text(
-                        text = "Total :",
+                        text = "Total:",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "$298.00",
+                        text = formatCurrency(totalCartPrice),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )

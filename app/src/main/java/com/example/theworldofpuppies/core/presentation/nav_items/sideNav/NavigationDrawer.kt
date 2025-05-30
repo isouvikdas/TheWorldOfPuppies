@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -126,63 +127,68 @@ fun DrawerContent(
         DrawerItems.RateUs,
         DrawerItems.Support
     )
-
-    ModalDrawerSheet(
-        drawerContainerColor = Color.LightGray,
-        drawerContentColor = Color.Black,
-        drawerShape = RectangleShape,
+    Surface(
         modifier = Modifier
             .fillMaxWidth(0.65f)
-            .fillMaxHeight()
+            .fillMaxHeight(), color = Color.White
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+        ModalDrawerSheet(
+            drawerContainerColor = Color.LightGray.copy(0.4f),
+            drawerContentColor = Color.Black,
+            drawerShape = RectangleShape,
+            modifier = Modifier.wrapContentSize()
         ) {
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Top,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                DrawerHeader()
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    DrawerHeader()
 
-                drawerItems.forEach { drawerItem ->
-                    DrawerItem(
-                        title = drawerItem.title,
-                        icon = {
-                            drawerItem.icon(
-                                Modifier.size(MaterialTheme.dimens.small2)
-                            )
-                        },
-                        onClick = {
-                            navController.navigate(drawerItem.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                    drawerItems.forEach { drawerItem ->
+                        DrawerItem(
+                            title = drawerItem.title,
+                            icon = {
+                                drawerItem.icon(
+                                    Modifier.size(MaterialTheme.dimens.small2)
+                                )
+                            },
+                            onClick = {
+                                navController.navigate(drawerItem.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                                scope.launch {
+                                    drawerState.close()
+                                }
                             }
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
-            }
 
-            DrawerItem(
-                title = "Sign Out",
-                icon = {
-                    DrawerItems.SignOut(onSignOutClick).icon(
-                        Modifier.size(MaterialTheme.dimens.small2)
-                    )
-                },
-                onClick = { onSignOutClick() },
-                modifier = Modifier.padding(bottom = 16.dp),
-                selected = true
-            )
+                DrawerItem(
+                    title = "Sign Out",
+                    icon = {
+                        DrawerItems.SignOut(onSignOutClick).icon(
+                            Modifier.size(MaterialTheme.dimens.small2)
+                        )
+                    },
+                    onClick = { onSignOutClick() },
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    selected = true
+                )
+            }
         }
+
     }
 }
 
@@ -192,7 +198,7 @@ fun DrawerHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .height(MaterialTheme.dimens.extraLarge1),
-        color = Color.LightGray
+        color = Color.LightGray.copy(0.4f)
     ) {
         Column(
             modifier = Modifier

@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.navigation
 
+import android.util.Log
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,12 +15,14 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
 import com.example.theworldofpuppies.booking.presentation.BookingScreen
+import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
@@ -58,6 +61,9 @@ fun AppNavigation(
         loginViewModel.resetState()
     }
 
+    val cartViewModel = koinViewModel<CartViewModel>()
+    val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
+
     val startingRoute = when {
         isLoggedIn -> BottomNavigationItems.Home.route
         else -> Screen.WelcomeScreen.route
@@ -68,6 +74,7 @@ fun AppNavigation(
     val categoryListState by productViewModel.categoryListState.collectAsStateWithLifecycle()
     val featuredProductListState by productViewModel.featuredProductListState.collectAsStateWithLifecycle()
     val productDetailState by productViewModel.productDetailState.collectAsStateWithLifecycle()
+    val userRepository = UserRepository
 
     NavHost(
         navController = navController,
@@ -220,7 +227,9 @@ fun AppNavigation(
             CartScreen(
                 onBack = {
                     navController.popBackStack()
-                }
+                },
+                cartUiState = cartUiState,
+                cartViewModel = cartViewModel
             )
         }
     }

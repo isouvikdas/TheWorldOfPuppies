@@ -12,6 +12,10 @@ import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
+import com.example.theworldofpuppies.shop.cart.data.CartApi
+import com.example.theworldofpuppies.shop.cart.data.CartRepositoryImpl
+import com.example.theworldofpuppies.shop.cart.domain.CartRepository
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.data.remote.CategoryRepositoryImpl
 import com.example.theworldofpuppies.shop.product.data.remote.DummyApi
 import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
@@ -46,14 +50,12 @@ val appModule = module {
     singleOf(::ProductRepositoryImpl).bind<ProductRepository>()
     singleOf(::AuthApiImpl).bind<AuthApi>()
     singleOf(::CategoryRepositoryImpl).bind<CategoryRepository>()
-//    singleOf(::CartApi)
-//    singleOf(::CartRepositoryImpl).bind<CartRepository>()
+    singleOf(::CartApi)
+    singleOf(::CartRepositoryImpl).bind<CartRepository>()
 
     viewModelOf(::AuthViewModel)
-//    viewModelOf(::LoginViewModel)
-//    viewModelOf(::AccountDetailViewModel)
     viewModelOf(::ProductViewModel)
-//    viewModelOf(::CartViewModel)
+    viewModelOf(::CartViewModel)
     viewModelOf(::RegistrationViewModel)
     viewModelOf(::LoginViewModel)
 }

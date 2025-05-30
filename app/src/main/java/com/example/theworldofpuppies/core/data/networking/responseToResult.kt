@@ -27,6 +27,10 @@ suspend inline fun <reified T> responseToResult(
                 Log.w("ResponseToResult", "Request timeout: ${response.status.value}")
                 Result.Error(NetworkError.REQUEST_TIMEOUT)
             }
+            401 -> {
+                Log.w("ResponseToResult", "Request unauthorized: ${response.status.value}")
+                Result.Error(NetworkError.UNAUTHORIZED)
+            }
             429 -> {
                 Log.w("ResponseToResult", "Too many requests: ${response.status.value}")
                 Result.Error(NetworkError.TOO_MANY_REQUESTS)

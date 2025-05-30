@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
@@ -258,7 +259,8 @@ fun PlaceholderForEmptyImages() {
 @Composable
 fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, discount: Int) {
 
-    val discountedPrice = product?.price?.times(100 - discount)?.div(100)
+    val originalPrice = product?.price ?: 0.0
+    val discountedPrice = originalPrice * (100 - discount) / 100
 
     Column(
         modifier = modifier,
@@ -285,7 +287,6 @@ fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, disco
                 color = MaterialTheme.colorScheme.tertiary,
                 shadowElevation = 1.dp
             ) {
-
                 Text(
                     text = "$discount% Off",
                     style = MaterialTheme.typography.titleMedium,
@@ -313,7 +314,7 @@ fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, disco
             )
             /*without discounted price*/
             Text(
-                text = "$${product?.price.toString()}",
+                text = formatCurrency(originalPrice),
                 style = MaterialTheme.typography.headlineLarge,
                 textDecoration = TextDecoration.LineThrough,
                 fontWeight = FontWeight.SemiBold,
@@ -321,7 +322,7 @@ fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, disco
             )
             /*discounted price*/
             Text(
-                text = "$${discountedPrice.toString()}",
+                text = formatCurrency(discountedPrice),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -455,7 +456,7 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "$298.00",
+                        text = formatCurrency(298.00),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )

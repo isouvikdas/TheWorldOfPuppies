@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -66,7 +67,7 @@ fun ShopHomeScreen(
     getFeaturedProducts: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
-    val imageList = List(10) { painterResource(id = R.drawable.flag_india) }
+    val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
     val productList =
         remember(productListState.productList) { productListState.productList.take(4) }
     val categoryList =
@@ -210,7 +211,6 @@ fun ProductRowSection(
                 modifier = Modifier.clickable {}
             )
         }
-
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -238,7 +238,8 @@ fun ProductRowSection(
                         items(products, key = { it.id }) { product ->
                             ProductItem(
                                 modifier = Modifier.padding(
-                                    start = MaterialTheme.dimens.small1,
+                                    start = if (product == products.first()) MaterialTheme.dimens.small1
+                                    else MaterialTheme.dimens.small1.div(2),
                                     end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
                                 ), product = product, onProductSelect = {
                                     onProductSelect()
@@ -247,21 +248,17 @@ fun ProductRowSection(
                             )
                         }
                     }
-
                 }
             }
         }
-
-
     }
-
 }
 
 @Composable
 fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect: () -> Unit) {
     Surface(
         modifier = modifier
-            .width(MaterialTheme.dimens.extraLarge1)
+            .width(MaterialTheme.dimens.extraLarge2)
             .fillMaxHeight()
             .padding(vertical = MaterialTheme.dimens.small1)
             .clickable { onProductSelect() },
@@ -319,8 +316,8 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "$${product.price}",
-                        style = MaterialTheme.typography.bodyLarge,
+                        text = formatCurrency(product.price),
+                        style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -361,26 +358,31 @@ fun ProductBannerSection(modifier: Modifier = Modifier, imageList: List<Painter>
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge1),
+            .height(MaterialTheme.dimens.extraLarge2),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
         items(imageList) { image ->
-            Image(
-                painter = image,
-                contentDescription = null,
+            Surface(
                 modifier = Modifier
+                    .fillMaxHeight()
+                    .wrapContentWidth()
                     .padding(
                         start = MaterialTheme.dimens.small1,
                         end = if (image == imageList.last()) MaterialTheme.dimens.small1 else 0.dp
                     )
-                    .clip(RoundedCornerShape(MaterialTheme.dimens.small2))
-                    .shadow(elevation = 10.dp)
-                    .clickable {}
-            )
+                    .clickable {},
+                color = Color.White,
+                shape = RoundedCornerShape(MaterialTheme.dimens.small2)
+            ) {
+                Image(
+                    painter = image,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -417,7 +419,6 @@ fun ProductCategorySection(
                 fontWeight = FontWeight.W500,
                 modifier = Modifier.clickable {}
             )
-
         }
         Box(
             modifier = Modifier
