@@ -56,6 +56,18 @@ class ProductViewModel(
         }
     }
 
+    private val alreadyRequestedIds = mutableSetOf<String>()
+
+    fun fetchImagesIfNeeded(product: Product) {
+        product.imageIds.forEach { imageId ->
+            if (!_productDetailState.value.fetchedImageIds.contains(imageId) && !alreadyRequestedIds.contains(imageId)) {
+                alreadyRequestedIds.add(imageId)
+                getProductImages(imageId)
+            }
+        }
+    }
+
+
     fun getProductImages(imageId: String) {
         viewModelScope.launch {
             _productDetailState.update { it.copy(isImageLoading = true) }
@@ -63,12 +75,14 @@ class ProductViewModel(
             if (byteArrayImage != null) {
                 if (byteArrayImage.isNotEmpty()) {
                     val base64Image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT)
-                    Log.i("tagy", base64Image)
+                    val product = productDetailState.value.product?.copy(isImagesFetched = true)
                     _productDetailState.update {
                         it.copy(
                             errorMessage = null,
                             images = it.images + base64Image,
-                            isImageLoading = false
+                            fetchedImageIds = it.fetchedImageIds + imageId,
+                            isImageLoading = false,
+                            product = product
                         )
                     }
                 } else {
@@ -123,6 +137,15 @@ class ProductViewModel(
                             productList.forEach { Log.i("toggle", it.toString()) }
                         }
                         _featuredProductListState.update { it.copy(productList = productList) }
+//                        val product = featuredProductListState.value.productList.find {it.imageIds.isNotEmpty()}
+//                        val imageIds = product?.imageIds ?: emptyList()
+//                        if (imageIds.isNotEmpty()) {
+//                            imageIds.forEach {
+//                                Log.i("imageId", it.toString())
+//                            }
+//                        } else {
+//                            Log.i("imageId", "imageIds are empty")
+//                        }
                     }
 
                     is Result.Error -> _featuredProductListState.update { it.copy(errorMessage = result.error.toString()) }

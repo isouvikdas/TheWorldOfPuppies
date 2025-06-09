@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.shop.product.presentation.product_detail
 
 import android.util.Base64
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.SignalWifiStatusbarNull
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
@@ -36,7 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,23 +60,46 @@ import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
-import com.example.theworldofpuppies.shop.product.domain.Product
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
+import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     modifier: Modifier = Modifier,
     productDetailState: ProductDetailState,
+    productViewModel: ProductViewModel? = null,
     onBack: () -> Unit,
-    onCartClick: () -> Unit
+    onCartClick: () -> Unit,
+    cartViewModel: CartViewModel? = null,
 ) {
-    val discount = 25
+
+    val product = productDetailState.product
+    val discount = remember(product?.discount) { product?.discount ?: 0 }
+    val images = remember(productDetailState.images) { productDetailState.images }
+    val description = product?.description.orEmpty()
+    val price = remember(product?.price) { product?.price ?: 0.0 }
+    val discountedPrice = remember(product?.discountedPrice) { product?.discountedPrice ?: 0.0 }
+    val productName = remember(product?.name) { product?.name ?: "" }
+    val productId = remember(product?.id) { product?.id ?: "" }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        cartViewModel?.toastEvent?.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(product?.id) {
+        product?.let { productViewModel?.fetchImagesIfNeeded(product) }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -87,7 +113,12 @@ fun ProductDetailScreen(
                 onCartClick = { onCartClick() })
         },
         bottomBar = {
-            ProductBottomSection(modifier = Modifier)
+            ProductBottomSection(
+                modifier = Modifier,
+                cartViewModel = cartViewModel,
+                discountedPrice = discountedPrice,
+                productId = productId,
+            )
         }
 
     ) { innerPadding ->
@@ -100,11 +131,10 @@ fun ProductDetailScreen(
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
                     ProductImageSection(
-                        productDetailState = productDetailState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(MaterialTheme.dimens.large3.times(2))
-                            .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4)
+                            .height(MaterialTheme.dimens.large3.times(2)),
+                        images = images
                     )
                 }
                 item {
@@ -115,8 +145,11 @@ fun ProductDetailScreen(
                         modifier = Modifier
                             .wrapContentSize()
                             .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
-                        product = productDetailState.product,
-                        discount = discount
+                        discount = discount,
+                        productName = productName,
+                        description = description,
+                        originalPrice = price,
+                        discountedPrice = discountedPrice
                     )
 
                 }
@@ -182,36 +215,49 @@ fun ProductHeader(
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun ProductImageSection(productDetailState: ProductDetailState, modifier: Modifier = Modifier) {
+fun ProductImageSection(
+    images: List<String>?,
+    modifier: Modifier = Modifier
+) {
     val pagerState = rememberPagerState(
-        pageCount = productDetailState.images.size,
+        pageCount = images?.size ?: 0,
         initialPage = 0
     )
 
     Column(
         modifier = modifier
     ) {
-        if (productDetailState.images.isNotEmpty()) {
-            Column {
-                Surface(
+        if (!images.isNullOrEmpty()) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HorizontalPager(
+                    state = pagerState,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = MaterialTheme.dimens.small1),
-                    shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                    shadowElevation = 5.dp
-                ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize()
-                    ) { page ->
-                        ProductImage(productDetailState.images[page])
+                        .fillMaxWidth()
+                        .height(MaterialTheme.dimens.large3.times(2) - MaterialTheme.dimens.small2)
+                        .padding(top = MaterialTheme.dimens.small1)
+                ) { page ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = MaterialTheme.dimens.small1.div(5).times(4)),
+                        shape = RoundedCornerShape(MaterialTheme.dimens.small2),
+                        shadowElevation = 1.dp,
+                        color = Color.White
+                    ) {
+                        ProductImage(images[page])
                     }
                 }
 
                 HorizontalPagerIndicator(
                     pagerState = pagerState,
                     modifier = Modifier
-                        .padding(16.dp),
+                        .padding(
+                            start = MaterialTheme.dimens.small1,
+                            end = MaterialTheme.dimens.small1,
+                            top = MaterialTheme.dimens.small1
+                        ),
                     activeColor = MaterialTheme.colorScheme.primary,
                     inactiveColor = Color.Gray
                 )
@@ -220,9 +266,13 @@ fun ProductImageSection(productDetailState: ProductDetailState, modifier: Modifi
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = MaterialTheme.dimens.small1),
+                    .padding(
+                        top = MaterialTheme.dimens.small1,
+                        start = MaterialTheme.dimens.small1.div(5).times(4),
+                        end = MaterialTheme.dimens.small1.div(5).times(4)
+                    ),
                 shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                shadowElevation = 5.dp,
+                shadowElevation = 1.dp,
                 color = Color.White
             ) {
                 PlaceholderForEmptyImages()
@@ -255,18 +305,19 @@ fun PlaceholderForEmptyImages() {
     }
 }
 
-
 @Composable
-fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, discount: Int) {
-
-    val originalPrice = product?.price ?: 0.0
-    val discountedPrice = originalPrice * (100 - discount) / 100
-
+fun ProductDetailSection(
+    modifier: Modifier = Modifier,
+    productName: String?,
+    description: String?,
+    discount: Int,
+    originalPrice: Double,
+    discountedPrice: Double
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.extraSmall.times(3) / 2)
     ) {
-
         /*Product name and discount row*/
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -274,7 +325,7 @@ fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, disco
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = product?.name.toString(),
+                text = productName.toString(),
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
                     .fillMaxWidth(0.65f),
@@ -362,7 +413,7 @@ fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, disco
             }
             var isExpanded by remember { mutableStateOf(false) }
             Text(
-                text = product?.description.toString(),
+                text = description.toString(),
                 modifier = Modifier
                     .padding(
                         vertical = MaterialTheme.dimens.extraSmall
@@ -376,37 +427,34 @@ fun ProductDetailSection(modifier: Modifier = Modifier, product: Product?, disco
             )
 
         }
-
-
     }
-
 }
 
 @Composable
 fun ProductImage(base64Image: String) {
     val byteArray = Base64.decode(base64Image, Base64.DEFAULT)
-
-    if (base64Image.isEmpty()) {
-        Image(
-            imageVector = Icons.Default.SignalWifiStatusbarNull,
-            contentDescription = null,
-            modifier = Modifier.size(70.dp),
-            contentScale = ContentScale.Fit
-        )
-    } else {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(byteArray)
-                .build(),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
-        )
-    }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(byteArray)
+            .error(R.drawable.login)
+            .build(),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Fit
+    )
 }
 
 @Composable
-fun ProductBottomSection(modifier: Modifier = Modifier) {
+fun ProductBottomSection(
+    modifier: Modifier = Modifier,
+    cartViewModel: CartViewModel? = null,
+    discountedPrice: Double,
+    productId: String,
+) {
+    val quantity = remember { mutableIntStateOf(0) }
+    val totalPrice = remember(discountedPrice, quantity.intValue) {
+        mutableDoubleStateOf(discountedPrice * quantity.intValue)
+    }
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -425,8 +473,8 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .background(Color.LightGray.copy(0.55f))
                 .padding(
-                    start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
-                    end = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
+                    start = MaterialTheme.dimens.small1.div(5).times(4),
+                    end = MaterialTheme.dimens.small1.div(5).times(4),
                     top = MaterialTheme.dimens.small2,
                     bottom = MaterialTheme.dimens.small1
                 ),
@@ -442,7 +490,10 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
                 CartQuantitySection(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .wrapContentHeight()
+                        .wrapContentHeight(),
+                    quantity = quantity.intValue,
+                    increaseQuantity = { quantity.intValue += 1 },
+                    decreaseQuantity = { if (quantity.intValue > 0) quantity.intValue -= 1 },
                 )
                 Row(
                     modifier = Modifier
@@ -456,7 +507,7 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = formatCurrency(298.00),
+                        text = formatCurrency(totalPrice.value),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -465,7 +516,13 @@ fun ProductBottomSection(modifier: Modifier = Modifier) {
             }
 
             Button(
-                onClick = {},
+                onClick = {
+                    cartViewModel?.addToCart(
+                        productId = productId,
+                        quantity = quantity.intValue,
+                        isItProductScreen = true
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.dimens.buttonHeight),

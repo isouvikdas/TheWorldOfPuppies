@@ -19,7 +19,7 @@ import io.ktor.client.request.put
 class CartApi(
     private val httpClient: HttpClient
 ) {
-    suspend fun addToCart(token: String, productId: String)
+    suspend fun addToCart(token: String, productId: String, quantity: Int)
             : Result<ApiResponse<CartItemDto>, NetworkError> {
         return safeCall {
             httpClient.post(
@@ -27,6 +27,7 @@ class CartApi(
             ) {
                 header("Authorization", token)
                 parameter("productId", productId)
+                parameter("quantity", quantity)
             }
         }
     }
@@ -40,22 +41,6 @@ class CartApi(
                 header("Authorization", token)
                 parameter("cartItemId", cartItemId)
                 parameter("isSelected", isSelected)
-            }
-        }
-    }
-
-    suspend fun updateItemQuantity(
-        token: String,
-        cartItemId: String,
-        quantity: Int
-    ): Result<ApiResponse<Unit>, NetworkError> {
-        return safeCall {
-            httpClient.put(
-                urlString = "orders/cart-items/update"
-            ) {
-                header("Authorization", token)
-                parameter("id", cartItemId)
-                parameter("quantity", quantity)
             }
         }
     }

@@ -30,11 +30,6 @@ class ProductRepositoryImpl(
         var products = emptyList<ProductEntity>()
         withContext(Dispatchers.IO) {
             products = db.productDao.getFeaturedProducts()
-            if (products.isNotEmpty()) {
-                products.forEach { Log.i("toggle", it.toString()) }
-            } else {
-                Log.i("toggle", "List is empty")
-            }
         }
         return products
     }
@@ -50,11 +45,6 @@ class ProductRepositoryImpl(
                         val products = response.data ?: emptyList()
                         val existingFeaturedProductIds = db.productDao.getFeaturedProductIds()
                         val newProducts = products.filter { it.id !in existingFeaturedProductIds }
-                        if (newProducts.isNullOrEmpty()) {
-                            newProducts.forEach { Log.e("toggle", "newProduct is empty") }
-                        } else {
-                            newProducts.forEach { Log.e("toggle", it.toString()) }
-                        }
                         if (newProducts.isNotEmpty()) {
                             storeProductsWithCaching(newProducts.map { it.toProductEntity() })
                             Result.Success(true)

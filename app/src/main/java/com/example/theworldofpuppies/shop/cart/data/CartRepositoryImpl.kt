@@ -33,6 +33,67 @@ class CartRepositoryImpl(
     private val context: Context
 ) : CartRepository {
 
+    override suspend fun addToCart(
+        productId: String,
+        quantity: Int,
+        isNewItem: Boolean
+    ): Result<CartItem, NetworkError> {
+        val token = userRepository.getToken()
+        if (token.isNullOrEmpty()) {
+            return Result.Error(NetworkError.UNAUTHORIZED)
+        }
+        return withContext(Dispatchers.IO) {
+            when (val result =
+                cartApi.addToCart(token = token, productId = productId, quantity = quantity)) {
+                is Result.Success -> {
+                    val response = result.data
+                    if (!response.success) {
+                        Result.Error(NetworkError.SERVER_ERROR)
+                    } else {
+                        response.data?.let {
+                            val cartItem = it.toCartItem()
+                            val finalCartItem = if (isNewItem) {
+                                val product = db.productDao.getProductById(cartItem.productId)?.toProduct()
+                                cartItem.copy(product = product)
+                            } else {
+                                cartItem
+                            }
+                            Result.Success(finalCartItem)
+
+                        } ?: Result.Error(NetworkError.SERVER_ERROR)
+                    }
+                }
+
+                is Result.Error -> {
+                    Result.Error(NetworkError.UNKNOWN)
+                }
+            }
+        }
+    }
+
+    override suspend fun removeCartItem(cartItemId: String): Result<Boolean, NetworkError> {
+        val token = userRepository.getToken()
+        if (token.isNullOrEmpty()) {
+            return Result.Error(NetworkError.UNAUTHORIZED)
+        }
+        return withContext(Dispatchers.IO) {
+            when(val result = cartApi.removeCartItem(token = token, cartItemId = cartItemId)) {
+                is Result.Success -> {
+                    val response = result.data
+                    if (response.success) {
+                        Result.Success(true)
+                    } else {
+                        Result.Error(NetworkError.SERVER_ERROR)
+                    }
+                }
+                is Result.Error -> {
+                    Result.Error(NetworkError.UNKNOWN)
+                }
+            }
+
+        }
+    }
+
     override suspend fun getUserCart(): Result<Cart, NetworkError> {
         val token = userRepository.getToken()
         if (token.isNullOrEmpty()) {
@@ -67,10 +128,11 @@ class CartRepositoryImpl(
             return Result.Error(NetworkError.UNAUTHORIZED)
         }
         return withContext(Dispatchers.IO) {
-            when(val result = cartApi.updateItemSelection(
+            when (val result = cartApi.updateItemSelection(
                 token = token,
                 cartItemId = cartItemId,
-                isSelected = isSelected)) {
+                isSelected = isSelected
+            )) {
                 is Result.Success -> {
                     val response = result.data
                     if (response.success) {
@@ -79,106 +141,107 @@ class CartRepositoryImpl(
                         Result.Error(NetworkError.SERVER_ERROR)
                     }
                 }
+
                 is Result.Error -> Result.Error(NetworkError.SERVER_ERROR)
             }
         }
     }
 
-        override suspend fun getCartItems(): Result<List<CartItem>, NetworkError> {
-            val token = userRepository.getToken()
-            if (token.isNullOrEmpty()) {
-                return Result.Error(NetworkError.UNAUTHORIZED)
-            }
-            return withContext(Dispatchers.IO) {
-                when (val result = cartApi.getCartItems(token = token)) {
-                    is Result.Success -> {
-                        val response = result.data
-                        if (!response.success) {
-                            Result.Error(NetworkError.SERVER_ERROR)
+    override suspend fun getCartItems(): Result<List<CartItem>, NetworkError> {
+        val token = userRepository.getToken()
+        if (token.isNullOrEmpty()) {
+            return Result.Error(NetworkError.UNAUTHORIZED)
+        }
+        return withContext(Dispatchers.IO) {
+            when (val result = cartApi.getCartItems(token = token)) {
+                is Result.Success -> {
+                    val response = result.data
+                    if (!response.success) {
+                        Result.Error(NetworkError.SERVER_ERROR)
+                    } else {
+                        val cartItems = response.data?.map { it.toCartItem() } ?: emptyList()
+                        val productIdsToBeFetched = cartItems.map { it.productId }
+                        val (dbProducts, missingProductIds) = fetchProductsFromDatabase(
+                            productIdsToBeFetched
+                        )
+                        val apiProducts = if (missingProductIds.isNotEmpty()) {
+                            fetchProductsFromApi(missingProductIds)
                         } else {
-                            val cartItems = response.data?.map { it.toCartItem() } ?: emptyList()
-                            val productIdsToBeFetched = cartItems.map { it.productId }
-                            val (dbProducts, missingProductIds) = fetchProductsFromDatabase(
-                                productIdsToBeFetched
-                            )
-                            val apiProducts = if (missingProductIds.isNotEmpty()) {
-                                fetchProductsFromApi(missingProductIds)
-                            } else {
-                                emptyList()
-                            }
-                            val allProducts = dbProducts + apiProducts
-                            cartItems.map { cartItem ->
-                                val matchedProduct =
-                                    allProducts.find { it.id == cartItem.productId }
-                                matchedProduct?.let {
-                                    cartItem.apply {
-                                        product = it.toProduct()
-                                        price = it.price
-                                        totalPrice = it.price.times(cartItem.quantity)
-                                    }
+                            emptyList()
+                        }
+                        val allProducts = dbProducts + apiProducts
+                        cartItems.map { cartItem ->
+                            val matchedProduct =
+                                allProducts.find { it.id == cartItem.productId }
+                            matchedProduct?.let {
+                                cartItem.apply {
+                                    product = it.toProduct()
+                                    price = it.discountedPrice
+                                    totalPrice = it.discountedPrice.times(cartItem.quantity)
                                 }
                             }
-                            cartItems.forEach {
-                                Log.i("getUserCart", it.toString())
-                            }
-                            Result.Success(cartItems)
                         }
-                    }
-
-                    is Result.Error -> {
-                        Log.e("getCartItems", "API call failed: ${result.error}")
-                        Result.Error(NetworkError.UNKNOWN)
-                    }
-                }
-            }
-        }
-
-        private suspend fun fetchProductsFromDatabase(productIds: List<String>): Pair<List<ProductEntity>, List<String>> {
-            val dbProducts = mutableListOf<ProductEntity>()
-            val missingProductIds = mutableListOf<String>()
-
-            db.withTransaction {
-                productIds.forEach { productId ->
-                    val product = db.productDao.getProductById(productId)
-                    if (product != null) {
-                        dbProducts.add(product)
-                    } else {
-                        missingProductIds.add(productId)
-                    }
-                }
-            }
-            return dbProducts to missingProductIds
-        }
-
-        private suspend fun fetchProductsFromApi(productIds: List<String>): List<ProductEntity> {
-            val result = cartApi.getProductsByIds(productIds)
-            result.onSuccess { apiResponse ->
-                if (!apiResponse.success) {
-                    throw IOException(apiResponse.message)
-                }
-                val products =
-                    fetchFirstImage(apiResponse.data?.map { it.toProductEntity() } ?: emptyList())
-                return products
-            }.onError { error ->
-                throw IOException("Failed loading products: $error")
-            }
-            return emptyList()
-        }
-
-        private suspend fun fetchFirstImage(products: List<ProductEntity>): List<ProductEntity> {
-            val updatedProducts = withContext(Dispatchers.IO) {
-                products.map { product ->
-                    async {
-                        try {
-                            val firstImageUri = productRepository.cacheFirstImage(product, context)
-                            product.copy(firstImageUri = firstImageUri)
-                        } catch (e: Exception) {
-                            Timber.e(e, "Error caching image for the product: ${product.id}")
-                            product
+                        cartItems.forEach {
+                            Log.i("getUserCart", it.toString())
                         }
+                        Result.Success(cartItems)
                     }
-                }.awaitAll()
+                }
+
+                is Result.Error -> {
+                    Log.e("getCartItems", "API call failed: ${result.error}")
+                    Result.Error(NetworkError.UNKNOWN)
+                }
             }
-            return updatedProducts
         }
     }
+
+    private suspend fun fetchProductsFromDatabase(productIds: List<String>): Pair<List<ProductEntity>, List<String>> {
+        val dbProducts = mutableListOf<ProductEntity>()
+        val missingProductIds = mutableListOf<String>()
+
+        db.withTransaction {
+            productIds.forEach { productId ->
+                val product = db.productDao.getProductById(productId)
+                if (product != null) {
+                    dbProducts.add(product)
+                } else {
+                    missingProductIds.add(productId)
+                }
+            }
+        }
+        return dbProducts to missingProductIds
+    }
+
+    private suspend fun fetchProductsFromApi(productIds: List<String>): List<ProductEntity> {
+        val result = cartApi.getProductsByIds(productIds)
+        result.onSuccess { apiResponse ->
+            if (!apiResponse.success) {
+                throw IOException(apiResponse.message)
+            }
+            val products =
+                fetchFirstImage(apiResponse.data?.map { it.toProductEntity() } ?: emptyList())
+            return products
+        }.onError { error ->
+            throw IOException("Failed loading products: $error")
+        }
+        return emptyList()
+    }
+
+    private suspend fun fetchFirstImage(products: List<ProductEntity>): List<ProductEntity> {
+        val updatedProducts = withContext(Dispatchers.IO) {
+            products.map { product ->
+                async {
+                    try {
+                        val firstImageUri = productRepository.cacheFirstImage(product, context)
+                        product.copy(firstImageUri = firstImageUri)
+                    } catch (e: Exception) {
+                        Timber.e(e, "Error caching image for the product: ${product.id}")
+                        product
+                    }
+                }
+            }.awaitAll()
+        }
+        return updatedProducts
+    }
+}

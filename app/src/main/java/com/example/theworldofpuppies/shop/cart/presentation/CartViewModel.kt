@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,9 +21,145 @@ class CartViewModel(
     private val _cartUiState = MutableStateFlow(CartUiState())
     val cartUiState: StateFlow<CartUiState> = _cartUiState.asStateFlow()
 
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent: SharedFlow<String> = _toastEvent
+
     init {
         getUserCart()
     }
+
+    suspend fun showToast(message: String) {
+        _toastEvent.emit(message)
+    }
+
+    fun addToCart(productId: String, quantity: Int, isItProductScreen: Boolean) {
+        viewModelScope.launch {
+            if (isItProductScreen) {
+                if (quantity < 1) {
+                    showToast("Please select at least 1")
+                    return@launch
+                }
+            }
+            _cartUiState.update { it.copy(errorMessage = null, isLoading = true) }
+            try {
+                val cartItems = cartUiState.value.cartItems.orEmpty()
+                val existingItem = cartItems.find { it.productId == productId }
+                val isNewItem = existingItem == null
+
+                when (
+                    val cartResult = cartRepository.addToCart(
+                        productId = productId,
+                        quantity = quantity,
+                        isNewItem = isNewItem
+                    )
+                ) {
+                    is Result.Success -> {
+                        val cartItem = cartResult.data
+                        val updatedItems = if (isNewItem) {
+                            cartItems + cartItem
+                        } else {
+                            updateExistingItemQuantity(
+                                cartItems = cartItems,
+                                quantity = quantity,
+                                productId = productId
+                            )
+                        }
+
+                        val totalSelectedItems = updatedItems.count { it.isSelected == true }
+                        val cartTotal = calculateCartTotal(updatedItems)
+
+                        _cartUiState.update {
+                            it.copy(
+                                cartItems = updatedItems,
+                                totalSelectedItems = totalSelectedItems,
+                                cartTotal = cartTotal
+                            )
+                        }
+                        showToast("Item added successfully")
+                    }
+
+                    is Result.Error -> {
+                        _cartUiState.update { it.copy(errorMessage = cartResult.error.toString()) }
+                    }
+                }
+            } catch (e: Exception) {
+                _cartUiState.update { it.copy(errorMessage = e.message) }
+            } finally {
+                _cartUiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun removeCartItem(productId: String) {
+        viewModelScope.launch {
+            _cartUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                val cartItems = cartUiState.value.cartItems.orEmpty()
+                val cartItem = cartItems.find { it.productId == productId }
+                val cartItemId = cartItem?.id
+
+                if (!cartItemId.isNullOrEmpty()) {
+                    when (val result = cartRepository.removeCartItem(cartItemId)) {
+                        is Result.Success -> {
+                            if (result.data) {
+                                val updatedCartItems = cartItems.filterNot { it.productId == productId }
+
+                                val updatedCart = cartUiState.value.cart?.let { cart ->
+                                    val updatedIds = cart.cartItemIds.filterNot { it == cartItemId }
+                                    cart.copy(cartItemIds = updatedIds)
+                                }
+
+                                val totalSelectedItems = updatedCartItems.count { it.isSelected == true }
+                                val cartTotal = calculateCartTotal(updatedCartItems)
+
+                                _cartUiState.update {
+                                    it.copy(
+                                        cartItems = updatedCartItems,
+                                        cart = updatedCart,
+                                        cartTotal = cartTotal,
+                                        totalSelectedItems = totalSelectedItems
+                                    )
+                                }
+                                showToast("Item removed successfully")
+                            }
+                        }
+                        is Result.Error -> {
+                            val errorMessage = result.error.toString()
+                            _cartUiState.update { it.copy(errorMessage = errorMessage) }
+                            showToast(errorMessage)
+
+                        }
+                    }
+                } else {
+                    val errorMessage = "Item not found in the cart"
+                    _cartUiState.update { it.copy(errorMessage = errorMessage) }
+                    showToast(errorMessage)
+                }
+            } catch (e: Exception) {
+                _cartUiState.update { it.copy(errorMessage = e.message) }
+            } finally {
+                _cartUiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    private fun updateExistingItemQuantity(
+        cartItems: List<CartItem>,
+        productId: String,
+        quantity: Int
+    ): List<CartItem> {
+        return cartItems.map {
+            if (it.productId == productId && it.product != null) {
+                val finalQuantity = it.quantity + quantity
+                it.copy(
+                    quantity = finalQuantity,
+                    price = it.product!!.discountedPrice,
+                    totalPrice = finalQuantity * it.product!!.discountedPrice
+                )
+            } else it
+        }
+    }
+
 
     fun getUserCart() {
         viewModelScope.launch {

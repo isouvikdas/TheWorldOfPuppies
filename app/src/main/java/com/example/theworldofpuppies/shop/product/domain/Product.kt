@@ -7,11 +7,13 @@ data class Product(
     val description: String,
     val price: Double,
     val discountedPrice: Double,
-    val discount: Int,
+    val discount: Int = 0,
     val inventory: Int,
     val categoryName: String,
     val imageIds: List<String> = ArrayList(),
     val firstImageId: String? = null,
     val firstImageUri: String? = "",
-    val isFeatured: Boolean? = false
+    val isFeatured: Boolean? = false,
+    val isDetailsFetched: Boolean = false,
+    val isImagesFetched: Boolean = false
 )

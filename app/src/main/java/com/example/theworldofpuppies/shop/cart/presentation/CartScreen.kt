@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.shop.cart.presentation
 
 import android.util.Base64
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +58,7 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CartScreen(
@@ -66,6 +69,14 @@ fun CartScreen(
 ) {
     val cartItems = remember(cartUiState.cartItems) { cartUiState.cartItems as List<CartItem> }
     val lazyListSTate = rememberLazyListState()
+
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        cartViewModel?.toastEvent?.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -99,14 +110,25 @@ fun CartScreen(
                         state = lazyListSTate
                     ) {
                         items(cartItems, key = { it.id }) { cartItem ->
+                            val cartItemId = remember(cartItem.id) { cartItem.id }
+                            val isSelected = remember(cartItem.isSelected) { cartItem.isSelected }
+                            val productName =
+                                remember(cartItem.product?.name) { cartItem.product?.name }
+                            val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
+                            val quantity = remember(cartItem.quantity) { cartItem.quantity }
+                            val productId = remember(cartItem.productId) { cartItem.productId }
                             CartItemSection(
-                                cartItem = cartItem,
-                                cartViewModel = cartViewModel
+                                cartViewModel = cartViewModel,
+                                cartItemId = cartItemId,
+                                isSelected = isSelected,
+                                productName = productName,
+                                totalPrice = totalPrice,
+                                productId = productId,
+                                quantity = quantity
                             )
                         }
                     }
                 }
-
             }
         }
     }
@@ -163,7 +185,15 @@ fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
 }
 
 @Composable
-fun CartItemSection(cartItem: CartItem, cartViewModel: CartViewModel? = null) {
+fun CartItemSection(
+    cartViewModel: CartViewModel? = null,
+    cartItemId: String,
+    isSelected: Boolean,
+    productName: String?,
+    totalPrice: Double,
+    productId: String,
+    quantity: Int
+) {
     val base64Image = ""
     val byteArray = Base64.decode(base64Image, Base64.DEFAULT)
 
@@ -179,20 +209,19 @@ fun CartItemSection(cartItem: CartItem, cartViewModel: CartViewModel? = null) {
         IconButton(
             onClick = {
                 cartViewModel?.updateItemSelection(
-                    cartItemId = cartItem.id,
-                    isSelected = !cartItem.isSelected
+                    cartItemId = cartItemId,
+                    isSelected = !isSelected
                 )
             },
             modifier = Modifier.padding(end = MaterialTheme.dimens.extraSmall.times(2))
         ) {
-            if (cartItem.isSelected) {
+            if (isSelected) {
                 Icon(
                     Icons.Default.RadioButtonChecked,
                     contentDescription = null,
                     modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
                     tint = MaterialTheme.colorScheme.tertiary
                 )
-
             } else {
                 Icon(
                     Icons.Default.RadioButtonUnchecked,
@@ -232,14 +261,14 @@ fun CartItemSection(cartItem: CartItem, cartViewModel: CartViewModel? = null) {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = cartItem.product?.name ?: "",
+                text = productName ?: "",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = cartItem.totalPrice.toString(),
+                text = formatCurrency(totalPrice),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.W500,
                 color = Color.Gray
@@ -258,16 +287,39 @@ fun CartItemSection(cartItem: CartItem, cartViewModel: CartViewModel? = null) {
                 modifier = Modifier
                     .padding(end = MaterialTheme.dimens.extraSmall)
                     .size(MaterialTheme.dimens.small2)
-                    .clickable {}
+                    .clickable { cartViewModel?.removeCartItem(productId) }
             )
-            CartQuantitySection(modifier = Modifier.fillMaxWidth())
+            CartQuantitySection(
+                modifier = Modifier.fillMaxWidth(),
+                quantity = quantity,
+                increaseQuantity = {
+                    cartViewModel?.addToCart(
+                        productId = productId.toString(),
+                        1, isItProductScreen = false
+                    )
+                },
+                decreaseQuantity = {
+                    if (quantity > 1)
+                        cartViewModel?.addToCart(
+                            productId = productId.toString(),
+                            -1, isItProductScreen = false
+                        ) else cartViewModel?.removeCartItem(productId)
+                }
+            )
         }
     }
 
 }
 
 @Composable
-fun CartQuantitySection(modifier: Modifier = Modifier) {
+fun CartQuantitySection(
+    modifier: Modifier = Modifier,
+    quantity: Int?,
+    increaseQuantity: () -> Unit,
+    decreaseQuantity: () -> Unit
+) {
+    val quantity = remember(quantity) { quantity }
+    val formattedQuantity = quantity.toString().padStart(2, '0')
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -277,7 +329,9 @@ fun CartQuantitySection(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(MaterialTheme.dimens.small1.times(3) / 2)
                 .clip(CircleShape)
-                .clickable {}
+                .clickable {
+                    decreaseQuantity()
+                }
                 .background(Color.White.copy(0.6f)),
             contentAlignment = Alignment.Center
         ) {
@@ -290,18 +344,18 @@ fun CartQuantitySection(modifier: Modifier = Modifier) {
             )
 
         }
-
         Text(
-            text = "02",
+            text = formattedQuantity,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
-
         Box(
             modifier = Modifier
                 .size(MaterialTheme.dimens.small1.times(3) / 2)
                 .clip(CircleShape)
-                .clickable {}
+                .clickable {
+                    increaseQuantity()
+                }
                 .background(Color.White.copy(0.6f)),
             contentAlignment = Alignment.Center
         ) {
@@ -342,8 +396,8 @@ fun CartBottomSection(
                 .fillMaxSize()
                 .background(Color.LightGray.copy(0.55f))
                 .padding(
-                    start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
-                    end = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4,
+                    start = MaterialTheme.dimens.small1.times(5).div(4),
+                    end = MaterialTheme.dimens.small1.times(5).div(4),
                     top = MaterialTheme.dimens.small2,
                     bottom = MaterialTheme.dimens.small1
                 ),

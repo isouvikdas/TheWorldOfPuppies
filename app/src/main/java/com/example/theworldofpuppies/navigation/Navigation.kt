@@ -26,6 +26,7 @@ import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListScreen
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
@@ -33,7 +34,7 @@ sealed class Screen(val route: String) {
     data object LoginScreen : Screen("LoginScreen")
     data object WelcomeScreen : Screen("WelcomeScreen")
     data object ProductDetailScreen : Screen("ProductDetailScreen")
-    data object ProductList : Screen("ProductList")
+    data object ProductListScreen : Screen("ProductList")
     data object CartScreen: Screen("CartScreen")
 }
 
@@ -74,7 +75,6 @@ fun AppNavigation(
     val categoryListState by productViewModel.categoryListState.collectAsStateWithLifecycle()
     val featuredProductListState by productViewModel.featuredProductListState.collectAsStateWithLifecycle()
     val productDetailState by productViewModel.productDetailState.collectAsStateWithLifecycle()
-    val userRepository = UserRepository
 
     NavHost(
         navController = navController,
@@ -198,6 +198,14 @@ fun AppNavigation(
             onGesturesChanged(true)
             ProfileScreen()
         }
+        composable(route = Screen.ProductListScreen.route) {
+            onBottomBarVisibilityChanged(true)
+            onProfileButtonVisibilityChanged(true)
+            onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(true)
+            onGesturesChanged(false)
+            ProductListScreen()
+        }
         composable(route = Screen.ProductDetailScreen.route) {
             hideAllChrome(
                 onBottomBarVisibilityChanged,
@@ -213,7 +221,9 @@ fun AppNavigation(
                 },
                 onCartClick = {
                     navController.navigate(Screen.CartScreen.route)
-                }
+                },
+                cartViewModel = cartViewModel,
+                productViewModel = productViewModel
             )
         }
         composable(route = Screen.CartScreen.route) {

@@ -28,7 +28,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://d135-49-47-140-240.ngrok-free.app\""
+                "\"https://719b-2409-40e7-e-8bef-d3f5-f1dc-7ff0-6d0e.ngrok-free.app\""
             )
         }
         release {
