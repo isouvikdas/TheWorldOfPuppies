@@ -1,7 +1,5 @@
-package com.example.theworldofpuppies.shop.product.presentation
+package com.example.theworldofpuppies.shop.product.presentation.product_list
 
-import com.example.theworldofpuppies.core.domain.util.NetworkError
-import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.domain.Product
 
 data class FeaturedProductListState(

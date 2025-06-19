@@ -22,7 +22,7 @@ import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
 import com.example.theworldofpuppies.shop.product.data.remote.ProductRepositoryImpl
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
 import com.example.theworldofpuppies.shop.product.domain.ProductRepository
-import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import io.ktor.client.engine.cio.CIO
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModelOf

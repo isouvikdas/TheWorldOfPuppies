@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.shop.product.presentation
+package com.example.theworldofpuppies.shop.product.presentation.product_list
 
 import com.example.theworldofpuppies.shop.product.domain.Category
 

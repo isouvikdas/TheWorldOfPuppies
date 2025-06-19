@@ -1,7 +1,7 @@
-package com.example.theworldofpuppies.shop.product.presentation
+package com.example.theworldofpuppies.shop.product.presentation.product_list
 
-import android.util.Log
 import android.util.Base64
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.theworldofpuppies.core.domain.util.Result
@@ -151,7 +151,7 @@ class ProductViewModel(
                     is Result.Error -> _featuredProductListState.update { it.copy(errorMessage = result.error.toString()) }
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Error fetching Featured Products.")
+                Timber.Forest.e(e, "Error fetching Featured Products.")
             } finally {
                 _featuredProductListState.update { it.copy(isLoading = false) }
             }
@@ -185,7 +185,7 @@ class ProductViewModel(
                     }
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Error fetching categories")
+                Timber.Forest.e(e, "Error fetching categories")
             } finally {
                 _categoryListState.update { it.copy(isLoading = false) }
             }
@@ -223,7 +223,7 @@ class ProductViewModel(
                     }
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Error fetching products")
+                Timber.Forest.e(e, "Error fetching products")
             } finally {
                 _productListState.update { it.copy(isLoading = false) }
             }

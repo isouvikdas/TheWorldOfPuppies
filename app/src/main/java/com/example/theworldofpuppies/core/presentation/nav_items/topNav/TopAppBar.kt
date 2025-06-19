@@ -30,9 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -153,8 +155,10 @@ fun TopAppbar(
                         }
                     ) {
                         Icon(
-                            Icons.Default.Search,
+                            painter = painterResource(R.drawable.search),
+//                            Icons.Default.Search,
                             contentDescription = "Search",
+                            modifier = Modifier.size(MaterialTheme.dimens.extraSmall.times(4))
                         )
                     }
                 }

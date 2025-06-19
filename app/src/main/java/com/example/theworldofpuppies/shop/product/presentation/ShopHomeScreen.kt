@@ -45,12 +45,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.Product
+import com.example.theworldofpuppies.shop.product.presentation.product_list.CategoryListState
+import com.example.theworldofpuppies.shop.product.presentation.product_list.FeaturedProductListState
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListState
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +70,8 @@ fun ShopHomeScreen(
     onProductSelect: () -> Unit,
     getCategories: () -> Unit,
     getProducts: () -> Unit,
-    getFeaturedProducts: () -> Unit
+    getFeaturedProducts: () -> Unit,
+    navController: NavHostController
 ) {
     val lazyListState = rememberLazyListState()
     val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
@@ -129,7 +136,11 @@ fun ShopHomeScreen(
                         errorMessage = featuredProductListState.errorMessage ?: "",
                         getProducts = { getFeaturedProducts() },
                         onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel
+                        productViewModel = productViewModel,
+                        onSeeAllClick = {
+                            navController.navigate(Screen.ProductListScreen.createRoute("featured"))
+                        }
+
                     )
                 }
 
@@ -146,7 +157,11 @@ fun ShopHomeScreen(
                         getProducts = { getProducts() },
                         errorMessage = productListState.errorMessage ?: "",
                         onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel
+                        productViewModel = productViewModel,
+                        onSeeAllClick = {
+                            navController.navigate(Screen.ProductListScreen.createRoute("new"))
+                        }
+
                     )
                 }
 
@@ -163,7 +178,11 @@ fun ShopHomeScreen(
                         getProducts = { getProducts() },
                         errorMessage = productListState.errorMessage ?: "",
                         onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel
+                        productViewModel = productViewModel,
+                        onSeeAllClick = {
+                            navController.navigate(Screen.ProductListScreen.createRoute("all"))
+                        }
+
                     )
                 }
 
@@ -184,7 +203,8 @@ fun ProductRowSection(
     errorMessage: String? = null,
     getProducts: () -> Unit,
     onProductSelect: () -> Unit,
-    productViewModel: ProductViewModel? = null
+    productViewModel: ProductViewModel? = null,
+    onSeeAllClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -204,12 +224,15 @@ fun ProductRowSection(
                 fontWeight = FontWeight.SemiBold
             )
 
-            Text(
-                text = "See all", style = MaterialTheme.typography.titleSmall,
-                color = Color.Gray,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.clickable {}
-            )
+            if (onSeeAllClick != null) {
+                Text(
+                    text = "See All",
+                    color = Color.Black.copy(0.5f),
+                    fontWeight = FontWeight.W500,
+                    modifier = Modifier
+                        .clickable { onSeeAllClick() }
+                )
+            }
         }
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -241,7 +264,7 @@ fun ProductRowSection(
                                     start = if (product == products.first()) MaterialTheme.dimens.small1
                                     else MaterialTheme.dimens.small1.div(2),
                                     end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
-                                ), product = product, onProductSelect = {
+                                ).padding(vertical = MaterialTheme.dimens.small1), product = product, onProductSelect = {
                                     onProductSelect()
                                     productViewModel?.setProduct(product)
                                 }
@@ -260,7 +283,6 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect
         modifier = modifier
             .width(MaterialTheme.dimens.extraLarge2)
             .fillMaxHeight()
-            .padding(vertical = MaterialTheme.dimens.small1)
             .clickable { onProductSelect() },
         shape = RoundedCornerShape(MaterialTheme.dimens.small1),
         shadowElevation = 5.dp,

@@ -62,7 +62,7 @@ import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
-import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
