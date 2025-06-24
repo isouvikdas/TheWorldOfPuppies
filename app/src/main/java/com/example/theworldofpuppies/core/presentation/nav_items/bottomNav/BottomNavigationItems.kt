@@ -15,7 +15,9 @@ import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.theworldofpuppies.R
 
 sealed class BottomNavigationItems(
     val route: String,
@@ -29,7 +31,7 @@ sealed class BottomNavigationItems(
         title = "Home",
         selectedIcon = { modifier ->
             Icon(
-                Icons.Filled.Home, contentDescription = null, modifier = modifier.then(
+                painter = painterResource(R.drawable.home_filled), contentDescription = null, modifier = modifier.then(
                     Modifier.size(
                         26.dp
                     )
@@ -38,7 +40,7 @@ sealed class BottomNavigationItems(
         },
         unselectedIcon = { modifier ->
             Icon(
-                Icons.Outlined.Home, contentDescription = null, modifier = modifier.then(
+                painter = painterResource(R.drawable.home_outline), contentDescription = null, modifier = modifier.then(
                     Modifier.size(
                         26.dp
                     )
@@ -52,14 +54,14 @@ sealed class BottomNavigationItems(
         title = "Booking",
         selectedIcon = { modifier ->
             Icon(
-                Icons.AutoMirrored.Filled.Article,
+                painter = painterResource(R.drawable.note_filled),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
             )
         },
         unselectedIcon = { modifier ->
             Icon(
-                Icons.AutoMirrored.Outlined.Article,
+                painter = painterResource(R.drawable.note_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
             )
@@ -71,14 +73,14 @@ sealed class BottomNavigationItems(
         title = "Shop",
         selectedIcon = { modifier ->
             Icon(
-                Icons.Filled.Store,
+                painter = painterResource(R.drawable.shop_filled),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
             )
         },
         unselectedIcon = { modifier ->
             Icon(
-                Icons.Outlined.Store,
+                painter = painterResource(R.drawable.shop_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
             )
@@ -90,14 +92,14 @@ sealed class BottomNavigationItems(
         title = "Messages",
         selectedIcon = { modifier ->
             Icon(
-                Icons.AutoMirrored.Filled.Chat,
+                painter = painterResource(R.drawable.message_filled),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
             )
         },
         unselectedIcon = { modifier ->
             Icon(
-                Icons.AutoMirrored.Outlined.Chat,
+                painter = painterResource(R.drawable.message_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
             )
@@ -109,14 +111,14 @@ sealed class BottomNavigationItems(
         title = "Me",
         selectedIcon = { modifier ->
             Icon(
-                Icons.Filled.Person,
+                painter = painterResource(R.drawable.user_filled),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(28.dp)),
             )
         },
         unselectedIcon = { modifier ->
             Icon(
-                Icons.Outlined.Person,
+                painter = painterResource(R.drawable.user_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(28.dp)),
             )

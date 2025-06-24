@@ -214,7 +214,7 @@ fun AppNavigation(
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(true)
-            onGesturesChanged(false)
+            onGesturesChanged(true)
 
             when (productType) {
                 "all" -> {
@@ -228,7 +228,8 @@ fun AppNavigation(
                         enablePagination = true,
                         isLoading = productListState.isLoading,
                         onLoadMore = { productViewModel.fetchNextPage() },
-                        productTypeLabel = ""
+                        productTypeLabel = "All",
+                        categoryListState = categoryListState
                     )
                 }
 
@@ -243,7 +244,8 @@ fun AppNavigation(
                         },
                         enablePagination = false,
                         isLoading = productListState.isLoading,
-                        productTypeLabel = "Featured Products"
+                        productTypeLabel = "Featured",
+                        categoryListState = categoryListState
                     )
                 }
 
@@ -257,7 +259,8 @@ fun AppNavigation(
                         },
                         enablePagination = false,
                         isLoading = productListState.isLoading,
-                        productTypeLabel = "New Launches"
+                        productTypeLabel = "New Launch",
+                        categoryListState = categoryListState
                     )
                 }
             }

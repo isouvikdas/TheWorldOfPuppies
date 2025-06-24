@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -81,8 +81,10 @@ fun TopAppbar(
                     isSearchActive = false
                 }) {
                     Icon(
-                        Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = "Back"
+                        painterResource(R.drawable.arrow_left_filled),
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .size(21.dp)
                     )
                 }
             },
@@ -155,17 +157,17 @@ fun TopAppbar(
                         }
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.search),
-//                            Icons.Default.Search,
+                            painter = painterResource(R.drawable.search_dens),
                             contentDescription = "Search",
-                            modifier = Modifier.size(MaterialTheme.dimens.extraSmall.times(4))
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
                 IconButton(onClick = { navController.navigate(Screen.CartScreen.route) }) {
                     Icon(
-                        Icons.Outlined.ShoppingBag,
+                        painter = painterResource(R.drawable.bag_outline),
                         contentDescription = "Bag",
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 if (profileButtonVisibility) {
@@ -184,8 +186,10 @@ fun TopAppbar(
                                 }
                             }
                         }) {
-                            it.unselectedIcon(
-                                Modifier.size(MaterialTheme.dimens.small2),
+                            Icon(
+                                painter = painterResource(R.drawable.user_outline),
+                                contentDescription = "Profile",
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     }

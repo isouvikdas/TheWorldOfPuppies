@@ -156,7 +156,7 @@ fun DrawerContent(
                             title = drawerItem.title,
                             icon = {
                                 drawerItem.icon(
-                                    Modifier.size(MaterialTheme.dimens.small2)
+                                    Modifier.size(MaterialTheme.dimens.small1.div(4).times(5))
                                 )
                             },
                             onClick = {
@@ -179,7 +179,7 @@ fun DrawerContent(
                     title = "Sign Out",
                     icon = {
                         DrawerItems.SignOut(onSignOutClick).icon(
-                            Modifier.size(MaterialTheme.dimens.small2)
+                            Modifier.size(MaterialTheme.dimens.small1.div(4).times(5))
                         )
                     },
                     onClick = { onSignOutClick() },

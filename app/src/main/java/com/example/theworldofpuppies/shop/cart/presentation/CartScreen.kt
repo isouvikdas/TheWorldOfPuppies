@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -154,10 +155,10 @@ fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
                     )
             ) {
                 Icon(
-                    Icons.AutoMirrored.Default.ArrowBack,
+                    painterResource(R.drawable.arrow_left_filled),
                     contentDescription = "Back",
                     modifier = Modifier
-                        .size(MaterialTheme.dimens.small2)
+                        .size(21.dp)
                 )
 
             }
@@ -176,8 +177,9 @@ fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
                 modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
             ) {
                 Icon(
-                    Icons.Outlined.ShoppingBag,
+                    painterResource(R.drawable.bag_outline),
                     contentDescription = "Bag",
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }

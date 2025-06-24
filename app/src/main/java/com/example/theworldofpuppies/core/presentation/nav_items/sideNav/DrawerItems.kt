@@ -2,27 +2,10 @@ package com.example.theworldofpuppies.core.presentation.nav_items.sideNav
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.EventNote
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.automirrored.outlined.Notes
-import androidx.compose.material.icons.filled.CreditScore
-import androidx.compose.material.icons.filled.Store
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.ManageAccounts
-import androidx.compose.material.icons.outlined.Money
-import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.outlined.PeopleAlt
-import androidx.compose.material.icons.outlined.PeopleOutline
-import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material.icons.outlined.Redeem
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.theworldofpuppies.R
@@ -32,14 +15,15 @@ sealed class DrawerItems(
     val title: String,
     val icon: @Composable (Modifier) -> Unit
 ) {
+
     data object Refer : DrawerItems(
         route = "Refer",
         title = "Refer & Earn",
         icon = { modifier ->
             Icon(
-                painterResource(id = R.drawable.credit_card_health),
+                painterResource(id = R.drawable.refer_earn_filled),
                 contentDescription = null,
-                modifier = modifier.then(Modifier.size(27.dp))
+                modifier = modifier.then(Modifier.size(20.dp))
             )
         }
     )
@@ -49,9 +33,9 @@ sealed class DrawerItems(
         title = "Support",
         icon = { modifier->
             Icon(
-                Icons.Outlined.Phone,
+                painterResource(R.drawable.call_outline),
                 contentDescription = null,
-                modifier = modifier.then(Modifier.size(27.dp))
+                modifier = modifier.then(Modifier.size(20.dp))
             )
         }
     )
@@ -61,7 +45,7 @@ sealed class DrawerItems(
         title = "Shop",
         icon = { modifier->
             Icon(
-                Icons.Filled.Store,
+                painterResource(R.drawable.shop_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
@@ -73,7 +57,7 @@ sealed class DrawerItems(
         title = "Pet Insurance",
         icon = { modifier->
             Icon(
-                Icons.Outlined.Pets,
+                painterResource(R.drawable.pet_insurance_filled),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
@@ -85,7 +69,7 @@ sealed class DrawerItems(
         title = "Dog Training",
         icon = { modifier->
             Icon(
-                painterResource(id = R.drawable.sound_detection_dog_barking),
+                painterResource(id = R.drawable.dog_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
@@ -97,7 +81,7 @@ sealed class DrawerItems(
         title = "Privacy & Policy",
         icon = { modifier->
             Icon(
-                Icons.AutoMirrored.Outlined.EventNote,
+                painterResource(R.drawable.privacy_pollicy_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
@@ -109,7 +93,7 @@ sealed class DrawerItems(
         title = "T&C",
         icon = { modifier->
             Icon(
-                Icons.Outlined.Description,
+                painterResource(R.drawable.terms_conditions_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
@@ -121,7 +105,7 @@ sealed class DrawerItems(
         title = "Rate Us",
         icon = { modifier->
             Icon(
-                Icons.Outlined.StarOutline,
+                painterResource(R.drawable.star_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
@@ -133,7 +117,7 @@ sealed class DrawerItems(
         title = "Sign Out",
         icon = { modifier->
             Icon(
-                Icons.AutoMirrored.Outlined.Logout,
+                painterResource(R.drawable.logout_outline),
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(27.dp))
             )

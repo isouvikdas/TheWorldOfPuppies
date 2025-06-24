@@ -185,7 +185,6 @@ fun ShopHomeScreen(
 
                     )
                 }
-
                 item {
                     Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
                 }

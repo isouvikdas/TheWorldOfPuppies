@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -89,11 +90,11 @@ fun BottomAppbar(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (currentRoute == screen.route) {
                         screen.selectedIcon(
-                            Modifier.size(MaterialTheme.dimens.small2),
+                            Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
                         )
                     } else {
                         screen.unselectedIcon(
-                            Modifier.size(MaterialTheme.dimens.small2),
+                            Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
                         )
                     }
                     screen.title?.let {

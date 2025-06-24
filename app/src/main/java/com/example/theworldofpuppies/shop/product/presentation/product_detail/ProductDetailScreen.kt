@@ -183,10 +183,10 @@ fun ProductHeader(
                     )
             ) {
                 Icon(
-                    Icons.AutoMirrored.Default.ArrowBack,
+                    painterResource(R.drawable.arrow_left_filled),
                     contentDescription = "Menu",
                     modifier = Modifier
-                        .size(MaterialTheme.dimens.small2)
+                        .size(21.dp)
                 )
 
             }
@@ -205,8 +205,9 @@ fun ProductHeader(
                 modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
             ) {
                 Icon(
-                    Icons.Outlined.ShoppingBag,
+                    painterResource(R.drawable.bag_outline),
                     contentDescription = "Bag",
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }

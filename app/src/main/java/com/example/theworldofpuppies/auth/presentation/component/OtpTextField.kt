@@ -138,7 +138,7 @@ private fun handleOtpInputChange(
         // Directly set the new value if it's a single character.
         otpFieldsValues[index].value = otpFieldsValues[index].value.copy(text = newValue)
     } else if (newValue.length == 2) {
-        // If length of new value is 2, we can guess the user is typing focusing on current box
+        // If length of new value is 2, we can guess the user_unfilled is typing focusing on current box
         // In this case set the unmatched character only
         otpFieldsValues[index].value =
             otpFieldsValues[index].value.copy(text = newValue.lastOrNull()?.toString() ?: "")
