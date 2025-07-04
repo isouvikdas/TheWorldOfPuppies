@@ -24,11 +24,12 @@ android {
     }
 
     buildTypes {
+        val baseUrl = "\"https://906a-2405-201-ac02-d032-b95b-2694-5471-bf48.ngrok-free.app\""
         debug {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://96d6-2405-201-ac02-d032-982a-12e2-96c8-3171.ngrok-free.app\""
+                baseUrl
             )
         }
         release {
@@ -40,7 +41,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://88c2-2405-201-ac02-d151-7a8a-8d66-aeb7-7d71.ngrok-free.app\""
+                baseUrl
             )
             signingConfig = signingConfigs.getByName("debug")
         }

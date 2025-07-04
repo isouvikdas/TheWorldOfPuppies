@@ -7,4 +7,14 @@
     <string name="error_serialization">Couldn\'t serialize or deserialize data.</string>
     <string name="product_description">Keep your pet clean and happy with our gentle, natural shampoo. Made with aloe vera and oatmeal, it soothes itchy skin and leaves coats soft, shiny, and fresh—without harsh chemicals. Perfect for all breeds and ages. Keep your pet clean and happy with our gentle, natural shampoo. Made with aloe vera and oatmeal, it soothes itchy skin and leaves coats soft, shiny, and fresh—without harsh chemicals. Perfect for all breeds and ages</string>
     <string name="error_unathorized">You are not authorized to access this data</string>
+    <string name="sort_latest">Latest</string>
+    <string name="sort_recommended">Recommended</string>
+    <string name="sort_high_to_low">High to Low</string>
+    <string name="sort_low_to_high">Low to High</string>
+    <string name="sort_highest_rated">Highest Rated</string>
+    <string name="all_products">All Products</string>
+    <string name="new_products">New Products</string>
+    <string name="featured_products">Featured Products</string>
+    <string name="popular_products">Popular Products</string>
+    <string name="see_all">See All</string>
 </resources>

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,11 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -41,34 +42,51 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.theworldofpuppies.shop.product.domain.Category
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.theworldofpuppies.shop.product.domain.Product
+import com.example.theworldofpuppies.shop.product.domain.util.ListType
+import com.example.theworldofpuppies.shop.product.domain.util.SortProduct
 import com.example.theworldofpuppies.shop.product.presentation.ProductItem
+import com.example.theworldofpuppies.shop.product.presentation.util.toString
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProductListScreen(
-    productList: List<Product>,
     onProductSelect: (Product) -> Unit,
-    enablePagination: Boolean = false,
     isLoading: Boolean = false,
     onLoadMore: (() -> Unit)? = null,
-    productTypeLabel: String = "",
-    categoryListState: CategoryListState
+    productTypeLabel: ListType,
+    categoryListState: CategoryListState,
+    productViewModel: ProductViewModel
 ) {
     val lazyGridState = rememberLazyGridState()
+    val filteredSortedProducts by productViewModel.filteredSortedProducts.collectAsStateWithLifecycle(
+        emptyList()
+    )
+    val selectedCategory by productViewModel.selectedCategory.collectAsStateWithLifecycle(null)
+    val sortOption by productViewModel.sortOption.collectAsStateWithLifecycle()
+
     val categoryList =
         remember(categoryListState.categoryList) { categoryListState.categoryList }
-    var selectedCategory by remember { mutableStateOf<Category?>(null) }
+
+    val sortOptions = listOf(
+        SortProduct.RECOMMENDED, SortProduct.HIGHEST_RATED, SortProduct.LOW_TO_HIGH,
+        SortProduct.LATEST, SortProduct.HIGH_TO_LOW
+    )
+
+    val context = LocalContext.current
+
+    val isPaginationEnabled by productViewModel.isPaginationEnabled.collectAsStateWithLifecycle()
+
     Surface(
         modifier = Modifier
             .fillMaxSize(),
@@ -91,7 +109,7 @@ fun ProductListScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = productTypeLabel,
+                            text = productTypeLabel.toString(context),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center,
@@ -110,37 +128,46 @@ fun ProductListScreen(
                                     .align(Alignment.CenterVertically),
                                 fontWeight = FontWeight.W500
                             )
-                            DropDownDemo()
-                        }
-                    }
-
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        categoryList.forEach { category ->
-                            val isSelected = selectedCategory == category
-                            FilterChip(
-                                onClick = {
-                                    selectedCategory = if (isSelected) null else category
+                            DropDownDemo(
+                                sortOptions = sortOptions,
+                                selectedIndex = sortOptions.indexOf(sortOption),
+                                onOptionSelected = { index ->
+                                    productViewModel.setSortOption(sortOptions[index])
                                 },
-                                label = { Text(category.name) },
-                                selected = isSelected,
-                                shape = RoundedCornerShape(MaterialTheme.dimens.small1),
-                                modifier = Modifier.padding(end = 8.dp).animateItem(),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                        0.3f
-                                    ),
-                                    selectedLabelColor = Color.Black
-                                ),
-                                border = BorderStroke(0.1.dp, color = Color.LightGray)
                             )
                         }
                     }
-
                 }
             }
-            items(productList) { product ->
+            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(categoryList) { category ->
+                        val isSelected = selectedCategory == category
+                        FilterChip(
+                            onClick = {
+                                productViewModel.setSelectedCategory(if (isSelected) null else category)
+                            },
+                            label = { Text(category.name) },
+                            selected = isSelected,
+                            shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                            modifier = Modifier
+                                .padding(end = MaterialTheme.dimens.small1.div(2))
+                                .animateItem(),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                    0.3f
+                                ),
+                                selectedLabelColor = Color.Black
+                            ),
+                            border = BorderStroke(0.1.dp, color = Color.LightGray)
+                        )
+                    }
+                }
+
+            }
+            items(filteredSortedProducts) { product ->
                 ProductItem(
                     product = product,
                     onProductSelect = {
@@ -151,7 +178,7 @@ fun ProductListScreen(
         }
     }
 
-    if (enablePagination && onLoadMore != null) {
+    if (isPaginationEnabled && onLoadMore != null) {
         LaunchedEffect(lazyGridState) {
             snapshotFlow { lazyGridState.layoutInfo.visibleItemsInfo }
                 .collect { visibleItems ->
@@ -169,10 +196,13 @@ fun ProductListScreen(
 }
 
 @Composable
-fun DropDownDemo() {
+fun DropDownDemo(
+    sortOptions: List<SortProduct>,
+    selectedIndex: Int,
+    onOptionSelected: (Int) -> Unit
+) {
     val isDropDownExpanded = remember { mutableStateOf(false) }
-    val itemPosition = remember { mutableIntStateOf(0) }
-    val usernames = listOf("Recommended", "High to Low", "Low to High", "Highest Rated", "Latest")
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -192,7 +222,7 @@ fun DropDownDemo() {
                     )
                 ) {
                     Text(
-                        text = usernames[itemPosition.intValue],
+                        text = sortOptions[selectedIndex].toString(context),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -223,17 +253,17 @@ fun DropDownDemo() {
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.End
             ) {
-                usernames.forEachIndexed { index, username ->
+                sortOptions.forEachIndexed { index, filter ->
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = username,
+                                text = filter.toString(context),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold
                             )
                         },
                         onClick = {
-                            itemPosition.intValue = index
+                            onOptionSelected(index)
                             isDropDownExpanded.value = false
                         }
                     )
@@ -242,12 +272,4 @@ fun DropDownDemo() {
             }
         }
     }
-}
-
-@Composable
-fun CategoryList(
-    cateGory: (String) -> Unit,
-
-    ) {
-
 }

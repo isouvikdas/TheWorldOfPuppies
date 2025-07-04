@@ -41,11 +41,13 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
@@ -53,10 +55,12 @@ import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.Product
+import com.example.theworldofpuppies.shop.product.domain.util.ListType
 import com.example.theworldofpuppies.shop.product.presentation.product_list.CategoryListState
 import com.example.theworldofpuppies.shop.product.presentation.product_list.FeaturedProductListState
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListState
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
+import com.example.theworldofpuppies.shop.product.presentation.util.toString
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +75,7 @@ fun ShopHomeScreen(
     getCategories: () -> Unit,
     getProducts: () -> Unit,
     getFeaturedProducts: () -> Unit,
-    navController: NavHostController
+    navController: NavController
 ) {
     val lazyListState = rememberLazyListState()
     val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
@@ -130,7 +134,7 @@ fun ShopHomeScreen(
                 item {
                     ProductRowSection(
                         modifier = Modifier,
-                        productListType = "Featured Products",
+                        productListType = ListType.FEATURED,
                         products = featuredProductList,
                         isLoading = featuredProductListState.isLoading,
                         errorMessage = featuredProductListState.errorMessage ?: "",
@@ -138,7 +142,29 @@ fun ShopHomeScreen(
                         onProductSelect = { onProductSelect() },
                         productViewModel = productViewModel,
                         onSeeAllClick = {
-                            navController.navigate(Screen.ProductListScreen.createRoute("featured"))
+                            productViewModel?.setListType(ListType.FEATURED)
+                            navController.navigate(Screen.ProductListScreen.route)
+                        }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                }
+
+                item {
+                    ProductRowSection(
+                        modifier = Modifier,
+                        productListType = ListType.NEW,
+                        products = productList,
+                        isLoading = productListState.isLoading,
+                        getProducts = { getProducts() },
+                        errorMessage = productListState.errorMessage ?: "",
+                        onProductSelect = { onProductSelect() },
+                        productViewModel = productViewModel,
+                        onSeeAllClick = {
+                            productViewModel?.setListType(ListType.NEW)
+                            navController.navigate(Screen.ProductListScreen.route)
                         }
 
                     )
@@ -151,7 +177,7 @@ fun ShopHomeScreen(
                 item {
                     ProductRowSection(
                         modifier = Modifier,
-                        productListType = "New Launches",
+                        productListType = ListType.ALL,
                         products = productList,
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
@@ -159,28 +185,8 @@ fun ShopHomeScreen(
                         onProductSelect = { onProductSelect() },
                         productViewModel = productViewModel,
                         onSeeAllClick = {
-                            navController.navigate(Screen.ProductListScreen.createRoute("new"))
-                        }
-
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-                }
-
-                item {
-                    ProductRowSection(
-                        modifier = Modifier,
-                        productListType = "Popular Products",
-                        products = productList,
-                        isLoading = productListState.isLoading,
-                        getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            navController.navigate(Screen.ProductListScreen.createRoute("all"))
+                            productViewModel?.setListType(ListType.ALL)
+                            navController.navigate(Screen.ProductListScreen.route)
                         }
 
                     )
@@ -196,15 +202,18 @@ fun ShopHomeScreen(
 @Composable
 fun ProductRowSection(
     modifier: Modifier = Modifier,
-    productListType: String,
+    productListType: ListType,
     products: List<Product>,
     isLoading: Boolean? = false,
     errorMessage: String? = null,
     getProducts: () -> Unit,
     onProductSelect: () -> Unit,
     productViewModel: ProductViewModel? = null,
-    onSeeAllClick: (() -> Unit)? = null
+    onSeeAllClick: () -> Unit
 ) {
+
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -218,20 +227,22 @@ fun ProductRowSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = productListType,
+                text = productListType.toString(context),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
-            if (onSeeAllClick != null) {
-                Text(
-                    text = "See All",
-                    color = Color.Black.copy(0.5f),
-                    fontWeight = FontWeight.W500,
-                    modifier = Modifier
-                        .clickable { onSeeAllClick() }
-                )
-            }
+            Text(
+                text = stringResource(R.string.see_all),
+                color = Color.Black.copy(0.5f),
+                style = MaterialTheme.typography.titleSmall,
+                textDecoration = if (products.isEmpty()) TextDecoration.LineThrough else TextDecoration.None,
+                fontStyle = if (products.isEmpty()) FontStyle.Italic else FontStyle.Normal,
+                fontWeight = FontWeight.W500,
+                modifier = Modifier
+                    .clickable(enabled = !products.isEmpty()) { onSeeAllClick() }
+            )
+
         }
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -259,11 +270,15 @@ fun ProductRowSection(
                     ) {
                         items(products, key = { it.id }) { product ->
                             ProductItem(
-                                modifier = Modifier.padding(
-                                    start = if (product == products.first()) MaterialTheme.dimens.small1
-                                    else MaterialTheme.dimens.small1.div(2),
-                                    end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
-                                ).padding(vertical = MaterialTheme.dimens.small1), product = product, onProductSelect = {
+                                modifier = Modifier
+                                    .padding(
+                                        start = if (product == products.first()) MaterialTheme.dimens.small1
+                                        else MaterialTheme.dimens.small1.div(2),
+                                        end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
+                                    )
+                                    .padding(vertical = MaterialTheme.dimens.small1),
+                                product = product,
+                                onProductSelect = {
                                     onProductSelect()
                                     productViewModel?.setProduct(product)
                                 }
@@ -434,11 +449,14 @@ fun ProductCategorySection(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "See all",
+                text = stringResource(R.string.see_all),
+                color = Color.Black.copy(0.5f),
                 style = MaterialTheme.typography.titleSmall,
-                color = Color.Gray,
+                textDecoration = if (categories.isEmpty()) TextDecoration.LineThrough else TextDecoration.None,
+                fontStyle = if (categories.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
-                modifier = Modifier.clickable {}
+                modifier = Modifier
+                    .clickable(enabled = !categories.isEmpty()) {  }
             )
         }
         Box(

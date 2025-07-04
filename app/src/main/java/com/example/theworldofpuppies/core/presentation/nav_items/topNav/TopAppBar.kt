@@ -138,8 +138,10 @@ fun TopAppbar(
                     }
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Default.Sort,
+                        painterResource(R.drawable.menu_flipped),
                         contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(22.dp)
                     )
                 }
             },

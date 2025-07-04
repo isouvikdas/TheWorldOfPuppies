@@ -22,7 +22,7 @@ class AuthApiImpl(
             : Result<ApiResponse<Unit>, NetworkError> {
         return safeCall {
             httpClient.post(
-                urlString = constructUrl("auth/register/user_unfilled/send-otp")
+                urlString = constructUrl("auth/register/user/send-otp")
             ) {
                 setBody(registrationRequest)
             }
@@ -33,7 +33,7 @@ class AuthApiImpl(
             : Result<ApiResponse<UserResponse>, NetworkError> {
         return safeCall {
             httpClient.post(
-                urlString = constructUrl("auth/register/user_unfilled/verify-otp")
+                urlString = constructUrl("auth/register/user/verify-otp")
             ) {
                 setBody(otpRequest)
             }
@@ -44,7 +44,7 @@ class AuthApiImpl(
             : Result<ApiResponse<Unit>, NetworkError> {
         return safeCall {
             httpClient.post(
-                urlString = constructUrl("auth/login/user_unfilled/send-otp")
+                urlString = constructUrl("auth/login/user/send-otp")
             ) {
                 setBody(loginRequest)
             }
@@ -55,7 +55,7 @@ class AuthApiImpl(
             : Result<ApiResponse<UserResponse>, NetworkError> {
         return safeCall {
             httpClient.post(
-                urlString = constructUrl("auth/login/user_unfilled/verify-otp")
+                urlString = constructUrl("auth/login/user/verify-otp")
             ) {
                 setBody(otpRequest)
             }

@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -95,7 +96,7 @@ fun PetExpertSection(modifier: Modifier = Modifier) {
             )
 
             Text(
-                text = "See all",
+                text = stringResource(R.string.see_all),
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.Gray,
                 fontWeight = FontWeight.W500,
@@ -274,7 +275,7 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "See all",
+                text = stringResource(R.string.see_all),
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.Gray,
                 fontWeight = FontWeight.W500,

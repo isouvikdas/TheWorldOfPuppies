@@ -18,5 +18,7 @@ data class ProductEntity(
     val imageIds: List<String> = ArrayList(),
     val firstImageId: String? = null,
     var firstImageUri: String? = null,
-    val isFeatured: Boolean? = false
+    val isFeatured: Boolean? = false,
+    val isRecommended: Boolean = false,
+    val rating: Double = 0.0
 )

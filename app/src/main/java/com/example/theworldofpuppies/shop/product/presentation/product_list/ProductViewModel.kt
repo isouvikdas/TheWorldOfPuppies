@@ -7,14 +7,18 @@ import androidx.lifecycle.viewModelScope
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.mappers.toCategory
 import com.example.theworldofpuppies.shop.product.data.mappers.toProduct
+import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.domain.ProductRepository
+import com.example.theworldofpuppies.shop.product.domain.util.ListType
+import com.example.theworldofpuppies.shop.product.domain.util.SortProduct
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -31,16 +35,74 @@ class ProductViewModel(
     val categoryListState: StateFlow<CategoryListState> = _categoryListState.asStateFlow()
 
     private val _featuredProductListState = MutableStateFlow(FeaturedProductListState())
-    val featuredProductListState: StateFlow<FeaturedProductListState> = _featuredProductListState.asStateFlow()
+    val featuredProductListState: StateFlow<FeaturedProductListState> =
+        _featuredProductListState.asStateFlow()
 
     private val _productDetailState = MutableStateFlow(ProductDetailState())
     val productDetailState: StateFlow<ProductDetailState> = _productDetailState.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow<Category?>(null)
+    val selectedCategory = _selectedCategory.asStateFlow()
+
+    fun setSelectedCategory(category: Category?) {
+        _selectedCategory.value = category
+    }
+
+    private val _sortOption = MutableStateFlow(SortProduct.RECOMMENDED)
+    val sortOption = _sortOption.asStateFlow()
+
+    private val _isPaginationEnabled = MutableStateFlow(false)
+    val isPaginationEnabled = _isPaginationEnabled.asStateFlow()
+
+    fun setSortOption(option: SortProduct) {
+        _sortOption.value = option
+    }
 
     init {
         clearCachedData()
         fetchCategories()
         fetchNextPage()
         fetchFeaturedProducts()
+    }
+
+    fun setListType(type: ListType) {
+        _productListState.update { it.copy(listType = type) }
+    }
+
+    fun getProductsByType(type: ListType): List<Product> {
+        return when (type) {
+            ListType.ALL -> {
+                _isPaginationEnabled.value = true
+                _productListState.value.productList.filter { it.isFeatured == false }
+            }
+            ListType.FEATURED -> {
+                _isPaginationEnabled.value = false
+                _productListState.value.productList.filter { it.isFeatured == true }
+            }
+            ListType.NEW -> {
+                _isPaginationEnabled.value = false
+                _productListState.value.productList
+            }
+            else -> emptyList()
+        }
+    }
+
+    val filteredSortedProducts = combine(
+        productListState,
+        selectedCategory,
+        sortOption
+    ) { productListState, selectedCategory, sortOption ->
+        var filtered = getProductsByType(productListState.listType)
+        if (selectedCategory != null) {
+            filtered = filtered.filter { it.categoryName == selectedCategory.name }
+        }
+        when (sortOption) {
+            SortProduct.HIGH_TO_LOW -> filtered.sortedByDescending { it.price }
+            SortProduct.LOW_TO_HIGH -> filtered.sortedBy { it.price }
+            SortProduct.HIGHEST_RATED -> filtered.sortedByDescending { it.rating }
+            SortProduct.LATEST -> filtered.sortedBy { it.isFeatured }
+            else -> filtered
+        }
     }
 
     fun setProduct(product: Product) {
@@ -60,7 +122,10 @@ class ProductViewModel(
 
     fun fetchImagesIfNeeded(product: Product) {
         product.imageIds.forEach { imageId ->
-            if (!_productDetailState.value.fetchedImageIds.contains(imageId) && !alreadyRequestedIds.contains(imageId)) {
+            if (!_productDetailState.value.fetchedImageIds.contains(imageId) && !alreadyRequestedIds.contains(
+                    imageId
+                )
+            ) {
                 alreadyRequestedIds.add(imageId)
                 getProductImages(imageId)
             }
@@ -137,15 +202,6 @@ class ProductViewModel(
                             productList.forEach { Log.i("toggle", it.toString()) }
                         }
                         _featuredProductListState.update { it.copy(productList = productList) }
-//                        val product = featuredProductListState.value.productList.find {it.imageIds.isNotEmpty()}
-//                        val imageIds = product?.imageIds ?: emptyList()
-//                        if (imageIds.isNotEmpty()) {
-//                            imageIds.forEach {
-//                                Log.i("imageId", it.toString())
-//                            }
-//                        } else {
-//                            Log.i("imageId", "imageIds are empty")
-//                        }
                     }
 
                     is Result.Error -> _featuredProductListState.update { it.copy(errorMessage = result.error.toString()) }

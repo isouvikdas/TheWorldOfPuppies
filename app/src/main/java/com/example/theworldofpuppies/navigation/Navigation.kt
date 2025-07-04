@@ -23,6 +23,7 @@ import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
+import com.example.theworldofpuppies.shop.product.domain.util.ListType
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListScreen
@@ -34,10 +35,7 @@ sealed class Screen(val route: String) {
     data object LoginScreen : Screen("LoginScreen")
     data object WelcomeScreen : Screen("WelcomeScreen")
     data object ProductDetailScreen : Screen("ProductDetailScreen")
-    data object ProductListScreen : Screen("ProductListScreen") {
-        fun createRoute(type: String) = "$route?type=$type"
-    }
-
+    data object ProductListScreen : Screen("ProductListScreen")
     data object CartScreen : Screen("CartScreen")
 }
 
@@ -202,68 +200,26 @@ fun AppNavigation(
             onGesturesChanged(true)
             ProfileScreen()
         }
-        composable(
-            route = "ProductListScreen?type={type}",
-            arguments = listOf(navArgument("type") {
-                defaultValue = "all"
-                type = NavType.StringType
-            })
-        ) { backStackEntry ->
-            val productType = backStackEntry.arguments?.getString("type") ?: "all"
+
+        composable(route = Screen.ProductListScreen.route) {
             onBottomBarVisibilityChanged(false)
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(true)
             onGesturesChanged(true)
+            val productType = productListState.listType
 
-            when (productType) {
-                "all" -> {
-                    val allProducts = productListState.productList.filter { it.isFeatured == false }
-                    ProductListScreen(
-                        productList = allProducts,
-                        onProductSelect = {
-                            productViewModel.setProduct(it)
-                            navController.navigate(Screen.ProductDetailScreen.route)
-                        },
-                        enablePagination = true,
-                        isLoading = productListState.isLoading,
-                        onLoadMore = { productViewModel.fetchNextPage() },
-                        productTypeLabel = "All",
-                        categoryListState = categoryListState
-                    )
-                }
-
-                "featured" -> {
-                    val featuredProductList =
-                        productListState.productList.filter { it.isFeatured == true }
-                    ProductListScreen(
-                        productList = featuredProductList,
-                        onProductSelect = {
-                            productViewModel.setProduct(it)
-                            navController.navigate(Screen.ProductDetailScreen.route)
-                        },
-                        enablePagination = false,
-                        isLoading = productListState.isLoading,
-                        productTypeLabel = "Featured",
-                        categoryListState = categoryListState
-                    )
-                }
-
-                "new" -> {
-                    val newProductList = productListState.productList
-                    ProductListScreen(
-                        productList = newProductList,
-                        onProductSelect = {
-                            productViewModel.setProduct(it)
-                            navController.navigate(Screen.ProductDetailScreen.route)
-                        },
-                        enablePagination = false,
-                        isLoading = productListState.isLoading,
-                        productTypeLabel = "New Launch",
-                        categoryListState = categoryListState
-                    )
-                }
-            }
+            ProductListScreen(
+                onProductSelect = {
+                    productViewModel.setProduct(it)
+                    navController.navigate(Screen.ProductDetailScreen.route)
+                },
+                isLoading = productListState.isLoading,
+                onLoadMore = { productViewModel.fetchNextPage() },
+                productTypeLabel = productType,
+                categoryListState = categoryListState,
+                productViewModel = productViewModel
+            )
         }
         composable(route = Screen.ProductDetailScreen.route) {
             hideAllChrome(

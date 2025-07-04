@@ -15,5 +15,7 @@ data class Product(
     val firstImageUri: String? = "",
     val isFeatured: Boolean? = false,
     val isDetailsFetched: Boolean = false,
-    val isImagesFetched: Boolean = false
+    val isImagesFetched: Boolean = false,
+    val isRecommended: Boolean = false,
+    val rating: Double = 0.0
 )
