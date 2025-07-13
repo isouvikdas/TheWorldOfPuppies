@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.theworldofpuppies.core.domain.util.Result
+import com.example.theworldofpuppies.core.presentation.SearchUiState
 import com.example.theworldofpuppies.shop.product.data.mappers.toCategory
 import com.example.theworldofpuppies.shop.product.data.mappers.toProduct
 import com.example.theworldofpuppies.shop.product.domain.Category
@@ -14,15 +15,26 @@ import com.example.theworldofpuppies.shop.product.domain.ProductRepository
 import com.example.theworldofpuppies.shop.product.domain.util.ListType
 import com.example.theworldofpuppies.shop.product.domain.util.SortProduct
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@OptIn(FlowPreview::class)
 class ProductViewModel(
     private val productRepository: ProductRepository,
     private val categoryRepository: CategoryRepository
@@ -44,8 +56,62 @@ class ProductViewModel(
     private val _selectedCategory = MutableStateFlow<Category?>(null)
     val selectedCategory = _selectedCategory.asStateFlow()
 
+    private val _searchText = MutableStateFlow("")
+    val searchText = _searchText.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching = _isSearching.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val searchedProductFlow = searchText
+        .debounce(300L)
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            flow {
+                try {
+                    _isSearching.emit(true)
+                    val filtered = if (query.isBlank()) {
+                        productListState.value.productList
+                    } else {
+                        delay(300L)
+                        productListState.value.productList.filter {
+                            it.doesMatchSearchQuery(query)
+                        }
+                    }
+                    emit(filtered)
+                } finally {
+                    _isSearching.emit(false)
+                }
+            }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            emptyList()
+        )
+
+    val searchUiState = combine(
+        searchText,
+        searchedProductFlow,
+        isSearching
+    ) { query, results, loading ->
+        SearchUiState(
+            query = query,
+            results = results,
+            isSearching = loading
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        SearchUiState()
+    )
+
+    fun onSearchTextChange(text: String) {
+        _searchText.value = text
+    }
+
     fun setSelectedCategory(category: Category?) {
-        _selectedCategory.value = category
+        _selectedCategory.update { category }
     }
 
     private val _sortOption = MutableStateFlow(SortProduct.RECOMMENDED)
@@ -55,7 +121,7 @@ class ProductViewModel(
     val isPaginationEnabled = _isPaginationEnabled.asStateFlow()
 
     fun setSortOption(option: SortProduct) {
-        _sortOption.value = option
+        _sortOption.update { option }
     }
 
     init {
@@ -75,14 +141,17 @@ class ProductViewModel(
                 _isPaginationEnabled.value = true
                 _productListState.value.productList.filter { it.isFeatured == false }
             }
+
             ListType.FEATURED -> {
                 _isPaginationEnabled.value = false
                 _productListState.value.productList.filter { it.isFeatured == true }
             }
+
             ListType.NEW -> {
                 _isPaginationEnabled.value = false
                 _productListState.value.productList
             }
+
             else -> emptyList()
         }
     }

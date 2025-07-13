@@ -179,7 +179,6 @@ fun ProductHeader(
                 modifier = Modifier
                     .size(
                         MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(3)
-                            .div(2)
                     )
             ) {
                 Icon(

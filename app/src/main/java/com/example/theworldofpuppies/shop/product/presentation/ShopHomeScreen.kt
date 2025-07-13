@@ -92,7 +92,7 @@ fun ShopHomeScreen(
             .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)),
         color = Color.Transparent
     ) {
-        when (productListState.isLoading == true && categoryListState.isLoading == true && featuredProductListState.isLoading == true) {
+        when (productListState.isLoading && categoryListState.isLoading && featuredProductListState.isLoading) {
             true -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

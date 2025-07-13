@@ -38,6 +38,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
 import com.example.theworldofpuppies.core.presentation.nav_items.topNav.TopAppbar
+import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -57,7 +59,6 @@ fun NavigationDrawer(
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior,
     searchIconVisibility: Boolean,
-    onBottomBarVisibilityChanged: (Boolean) -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -90,7 +91,9 @@ fun NavigationDrawer(
                         drawerState = drawerState,
                         scrollBehavior = scrollBehavior,
                         searchIconVisibility = searchIconVisibility,
-                        onBottomBarVisibilityChange = onBottomBarVisibilityChanged
+                        onSearchClick = {
+                            navController.navigate(Screen.SearchScreen.route)
+                        }
                     )
                 },
                 bottomBar = {

@@ -30,6 +30,7 @@ import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.sideNav.NavigationDrawer
 import com.example.theworldofpuppies.navigation.AppNavigation
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
+import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
@@ -77,9 +78,7 @@ class MainActivity : ComponentActivity() {
                     var searchIconVisibility by remember {
                         mutableStateOf(false)
                     }
-                    var searchScreenVisibility by remember {
-                        mutableStateOf(false)
-                    }
+
                     var openSignOutDialog by remember { mutableStateOf(false) }
 
                     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -97,7 +96,6 @@ class MainActivity : ComponentActivity() {
                         gesturesEnabled = gesturesEnabled,
                         modifier = Modifier,
                         searchIconVisibility = searchIconVisibility,
-                        onBottomBarVisibilityChanged = { bottomBarVisible = it },
                         content = { innerPadding ->
 
                             Box(
@@ -116,7 +114,7 @@ class MainActivity : ComponentActivity() {
                                     onTopBarVisibilityChanged = { topBarVisible = it },
                                     isLoggedIn = isLoggedIn,
                                     onGesturesChanged = { gesturesEnabled = it },
-                                    searchIconVisibilityChanged = { searchIconVisibility = it }
+                                    searchIconVisibilityChanged = { searchIconVisibility = it },
                                 )
 
                                 if (openSignOutDialog) {

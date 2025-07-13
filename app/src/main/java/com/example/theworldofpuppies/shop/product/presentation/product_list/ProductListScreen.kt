@@ -39,7 +39,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -79,12 +78,14 @@ fun ProductListScreen(
         remember(categoryListState.categoryList) { categoryListState.categoryList }
 
     val sortOptions = listOf(
-        SortProduct.RECOMMENDED, SortProduct.HIGHEST_RATED, SortProduct.LOW_TO_HIGH,
-        SortProduct.LATEST, SortProduct.HIGH_TO_LOW
+        SortProduct.RECOMMENDED,
+        SortProduct.HIGHEST_RATED,
+        SortProduct.HIGH_TO_LOW,
+        SortProduct.LOW_TO_HIGH,
+        SortProduct.LATEST
     )
 
     val context = LocalContext.current
-
     val isPaginationEnabled by productViewModel.isPaginationEnabled.collectAsStateWithLifecycle()
 
     Surface(

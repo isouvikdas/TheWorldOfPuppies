@@ -6,10 +6,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.example.theworldofpuppies.auth.presentation.WelcomeScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
@@ -23,7 +21,7 @@ import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
-import com.example.theworldofpuppies.shop.product.domain.util.ListType
+import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListScreen
@@ -37,6 +35,7 @@ sealed class Screen(val route: String) {
     data object ProductDetailScreen : Screen("ProductDetailScreen")
     data object ProductListScreen : Screen("ProductListScreen")
     data object CartScreen : Screen("CartScreen")
+    data object SearchScreen: Screen("SearchScreen")
 }
 
 @Composable
@@ -49,7 +48,7 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     isLoggedIn: Boolean,
     onGesturesChanged: (Boolean) -> Unit,
-    searchIconVisibilityChanged: (Boolean) -> Unit
+    searchIconVisibilityChanged: (Boolean) -> Unit,
 ) {
 
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
@@ -199,6 +198,18 @@ fun AppNavigation(
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
             ProfileScreen()
+        }
+
+        composable(route = Screen.SearchScreen.route) {
+            onBottomBarVisibilityChanged(false)
+            onTopBarVisibilityChanged(false)
+            onProfileButtonVisibilityChanged(false)
+            onGesturesChanged(false)
+            searchIconVisibilityChanged(false)
+            SearchScreen(
+                productViewModel = productViewModel,
+                navController = navController
+            )
         }
 
         composable(route = Screen.ProductListScreen.route) {
