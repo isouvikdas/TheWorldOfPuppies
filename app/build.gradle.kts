@@ -24,7 +24,7 @@ android {
     }
 
     buildTypes {
-        val baseUrl = "\"https://a397bd3a02b6.ngrok-free.app\""
+        val baseUrl = "\"https://195e61b05c79.ngrok-free.app\""
         debug {
             buildConfigField(
                 "String",

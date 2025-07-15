@@ -58,7 +58,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
+        color = Color.Transparent
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

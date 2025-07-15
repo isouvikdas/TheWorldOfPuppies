@@ -21,6 +21,7 @@ import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
+import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
 import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
@@ -35,7 +36,8 @@ sealed class Screen(val route: String) {
     data object ProductDetailScreen : Screen("ProductDetailScreen")
     data object ProductListScreen : Screen("ProductListScreen")
     data object CartScreen : Screen("CartScreen")
-    data object SearchScreen: Screen("SearchScreen")
+    data object SearchScreen : Screen("SearchScreen")
+    data object CheckoutScreen : Screen("CheckoutScreen")
 }
 
 @Composable
@@ -267,6 +269,16 @@ fun AppNavigation(
                 cartUiState = cartUiState,
                 cartViewModel = cartViewModel
             )
+        }
+        composable(route = Screen.CheckoutScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            CheckoutScreen(navController = navController)
         }
     }
 }

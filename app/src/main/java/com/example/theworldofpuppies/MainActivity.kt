@@ -129,8 +129,7 @@ class MainActivity : ComponentActivity() {
                                         })
                                 }
                             }
-                        },
-                        scrollBehavior = scrollBehavior
+                        }
                     )
                 }
             }

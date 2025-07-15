@@ -91,7 +91,7 @@ fun ProductListScreen(
     Surface(
         modifier = Modifier
             .fillMaxSize(),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
+        color = Color.Transparent
     ) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -157,10 +157,8 @@ fun ProductListScreen(
                                 .padding(end = MaterialTheme.dimens.small1.div(2))
                                 .animateItem(),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                    0.3f
-                                ),
-                                selectedLabelColor = Color.Black
+                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(0.8f),
+                                selectedLabelColor = Color.White
                             ),
                             border = BorderStroke(0.1.dp, color = Color.LightGray)
                         )

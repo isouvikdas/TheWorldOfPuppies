@@ -88,8 +88,7 @@ fun ShopHomeScreen(
 
     Surface(
         modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)),
+            .fillMaxSize(),
         color = Color.Transparent
     ) {
         when (productListState.isLoading && categoryListState.isLoading && featuredProductListState.isLoading) {

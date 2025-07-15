@@ -23,13 +23,15 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +41,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
 import com.example.theworldofpuppies.core.presentation.nav_items.topNav.TopAppbar
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -57,11 +58,14 @@ fun NavigationDrawer(
     topBarVisibility: Boolean,
     gesturesEnabled: Boolean,
     modifier: Modifier = Modifier,
-    scrollBehavior: TopAppBarScrollBehavior,
     searchIconVisibility: Boolean,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState()
+    )
 
     ModalNavigationDrawer(
         modifier = Modifier,
@@ -81,7 +85,8 @@ fun NavigationDrawer(
             Scaffold(
                 modifier = modifier
                     .fillMaxSize()
-                    .navigationBarsPadding(),
+                    .navigationBarsPadding()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
                 topBar = {
                     TopAppbar(
                         navController = navController,
@@ -122,6 +127,7 @@ fun DrawerContent(
 ) {
     val drawerItems = listOf(
         DrawerItems.Shop,
+        DrawerItems.Payment,
         DrawerItems.Insurance,
         DrawerItems.Training,
         DrawerItems.PrivacyPolicy,
@@ -136,10 +142,10 @@ fun DrawerContent(
             .fillMaxHeight(), color = Color.White
     ) {
         ModalDrawerSheet(
-            drawerContainerColor = Color.LightGray.copy(0.4f),
+            drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.25f),
             drawerContentColor = Color.Black,
             drawerShape = RectangleShape,
-            modifier = Modifier.wrapContentSize()
+            modifier = Modifier.fillMaxWidth(0.65f).fillMaxHeight()
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -201,7 +207,7 @@ fun DrawerHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .height(MaterialTheme.dimens.extraLarge1),
-        color = Color.LightGray.copy(0.4f)
+        color = Color.Transparent
     ) {
         Column(
             modifier = Modifier

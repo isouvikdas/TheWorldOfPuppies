@@ -21,13 +21,13 @@ data class Product(
 ) {
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombinations = listOf(
-            "$name",
-            "${name.first()}",
-            "${name.last()}",
-            "$price",
-            "$categoryName",
-            "$description.",
-            "$discountedPrice"
+            name,
+            name.first().toString(),
+            name.last().toString(),
+            price.toString(),
+            categoryName,
+            description,
+            discountedPrice.toString()
         )
         return matchingCombinations.any {
             it.contains(query, ignoreCase = true)

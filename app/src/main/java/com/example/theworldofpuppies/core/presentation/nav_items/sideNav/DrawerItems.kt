@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.navigation.Screen
 
 sealed class DrawerItems(
     val route: String,
@@ -43,6 +44,17 @@ sealed class DrawerItems(
     data object Shop : DrawerItems(
         route = "Shop",
         title = "Shop",
+        icon = { modifier->
+            Icon(
+                painterResource(R.drawable.shop_outline),
+                contentDescription = null,
+                modifier = modifier.then(Modifier.size(27.dp))
+            )
+        }
+    )
+    data object Payment : DrawerItems(
+        route = Screen.CheckoutScreen.route,
+        title = Screen.CheckoutScreen.route,
         icon = { modifier->
             Icon(
                 painterResource(R.drawable.shop_outline),

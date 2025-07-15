@@ -51,8 +51,10 @@ fun TopAppbar(
     onSearchClick: () -> Unit
 ) {
     TopAppBar(
+        scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent
         ),
         modifier = modifier,
         navigationIcon = {

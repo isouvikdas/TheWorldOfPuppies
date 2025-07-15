@@ -1,16 +1,22 @@
 package com.example.theworldofpuppies.shop.product.presentation
 
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -18,25 +24,28 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.nav_items.ProductSearchView
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
@@ -49,138 +58,169 @@ fun SearchScreen(
 ) {
     val searchUiState by productViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchQuery = searchUiState.query
-    var isSearchActive by remember { mutableStateOf(false) }
+    val categoryListState by productViewModel.categoryListState.collectAsStateWithLifecycle()
+    val categoryList =
+        rememberSaveable(categoryListState.categoryList) { categoryListState.categoryList }
+    val selectedCategory = rememberSaveable { mutableStateOf<Category?>(null) }
+
+    val productList by remember(searchUiState.results, selectedCategory.value) {
+        derivedStateOf {
+            if (selectedCategory.value == null) {
+                searchUiState.results
+            } else {
+                searchUiState.results.filter { it.categoryName == selectedCategory.value?.name }
+            }
+        }
+    }
+
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState()
+    )
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
         topBar = {
-            TopAppBar(
+            MediumTopAppBar(
+                scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
                 ),
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(start = MaterialTheme.dimens.extraSmall),
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        },
+                    .padding(vertical = MaterialTheme.dimens.extraSmall),
+                title = {
+                    LazyRow(
                         modifier = Modifier
-                            .size(
-                                MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
-                                    3
-                                )
-                            )
+                            .fillMaxWidth()
                     ) {
-                        Icon(
-                            painterResource(R.drawable.arrow_left_filled),
-                            contentDescription = "Menu",
-                            modifier = Modifier
-                                .size(21.dp)
-                        )
+                        items(categoryList) { category ->
+                            val isSelected = selectedCategory.value == category
+                            FilterChip(
+                                onClick = {
+                                    selectedCategory.value = if (isSelected) null else category
+                                },
+                                label = { Text(category.name) },
+                                selected = isSelected,
+                                shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                                modifier = Modifier
+                                    .padding(end = MaterialTheme.dimens.small1.div(2))
+                                    .animateItem(),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                        0.8f
+                                    ),
+                                    selectedLabelColor = Color.White
+                                ),
+                                border = BorderStroke(0.1.dp, color = Color.LightGray)
+                            )
+                        }
                     }
                 },
-                title = {
-
-
-                },
                 actions = {
-                    OutlinedTextField(
-                        modifier = Modifier.height(55.dp),
-                        value = searchQuery,
-                        onValueChange = { text -> productViewModel.onSearchTextChange(text) },
-                        placeholder = { Text("Search products", color = Color.Black.copy(0.9f)) },
-                        leadingIcon = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(
+                            onClick = {
+                                navController.popBackStack()
+                            },
+                            modifier = Modifier
+                                .padding(horizontal = MaterialTheme.dimens.extraSmall)
+                                .size(
+                                    MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
+                                        3
+                                    )
+                                )
+                        ) {
                             Icon(
-                                painterResource(R.drawable.search_dens),
-                                contentDescription = "Back",
+                                painterResource(R.drawable.arrow_left_filled),
+                                contentDescription = "Menu",
                                 modifier = Modifier
                                     .size(21.dp)
                             )
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { productViewModel.onSearchTextChange("") }) {
-                                    Icon(Icons.Default.Close, contentDescription = "Clear")
+                        }
+                        OutlinedTextField(
+                            modifier = Modifier.width(MaterialTheme.dimens.medium2.times(4)),
+                            value = searchQuery,
+                            onValueChange = { text -> productViewModel.onSearchTextChange(text) },
+                            singleLine = true,
+                            placeholder = {
+                                Text(
+                                    "Search products",
+                                    color = Color.Black.copy(0.9f)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painterResource(R.drawable.search_dens),
+                                    contentDescription = "Back",
+                                    modifier = Modifier
+                                        .size(21.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { productViewModel.onSearchTextChange("") }) {
+                                        Icon(Icons.Default.Close, contentDescription = "Clear")
+                                    }
                                 }
-                            }
-                        },
-                        shape = RoundedCornerShape(MaterialTheme.dimens.small2),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Transparent,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = Color.LightGray.copy(0.4f),
-                            unfocusedContainerColor = Color.LightGray.copy(0.4f)
+                            },
+                            shape = RoundedCornerShape(MaterialTheme.dimens.small2),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedContainerColor = Color.LightGray.copy(0.4f),
+                                unfocusedContainerColor = Color.LightGray.copy(0.4f)
+                            )
                         )
-                    )
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.CartScreen.route)
-                        },
-                        modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.bag_outline),
-                            contentDescription = "Bag",
-                            modifier = Modifier.size(22.dp)
-                        )
+                        IconButton(
+                            onClick = {
+                                navController.navigate(Screen.CartScreen.route)
+                            },
+                            modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.bag_outline),
+                                contentDescription = "Bag",
+                                modifier = Modifier.size(22.dp),
+                            )
+                        }
+
                     }
                 }
             )
 
+
         },
         content = {
-            ProductSearchView(
+            Surface(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(it),
-                productViewModel = productViewModel,
-                color = Color.Transparent,
-                navController = navController
-            )
+                color = Color.Transparent
+            ) {
+                ProductSearchView(
+                    modifier = Modifier
+                        .padding(horizontal = MaterialTheme.dimens.extraSmall),
+                    productViewModel = productViewModel,
+                    color = Color.Transparent,
+                    navController = navController,
+                    productList = productList,
+                    searchQuery = searchQuery,
+                    isSearching = searchUiState.isSearching
+                )
+
+            }
         }
     )
 
 }
-
-
-//DockedSearchBar(
-//colors = SearchBarDefaults.colors(
-//containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
-//dividerColor = Color.Transparent
-//),
-//query = searchQuery,
-//onQueryChange = { text -> productViewModel.onSearchTextChange(text) },
-//onSearch = { text -> productViewModel.onSearchTextChange(text) },
-//active = isSearchActive,
-//onActiveChange = { text ->
-//    isSearchActive = text
-//},
-//placeholder = { Text("Search products", color = Color.Black.copy(0.9f)) },
-//leadingIcon = {
-//    Icon(
-//        painterResource(R.drawable.search_dens),
-//        contentDescription = "Back",
-//        modifier = Modifier
-//            .size(21.dp)
-//    )
-//
-//},
-//trailingIcon = {
-//    if (searchQuery.isNotEmpty()) {
-//        IconButton(onClick = { productViewModel.onSearchTextChange("") }) {
-//            Icon(Icons.Default.Close, contentDescription = "Clear")
-//        }
-//    }
-//},
-//modifier = modifier
-//.wrapContentHeight()
-//
-//) {
-//
-//}
-//
-

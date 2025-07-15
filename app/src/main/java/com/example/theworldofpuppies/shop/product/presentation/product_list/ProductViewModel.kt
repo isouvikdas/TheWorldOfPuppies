@@ -71,7 +71,7 @@ class ProductViewModel(
                 try {
                     _isSearching.emit(true)
                     val filtered = if (query.isBlank()) {
-                        productListState.value.productList
+                        emptyList()
                     } else {
                         delay(300L)
                         productListState.value.productList.filter {

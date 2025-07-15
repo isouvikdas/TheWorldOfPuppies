@@ -22,13 +22,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +38,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,6 +62,7 @@ import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     modifier: Modifier = Modifier,
@@ -70,6 +72,10 @@ fun CartScreen(
 ) {
     val cartItems = remember(cartUiState.cartItems) { cartUiState.cartItems as List<CartItem> }
     val lazyListSTate = rememberLazyListState()
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState()
+    )
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -81,12 +87,13 @@ fun CartScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
         topBar = {
             CartHeader(onBack = {
                 onBack()
-            })
+            }, scrollBehavior = scrollBehavior)
         },
         bottomBar = {
             CartBottomSection(
@@ -137,50 +144,62 @@ fun CartScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartHeader(modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun CartHeader(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
+) {
     TopAppBar(
+        scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent
         ),
         modifier = modifier
-            .fillMaxWidth()
-            .padding(start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
-        navigationIcon = {
-            IconButton(
-                onClick = { onBack() },
-                modifier = Modifier
-                    .size(
-                        MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(3)
-                            .div(2)
-                    )
-            ) {
-                Icon(
-                    painterResource(R.drawable.arrow_left_filled),
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .size(21.dp)
-                )
-
-            }
-        },
-        title = {
-            Text(
-                text = "My Cart",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-            )
-        },
+            .fillMaxWidth(),
+        title = {},
         actions = {
-            IconButton(
-                onClick = { /* Bag action */ },
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    painterResource(R.drawable.bag_outline),
-                    contentDescription = "Bag",
-                    modifier = Modifier.size(22.dp)
+                IconButton(
+                    onClick = {
+                        onBack()
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = MaterialTheme.dimens.extraSmall)
+                        .size(
+                            MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
+                                3
+                            )
+                        )
+                ) {
+                    Icon(
+                        painterResource(R.drawable.arrow_left_filled),
+                        contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(21.dp)
+                    )
+                }
+                Text(
+                    text = "My Cart",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.W500,
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
                 )
+                IconButton(
+                    onClick = { /* Bag action */ },
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+                ) {
+                    Icon(
+                        painterResource(R.drawable.bag_outline),
+                        contentDescription = "Bag",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
     )
@@ -217,22 +236,12 @@ fun CartItemSection(
             },
             modifier = Modifier.padding(end = MaterialTheme.dimens.extraSmall.times(2))
         ) {
-            if (isSelected) {
-                Icon(
-                    Icons.Default.RadioButtonChecked,
-                    contentDescription = null,
-                    modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-            } else {
-                Icon(
-                    Icons.Default.RadioButtonUnchecked,
-                    contentDescription = null,
-                    modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-
-            }
+            Icon(
+                if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                tint = Color.Red
+            )
         }
         /*Cart image Section*/
         Surface(
