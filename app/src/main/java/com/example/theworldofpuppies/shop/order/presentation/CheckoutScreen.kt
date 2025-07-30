@@ -2,6 +2,7 @@ package com.example.theworldofpuppies.shop.order.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,51 +36,66 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
+import com.example.theworldofpuppies.shop.order.domain.OrderUiState
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    orderViewModel: OrderViewModel,
+    cartViewModel: CartViewModel
 ) {
+    val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
+    val orderUiState by orderViewModel.orderUiState.collectAsStateWithLifecycle()
+    val paymentUiState by orderViewModel.paymentUiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
-    val isSelected = rememberSaveable { mutableStateOf(true) }
+    val addresses = remember(orderUiState.addresses) { orderUiState.addresses }
+    val selectedAddress = remember(orderUiState.selectedAddress) { orderUiState.selectedAddress }
 
+    val shippingFee = 30.00
+    val cartTotal = remember(cartUiState.cartTotal) { cartUiState.cartTotal }
+    val total = cartTotal + shippingFee
 
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .navigationBarsPadding(),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
         topBar = {
             CheckoutHeader(scrollBehavior = scrollBehavior, navController = navController)
         },
         bottomBar = {
             CheckoutBottomSection(
-                totalCartPrice = 100.00,
-                shippingFee = 30.00,
-                total = 130.00
+                totalCartPrice = cartUiState.cartTotal,
+                shippingFee = shippingFee,
+                total = total,
+                orderViewModel = orderViewModel,
+                orderUiState = orderUiState
             )
         }
     ) {
@@ -94,8 +111,11 @@ fun CheckoutScreen(
                     .padding(horizontal = MaterialTheme.dimens.small1.div(4).times(5))
             ) {
                 AddressSection(
-                    isSelected = isSelected, modifier = Modifier
-                        .padding(vertical = MaterialTheme.dimens.extraSmall)
+                    modifier = Modifier
+                        .padding(vertical = MaterialTheme.dimens.extraSmall),
+                    addresses = addresses,
+                    orderViewModel = orderViewModel,
+                    selectedAddress = selectedAddress
                 )
 
                 PaymentSection(
@@ -108,6 +128,130 @@ fun CheckoutScreen(
     }
 
 }
+
+
+@Composable
+fun AddressSection(
+    modifier: Modifier = Modifier,
+    addresses: List<Address>,
+    orderViewModel: OrderViewModel,
+    selectedAddress: Address? = null
+) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+    ) {
+        Text(
+            text = "Shipping to",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        addresses.forEach { address ->
+            val isSelected = selectedAddress?.id == address.id
+            val addressTitle = remember(address.addressType) { address.addressType }
+            AddressCard(
+                isSelected = isSelected,
+                addressTitle = addressTitle.name,
+                addressDescription = "${address.houseNumber} ${address.landmark} ${address.city} ${address.state} ${address.pinCode}",
+                phoneNumber = address.contactNumber,
+                orderViewModel = orderViewModel,
+                address = address
+            )
+        }
+    }
+}
+
+@Composable
+fun AddressCard(
+    modifier: Modifier = Modifier,
+    isSelected: Boolean,
+    addressTitle: String,
+    addressDescription: String,
+    phoneNumber: String,
+    orderViewModel: OrderViewModel,
+    address: Address
+) {
+    Surface(
+        modifier = modifier
+            .wrapContentSize()
+            .clickable {
+                orderViewModel.updateAddressSelection(address)
+            },
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = if (isSelected) 8.dp else 0.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(90.dp)
+                .background(
+                    if (isSelected) Color.White.copy(0.2f)
+                    else MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.fillMaxHeight()) {
+                IconButton(
+                    onClick = {
+                        orderViewModel.updateAddressSelection(address)
+                    },
+                    modifier = Modifier.padding(end = MaterialTheme.dimens.extraSmall)
+                ) {
+                    Icon(
+                        if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                        contentDescription = null,
+                        modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                        tint = Color.Red
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.7f)
+                    .padding(vertical = MaterialTheme.dimens.extraSmall),
+                verticalArrangement = Arrangement.SpaceAround
+            ) {
+                Text(
+                    text = addressTitle,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = phoneNumber,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray.copy(0.7f),
+                    modifier = Modifier,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = addressDescription,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray.copy(0.7f),
+                    modifier = Modifier,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Box(modifier = Modifier.fillMaxSize()) {
+                IconButton(onClick = {}, modifier = Modifier.align(Alignment.TopEnd)) {
+                    Icon(
+                        painterResource(R.drawable.pencil),
+                        contentDescription = "Edit Address icon",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    }
+
+}
+
 
 @Composable
 fun PaymentSection(modifier: Modifier = Modifier) {
@@ -264,119 +408,6 @@ fun PaymentSection(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun AddressSection(modifier: Modifier = Modifier, isSelected: MutableState<Boolean>) {
-    Column(
-        modifier = modifier
-            .wrapContentHeight()
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
-    ) {
-        Text(
-            text = "Shipping to",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        AddressCard(
-            isSelected = isSelected,
-            addressTitle = "Home",
-            address = "Kolkata, WestBengal, India, Asia, Earth",
-            phoneNumber = "+91 60091 81866"
-        )
-        AddressCard(
-            isSelected = isSelected,
-            addressTitle = "Office",
-            address = "Kolkata, WestBengal, India, Asia, Earth",
-            phoneNumber = "+91 97745 98137"
-        )
-
-    }
-}
-
-@Composable
-fun AddressCard(
-    modifier: Modifier = Modifier,
-    isSelected: MutableState<Boolean>,
-    addressTitle: String,
-    address: String,
-    phoneNumber: String
-) {
-    Surface(
-        modifier = modifier
-            .wrapContentSize(),
-        color = Color.White,
-        shape = RoundedCornerShape(16.dp),
-        shadowElevation = if (isSelected.value) 8.dp else 0.dp,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(90.dp)
-                .background(
-                    if (isSelected.value) Color.White.copy(0.2f)
-                    else MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.fillMaxHeight()) {
-                IconButton(
-                    onClick = {
-                        isSelected.value = !isSelected.value
-                    },
-                    modifier = Modifier.padding(end = MaterialTheme.dimens.extraSmall)
-                ) {
-                    Icon(
-                        if (isSelected.value) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                        contentDescription = null,
-                        modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
-                        tint = Color.Red
-                    )
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.7f)
-                    .padding(vertical = MaterialTheme.dimens.extraSmall),
-                verticalArrangement = Arrangement.SpaceAround
-            ) {
-                Text(
-                    text = addressTitle,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = phoneNumber,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray.copy(0.7f),
-                    modifier = Modifier,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = address,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray.copy(0.7f),
-                    modifier = Modifier,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Box(modifier = Modifier.fillMaxSize()) {
-                IconButton(onClick = {}, modifier = Modifier.align(Alignment.TopEnd)) {
-                    Icon(
-                        painterResource(R.drawable.pencil),
-                        contentDescription = "Edit Address icon",
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -449,8 +480,11 @@ fun CheckoutBottomSection(
     modifier: Modifier = Modifier,
     totalCartPrice: Double,
     shippingFee: Double,
-    total: Double
+    total: Double,
+    orderViewModel: OrderViewModel,
+    orderUiState: OrderUiState
 ) {
+    val context = LocalContext.current
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -489,7 +523,7 @@ fun CheckoutBottomSection(
             )
 
             Button(
-                onClick = {},
+                onClick = { orderViewModel.createOrderAndStartPayment(context = context) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.dimens.buttonHeight),
@@ -501,11 +535,19 @@ fun CheckoutBottomSection(
                     disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 ),
             ) {
-                Text(
-                    text = "Payment",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+                if (orderUiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                } else {
+                    Text(
+                        text = "Place Order",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                }
             }
         }
     }

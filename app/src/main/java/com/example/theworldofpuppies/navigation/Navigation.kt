@@ -22,6 +22,7 @@ import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
+import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
 import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
@@ -51,6 +52,7 @@ fun AppNavigation(
     isLoggedIn: Boolean,
     onGesturesChanged: (Boolean) -> Unit,
     searchIconVisibilityChanged: (Boolean) -> Unit,
+    orderViewModel: OrderViewModel
 ) {
 
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
@@ -278,7 +280,11 @@ fun AppNavigation(
                 onGesturesChanged,
                 searchIconVisibilityChanged
             )
-            CheckoutScreen(navController = navController)
+            CheckoutScreen(
+                navController = navController,
+                orderViewModel = orderViewModel,
+                cartViewModel = cartViewModel
+            )
         }
     }
 }

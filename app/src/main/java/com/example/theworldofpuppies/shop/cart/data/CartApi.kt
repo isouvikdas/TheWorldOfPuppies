@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.shop.cart.data
 
-import com.example.furryroyals.core.response.ApiResponse
+import com.example.theworldofpuppies.core.response.ApiResponse
 import com.example.theworldofpuppies.core.data.networking.constructUrl
 import com.example.theworldofpuppies.core.data.networking.safeCall
 import com.example.theworldofpuppies.core.domain.util.NetworkError

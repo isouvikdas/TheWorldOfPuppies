@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.shop.product.data.remote
 
-import com.example.furryroyals.core.response.ApiResponse
+import com.example.theworldofpuppies.core.response.ApiResponse
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.remote.dto.CategoryDto

@@ -24,7 +24,7 @@ android {
     }
 
     buildTypes {
-        val baseUrl = "\"https://8bb03a9e0883.ngrok-free.app\""
+        val baseUrl = "\"https://111032390fb9.ngrok-free.app\""
         debug {
             buildConfigField(
                 "String",
@@ -125,5 +125,8 @@ dependencies {
     //WindowSizeClass
 //    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
     implementation("androidx.compose.material3:material3-window-size-class")
+
+    //razorpay
+    implementation("com.razorpay:checkout:1.6.40")
 
 }

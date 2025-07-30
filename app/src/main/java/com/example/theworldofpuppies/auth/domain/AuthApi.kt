@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.auth.domain
 
-import com.example.furryroyals.core.response.ApiResponse
+import com.example.theworldofpuppies.core.response.ApiResponse
 import com.example.theworldofpuppies.auth.data.request.LoginRequest
 import com.example.theworldofpuppies.auth.data.request.OtpRequest
 import com.example.theworldofpuppies.auth.data.request.RegistrationRequest

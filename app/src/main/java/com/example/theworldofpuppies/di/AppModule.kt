@@ -1,11 +1,14 @@
 package com.example.theworldofpuppies.di
 
-import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.example.theworldofpuppies.address.data.AddressRepositoryImpl
+import com.example.theworldofpuppies.address.data.DummyAddressApi
+import com.example.theworldofpuppies.address.domain.AddressRepository
+import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.auth.data.AuthApiImpl
-import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.auth.domain.AuthApi
+import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
 import com.example.theworldofpuppies.core.data.local.Database
@@ -16,6 +19,13 @@ import com.example.theworldofpuppies.shop.cart.data.CartApi
 import com.example.theworldofpuppies.shop.cart.data.CartRepositoryImpl
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
+import com.example.theworldofpuppies.shop.order.data.OrderApi
+import com.example.theworldofpuppies.shop.order.data.OrderRepositoryImpl
+import com.example.theworldofpuppies.shop.order.data.PaymentApi
+import com.example.theworldofpuppies.shop.order.data.PaymentRepositoryImpl
+import com.example.theworldofpuppies.shop.order.domain.OrderRepository
+import com.example.theworldofpuppies.shop.order.domain.PaymentRepository
+import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
 import com.example.theworldofpuppies.shop.product.data.remote.CategoryRepositoryImpl
 import com.example.theworldofpuppies.shop.product.data.remote.DummyApi
 import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
@@ -44,6 +54,9 @@ val appModule = module {
     single { get<Database>().productDao }
     single { get<Database>().categoryDao }
     singleOf(::ProductApi)
+    singleOf(::PaymentApi)
+    singleOf(::DummyAddressApi)
+    singleOf(::OrderApi)
     singleOf(::DummyApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
@@ -52,10 +65,15 @@ val appModule = module {
     singleOf(::CategoryRepositoryImpl).bind<CategoryRepository>()
     singleOf(::CartApi)
     singleOf(::CartRepositoryImpl).bind<CartRepository>()
+    singleOf(::OrderRepositoryImpl).bind<OrderRepository>()
+    singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
+    singleOf(::AddressRepositoryImpl).bind<AddressRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
     viewModelOf(::CartViewModel)
     viewModelOf(::RegistrationViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::OrderViewModel)
+    viewModelOf(::AddressViewModel)
 }

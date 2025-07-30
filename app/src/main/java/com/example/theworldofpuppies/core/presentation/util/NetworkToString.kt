@@ -13,6 +13,7 @@ fun NetworkError.toString(context: Context): String {
         NetworkError.SERIALIZATION -> R.string.error_serialization
         NetworkError.UNKNOWN -> R.string.error_unknown
         NetworkError.UNAUTHORIZED -> R.string.error_unathorized
+        NetworkError.PAYMENT_VERIFICATION_FAILED -> R.string.payment_verification_failed
     }
     return context.getString(resId)
 }

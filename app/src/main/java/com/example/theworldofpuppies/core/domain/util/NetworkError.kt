@@ -9,5 +9,6 @@ enum class NetworkError: Error {
     SERVER_ERROR,
     SERIALIZATION,
     UNKNOWN,
-    UNAUTHORIZED
+    UNAUTHORIZED,
+    PAYMENT_VERIFICATION_FAILED
 }
