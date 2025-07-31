@@ -37,13 +37,13 @@ class OrderRepositoryImpl(
         }
     }
 
-    override suspend fun createPodOrder(): Result<Order, NetworkError> {
+    override suspend fun createCodOrder(): Result<Order, NetworkError> {
         val token = userRepository.getToken()
         if (token.isNullOrEmpty()) {
             return Result.Error(NetworkError.UNAUTHORIZED)
         }
         return withContext(Dispatchers.IO) {
-            when (val result = orderApi.createPodOrder(token = token)) {
+            when (val result = orderApi.createCodOrder(token = token)) {
                 is Result.Success -> {
                     val response = result.data
                     if (!response.success || response.data == null) {

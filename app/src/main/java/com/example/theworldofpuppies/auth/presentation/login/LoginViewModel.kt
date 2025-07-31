@@ -42,9 +42,6 @@ class LoginViewModel(
         Log.i("token", token ?: "token not found")
     }
 
-    private val _events = Channel<Event>()
-    val events = _events.receiveAsFlow()
-
     fun resetState() {
         viewModelScope.launch {
             _loginUiState.value = LoginUiState()
@@ -89,7 +86,6 @@ class LoginViewModel(
                         errorMessage = error.toString()
                     )
                 }
-                _events.send(Event.Error(error))
             }
         }
     }
@@ -145,12 +141,10 @@ class LoginViewModel(
                         errorMessage = error.toString()
                     )
                 }
-                _events.send(Event.Error(error))
 
             }
         }
     }
-
 
 
 }

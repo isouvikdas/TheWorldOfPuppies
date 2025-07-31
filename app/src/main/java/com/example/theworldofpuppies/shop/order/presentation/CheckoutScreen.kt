@@ -37,9 +37,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -58,6 +57,7 @@ import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.domain.OrderUiState
+import com.example.theworldofpuppies.shop.order.domain.PaymentMethod
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +77,8 @@ fun CheckoutScreen(
     val addresses = remember(orderUiState.addresses) { orderUiState.addresses }
     val selectedAddress = remember(orderUiState.selectedAddress) { orderUiState.selectedAddress }
 
+    val selectedPaymentMethod by orderViewModel.selectedPaymentMethod.collectAsStateWithLifecycle()
+
     val shippingFee = 30.00
     val cartTotal = remember(cartUiState.cartTotal) { cartUiState.cartTotal }
     val total = cartTotal + shippingFee
@@ -95,7 +97,9 @@ fun CheckoutScreen(
                 shippingFee = shippingFee,
                 total = total,
                 orderViewModel = orderViewModel,
-                orderUiState = orderUiState
+                orderUiState = orderUiState,
+                selectedAddress = selectedAddress,
+                selectedPaymentMethod = selectedPaymentMethod
             )
         }
     ) {
@@ -118,15 +122,15 @@ fun CheckoutScreen(
                     selectedAddress = selectedAddress
                 )
 
-                PaymentSection(
+                OrderSection(
                     modifier = Modifier
-                        .padding(top = MaterialTheme.dimens.extraSmall.times(2))
+                        .padding(top = MaterialTheme.dimens.extraSmall.times(2)),
+                    selectedPaymentMethod = selectedPaymentMethod,
+                    orderViewModel = orderViewModel
                 )
-
             }
         }
     }
-
 }
 
 
@@ -254,7 +258,11 @@ fun AddressCard(
 
 
 @Composable
-fun PaymentSection(modifier: Modifier = Modifier) {
+fun OrderSection(
+    modifier: Modifier = Modifier,
+    selectedPaymentMethod: PaymentMethod?,
+    orderViewModel: OrderViewModel
+) {
     Column(
         modifier = modifier
             .wrapContentHeight()
@@ -262,7 +270,7 @@ fun PaymentSection(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
     ) {
         Text(
-            text = "Payment Method",
+            text = "Payment Methods",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold
         )
@@ -273,139 +281,94 @@ fun PaymentSection(modifier: Modifier = Modifier) {
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(modifier = Modifier.padding(start = 6.dp)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val isSelected = rememberSaveable { mutableStateOf(false) }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Image(
-                            painterResource(R.drawable.master_card),
-                            contentDescription = null,
-                            modifier = Modifier.size(50.dp)
-                        )
-                        Text(
-                            text = "Credit/Debit Card",
-                            modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            isSelected.value = !isSelected.value
-                        }
-                    ) {
-                        Icon(
-                            if (isSelected.value) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                            contentDescription = null,
-                            modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
-                            tint = Color.Red
-                        )
-                    }
-
-                }
+                Spacer(modifier = Modifier.height(5.dp))
+                PaymentMethods(
+                    method = "Pay Online",
+                    methodStartPadding = MaterialTheme.dimens.small1,
+                    methodDescription = "Pay using credit/debit cards, UPI, net banking and more",
+                    image = R.drawable.master_card,
+                    imageSize = 50.dp,
+                    selected = selectedPaymentMethod is PaymentMethod.ONLINE,
+                    onClick = { orderViewModel.updatePaymentMethodSelection(PaymentMethod.ONLINE) }
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                PaymentMethods(
+                    method = "Cash On Delivery",
+                    methodStartPadding = MaterialTheme.dimens.small2,
+                    methodDescription = "Pay using Cash on Delivery",
+                    image = R.drawable.cod,
+                    imageSize = 40.dp,
+                    selected = selectedPaymentMethod is PaymentMethod.COD,
+                    onClick = { orderViewModel.updatePaymentMethodSelection(PaymentMethod.COD) }
+                )
                 Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val isSelected = rememberSaveable { mutableStateOf(false) }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Image(
-                            painterResource(R.drawable.upi_color),
-                            contentDescription = null,
-                            modifier = Modifier.size(50.dp)
-                        )
-                        Text(
-                            text = "UPI",
-                            modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            isSelected.value = !isSelected.value
-                        }
-                    ) {
-                        Icon(
-                            if (isSelected.value) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                            contentDescription = null,
-                            modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
-                            tint = Color.Red
-                        )
-                    }
-
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val isSelected = rememberSaveable { mutableStateOf(false) }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Image(
-                            painterResource(R.drawable.cod),
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Text(
-                            text = "Cash on Delivery",
-                            modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            isSelected.value = !isSelected.value
-                        }
-                    ) {
-                        Icon(
-                            if (isSelected.value) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                            contentDescription = null,
-                            modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
-                            tint = Color.Red
-                        )
-                    }
-
-                }
-
             }
+        }
+    }
+}
+
+@Composable
+fun PaymentMethods(
+    modifier: Modifier = Modifier,
+    method: String,
+    methodStartPadding: Dp,
+    methodDescription: String,
+    image: Int,
+    imageSize: Dp,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.fillMaxWidth(0.8f)) {
+            Row(
+                modifier = Modifier,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Image(
+                    painterResource(image),
+                    contentDescription = null,
+                    modifier = Modifier.size(imageSize)
+                )
+                Text(
+                    text = method,
+                    modifier = Modifier.padding(start = methodStartPadding),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.W500
+                )
+            }
+
+            Text(
+                methodDescription,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.W400,
+                modifier = Modifier
+                    .padding(start = MaterialTheme.dimens.medium2),
+                color = Color.Black.copy(0.8f)
+            )
+        }
+
+        IconButton(
+            onClick = {
+                onClick()
+            }
+        ) {
+            Icon(
+                if (selected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                tint = Color.Red
+            )
         }
 
     }
+
 }
 
 
@@ -482,7 +445,9 @@ fun CheckoutBottomSection(
     shippingFee: Double,
     total: Double,
     orderViewModel: OrderViewModel,
-    orderUiState: OrderUiState
+    orderUiState: OrderUiState,
+    selectedAddress: Address? = null,
+    selectedPaymentMethod: PaymentMethod
 ) {
     val context = LocalContext.current
     Surface(
@@ -523,7 +488,11 @@ fun CheckoutBottomSection(
             )
 
             Button(
-                onClick = { orderViewModel.createOrderAndStartPayment(context = context) },
+                onClick = {
+                    if (selectedPaymentMethod == PaymentMethod.ONLINE) orderViewModel.createOrderAndStartPayment(
+                        context = context
+                    ) else orderViewModel.createCodOrder()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.dimens.buttonHeight),
@@ -534,6 +503,7 @@ fun CheckoutBottomSection(
                     disabledContainerColor = Color.LightGray,
                     disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 ),
+                enabled = selectedAddress != null && selectedPaymentMethod != PaymentMethod.IDLE
             ) {
                 if (orderUiState.isLoading) {
                     CircularProgressIndicator(

@@ -3,9 +3,13 @@ package com.example.theworldofpuppies.shop.cart.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.core.domain.util.Result
+import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
+import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEvent
+import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -16,7 +20,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CartViewModel(
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    private val orderEventManager: OrderEventManager,
+    private val authEventManager: AuthEventManager
 ) : ViewModel() {
     private val _cartUiState = MutableStateFlow(CartUiState())
     val cartUiState: StateFlow<CartUiState> = _cartUiState.asStateFlow()
@@ -26,6 +32,8 @@ class CartViewModel(
 
     init {
         getUserCart()
+        observeAuthEvents()
+        observeOrderEvents()
     }
 
     suspend fun showToast(message: String) {
@@ -243,7 +251,29 @@ class CartViewModel(
 
     fun calculateCartTotal(cartItems: List<CartItem>): Double {
         return cartItems
-            .filter { it.isSelected == true }
+            .filter { it.isSelected }
             .sumOf { it.totalPrice }
+    }
+
+    private fun observeOrderEvents() {
+        viewModelScope.launch {
+            orderEventManager.events.collect { event ->
+                if (event is OrderEvent.orderPlaced) {
+                    _cartUiState.update { CartUiState() }
+                    getUserCart()
+                }
+            }
+        }
+    }
+
+    private fun observeAuthEvents() {
+        viewModelScope.launch {
+            authEventManager.events.collect { event ->
+                if (event is Event.LoggedIn) {
+                    _cartUiState.update { CartUiState() }
+                    getUserCart()
+                }
+            }
+        }
     }
 }

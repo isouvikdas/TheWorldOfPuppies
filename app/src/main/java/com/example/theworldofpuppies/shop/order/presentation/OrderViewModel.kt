@@ -15,8 +15,11 @@ import com.example.theworldofpuppies.shop.order.data.requests.PaymentRequest
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentVerificationRequest
 import com.example.theworldofpuppies.shop.order.domain.OrderRepository
 import com.example.theworldofpuppies.shop.order.domain.OrderUiState
+import com.example.theworldofpuppies.shop.order.domain.PaymentMethod
 import com.example.theworldofpuppies.shop.order.domain.PaymentRepository
 import com.example.theworldofpuppies.shop.order.domain.PaymentUiState
+import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEvent
+import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
 import com.razorpay.Checkout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +32,8 @@ class OrderViewModel(
     private val orderRepository: OrderRepository,
     private val paymentRepository: PaymentRepository,
     private val userRepository: UserRepository,
-    private val addressRepository: AddressRepository
+    private val addressRepository: AddressRepository,
+    private val orderEventManager: OrderEventManager
 ) : ViewModel() {
 
     private val _orderUiState = MutableStateFlow(OrderUiState())
@@ -37,6 +41,9 @@ class OrderViewModel(
 
     private val _paymentUiState = MutableStateFlow<PaymentUiState>(PaymentUiState.Idle)
     val paymentUiState: StateFlow<PaymentUiState> = _paymentUiState.asStateFlow()
+
+    private val _selectedPaymentMethod = MutableStateFlow<PaymentMethod>(PaymentMethod.IDLE)
+    val selectedPaymentMethod = _selectedPaymentMethod.asStateFlow()
 
     init {
         getAddresses()
@@ -60,12 +67,33 @@ class OrderViewModel(
         }
     }
 
-    fun selectUnselectPod() {
-        _orderUiState.update { it.copy(isPodSelected = !it.isPodSelected) }
-    }
-
     fun updateAddressSelection(address: Address) {
         _orderUiState.update { it.copy(selectedAddress = address) }
+    }
+
+    fun updatePaymentMethodSelection(paymentMethod: PaymentMethod) {
+        _selectedPaymentMethod.value = paymentMethod
+    }
+
+    fun createCodOrder() {
+        viewModelScope.launch {
+            try {
+                _orderUiState.update { it.copy(isLoading = true) }
+                when (val result = orderRepository.createCodOrder()) {
+                    is Result.Success -> {
+                        _orderUiState.update { it.copy(isLoading = false) }
+                        orderEventManager.sendEvent(OrderEvent.orderPlaced)
+                    }
+
+                    is Result.Error -> {
+                        _orderUiState.update { it.copy(error = result.error) }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("cod error", e.toString())
+                _orderUiState.update { it.copy(error = NetworkError.UNKNOWN) }
+            }
+        }
     }
 
     fun createOrderAndStartPayment(context: Context) {
@@ -157,6 +185,7 @@ class OrderViewModel(
                 is Result.Error -> {
                     _paymentUiState.value =
                         PaymentUiState.Error(R.string.payment_verification_failed.toString())
+                    orderEventManager.sendEvent(OrderEvent.orderPlaced)
                 }
             }
         }
@@ -199,5 +228,6 @@ class OrderViewModel(
 
         checkout.open(activity, options)
     }
+
 
 }

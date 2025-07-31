@@ -26,6 +26,7 @@ import com.example.theworldofpuppies.shop.order.data.PaymentRepositoryImpl
 import com.example.theworldofpuppies.shop.order.domain.OrderRepository
 import com.example.theworldofpuppies.shop.order.domain.PaymentRepository
 import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
+import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
 import com.example.theworldofpuppies.shop.product.data.remote.CategoryRepositoryImpl
 import com.example.theworldofpuppies.shop.product.data.remote.DummyApi
 import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
@@ -60,6 +61,7 @@ val appModule = module {
     singleOf(::DummyApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
+    singleOf(::OrderEventManager)
     singleOf(::ProductRepositoryImpl).bind<ProductRepository>()
     singleOf(::AuthApiImpl).bind<AuthApi>()
     singleOf(::CategoryRepositoryImpl).bind<CategoryRepository>()

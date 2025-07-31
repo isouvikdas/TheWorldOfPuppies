@@ -24,7 +24,7 @@ class OrderApi(
         }
     }
 
-    suspend fun createPodOrder(token: String)
+    suspend fun createCodOrder(token: String)
             : Result<ApiResponse<OrderDto>, NetworkError> {
         return safeCall {
             httpClient.post(

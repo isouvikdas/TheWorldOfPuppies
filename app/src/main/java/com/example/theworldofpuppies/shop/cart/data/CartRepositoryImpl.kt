@@ -53,7 +53,8 @@ class CartRepositoryImpl(
                         response.data?.let {
                             val cartItem = it.toCartItem()
                             val finalCartItem = if (isNewItem) {
-                                val product = db.productDao.getProductById(cartItem.productId)?.toProduct()
+                                val product =
+                                    db.productDao.getProductById(cartItem.productId)?.toProduct()
                                 cartItem.copy(product = product)
                             } else {
                                 cartItem
@@ -77,7 +78,7 @@ class CartRepositoryImpl(
             return Result.Error(NetworkError.UNAUTHORIZED)
         }
         return withContext(Dispatchers.IO) {
-            when(val result = cartApi.removeCartItem(token = token, cartItemId = cartItemId)) {
+            when (val result = cartApi.removeCartItem(token = token, cartItemId = cartItemId)) {
                 is Result.Success -> {
                     val response = result.data
                     if (response.success) {
@@ -86,6 +87,7 @@ class CartRepositoryImpl(
                         Result.Error(NetworkError.SERVER_ERROR)
                     }
                 }
+
                 is Result.Error -> {
                     Result.Error(NetworkError.UNKNOWN)
                 }
