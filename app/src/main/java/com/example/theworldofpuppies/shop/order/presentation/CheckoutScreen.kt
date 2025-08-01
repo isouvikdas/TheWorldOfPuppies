@@ -1,8 +1,8 @@
 package com.example.theworldofpuppies.shop.order.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -53,12 +54,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.domain.Address
+import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.domain.OrderUiState
 import com.example.theworldofpuppies.shop.order.domain.PaymentMethod
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +73,6 @@ fun CheckoutScreen(
 ) {
     val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
     val orderUiState by orderViewModel.orderUiState.collectAsStateWithLifecycle()
-    val paymentUiState by orderViewModel.paymentUiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
@@ -82,6 +84,45 @@ fun CheckoutScreen(
     val shippingFee = 30.00
     val cartTotal = remember(cartUiState.cartTotal) { cartUiState.cartTotal }
     val total = cartTotal + shippingFee
+
+    val orderId = orderUiState.orderId
+
+
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        orderViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    if (orderUiState.showSuccessDialog && orderId != null) {
+
+        OrderSuccessDialog(
+            orderId = orderId,
+            onViewOrder = {
+                orderViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Home.route
+                )
+
+            },
+            onContinueShopping = {
+                orderViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Shop.route
+                )
+            },
+            onDismiss = {
+                orderViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Shop.route
+                )
+
+            }
+        )
+
+    }
+
 
     Scaffold(
         modifier = modifier
@@ -96,10 +137,10 @@ fun CheckoutScreen(
                 totalCartPrice = cartUiState.cartTotal,
                 shippingFee = shippingFee,
                 total = total,
-                orderViewModel = orderViewModel,
                 orderUiState = orderUiState,
                 selectedAddress = selectedAddress,
-                selectedPaymentMethod = selectedPaymentMethod
+                selectedPaymentMethod = selectedPaymentMethod,
+                onClick = { orderViewModel.onPlaceOrderClick(context = context) }
             )
         }
     ) {
@@ -180,10 +221,7 @@ fun AddressCard(
 ) {
     Surface(
         modifier = modifier
-            .wrapContentSize()
-            .clickable {
-                orderViewModel.updateAddressSelection(address)
-            },
+            .wrapContentSize(),
         color = Color.White,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = if (isSelected) 8.dp else 0.dp,
@@ -401,7 +439,7 @@ fun CheckoutHeader(
                         navController.popBackStack()
                     },
                     modifier = Modifier
-                        .padding(horizontal = MaterialTheme.dimens.extraSmall)
+                        .padding(horizontal = MaterialTheme.dimens.small1)
                         .size(
                             MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
                                 3
@@ -444,12 +482,11 @@ fun CheckoutBottomSection(
     totalCartPrice: Double,
     shippingFee: Double,
     total: Double,
-    orderViewModel: OrderViewModel,
+    onClick: () -> Unit,
     orderUiState: OrderUiState,
     selectedAddress: Address? = null,
     selectedPaymentMethod: PaymentMethod
 ) {
-    val context = LocalContext.current
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -489,9 +526,7 @@ fun CheckoutBottomSection(
 
             Button(
                 onClick = {
-                    if (selectedPaymentMethod == PaymentMethod.ONLINE) orderViewModel.createOrderAndStartPayment(
-                        context = context
-                    ) else orderViewModel.createCodOrder()
+                    onClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -503,7 +538,6 @@ fun CheckoutBottomSection(
                     disabledContainerColor = Color.LightGray,
                     disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 ),
-                enabled = selectedAddress != null && selectedPaymentMethod != PaymentMethod.IDLE
             ) {
                 if (orderUiState.isLoading) {
                     CircularProgressIndicator(

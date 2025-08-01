@@ -52,17 +52,6 @@ sealed class DrawerItems(
             )
         }
     )
-    data object Payment : DrawerItems(
-        route = Screen.CheckoutScreen.route,
-        title = Screen.CheckoutScreen.route,
-        icon = { modifier->
-            Icon(
-                painterResource(R.drawable.shop_outline),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(27.dp))
-            )
-        }
-    )
 
     data object Insurance : DrawerItems(
         route = "Pet insurance",

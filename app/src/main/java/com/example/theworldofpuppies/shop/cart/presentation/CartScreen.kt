@@ -54,6 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
@@ -68,7 +69,8 @@ fun CartScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     cartUiState: CartUiState,
-    cartViewModel: CartViewModel? = null
+    cartViewModel: CartViewModel? = null,
+    navController: NavController
 ) {
     val cartItems = remember(cartUiState.cartItems) { cartUiState.cartItems as List<CartItem> }
     val lazyListSTate = rememberLazyListState()
@@ -98,7 +100,11 @@ fun CartScreen(
         bottomBar = {
             CartBottomSection(
                 totalCartPrice = cartUiState.cartTotal,
-                totalSelectedItems = cartUiState.totalSelectedItems
+                totalSelectedItems = cartUiState.totalSelectedItems,
+                onClick = {
+                    cartViewModel?.onCheckoutClick(navController = navController)
+                }
+
             )
         }
     ) { innerPadding ->
@@ -122,8 +128,8 @@ fun CartScreen(
                             val isSelected = remember(cartItem.isSelected) { cartItem.isSelected }
                             val productName =
                                 remember(cartItem.product?.name) { cartItem.product?.name }
-                            val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
                             val quantity = remember(cartItem.quantity) { cartItem.quantity }
+                            val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
                             val productId = remember(cartItem.productId) { cartItem.productId }
                             CartItemSection(
                                 cartViewModel = cartViewModel,
@@ -170,7 +176,7 @@ fun CartHeader(
                         onBack()
                     },
                     modifier = Modifier
-                        .padding(horizontal = MaterialTheme.dimens.extraSmall)
+                        .padding(horizontal = MaterialTheme.dimens.small1)
                         .size(
                             MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
                                 3
@@ -387,7 +393,8 @@ fun CartQuantitySection(
 fun CartBottomSection(
     modifier: Modifier = Modifier,
     totalSelectedItems: Int,
-    totalCartPrice: Double
+    totalCartPrice: Double,
+    onClick: () -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -462,7 +469,7 @@ fun CartBottomSection(
             }
 
             Button(
-                onClick = {},
+                onClick = { onClick() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.dimens.buttonHeight),

@@ -3,9 +3,11 @@ package com.example.theworldofpuppies.shop.cart.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEvent
@@ -40,6 +42,19 @@ class CartViewModel(
         _toastEvent.emit(message)
     }
 
+    fun onCheckoutClick(navController: NavController) {
+        viewModelScope.launch {
+            if (cartUiState.value.cartItems!!.isEmpty()) {
+                showToast("Please add items to your cart")
+            } else if (cartUiState.value.totalSelectedItems == 0) {
+                showToast("Please select at least one item")
+            } else {
+                navController.navigate(Screen.CheckoutScreen.route)
+            }
+        }
+    }
+
+
     fun addToCart(productId: String, quantity: Int, isItProductScreen: Boolean) {
         viewModelScope.launch {
             if (isItProductScreen) {
@@ -73,7 +88,7 @@ class CartViewModel(
                             )
                         }
 
-                        val totalSelectedItems = updatedItems.count { it.isSelected == true }
+                        val totalSelectedItems = updatedItems.count { it.isSelected }
                         val cartTotal = calculateCartTotal(updatedItems)
 
                         _cartUiState.update {
@@ -258,7 +273,7 @@ class CartViewModel(
     private fun observeOrderEvents() {
         viewModelScope.launch {
             orderEventManager.events.collect { event ->
-                if (event is OrderEvent.orderPlaced) {
+                if (event is OrderEvent.OrderConfirmed) {
                     _cartUiState.update { CartUiState() }
                     getUserCart()
                 }

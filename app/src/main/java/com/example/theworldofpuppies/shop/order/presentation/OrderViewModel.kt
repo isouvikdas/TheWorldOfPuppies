@@ -5,12 +5,14 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.address.domain.AddressRepository
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentRequest
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentVerificationRequest
 import com.example.theworldofpuppies.shop.order.domain.OrderRepository
@@ -21,7 +23,9 @@ import com.example.theworldofpuppies.shop.order.domain.PaymentUiState
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEvent
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
 import com.razorpay.Checkout
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -45,6 +49,9 @@ class OrderViewModel(
     private val _selectedPaymentMethod = MutableStateFlow<PaymentMethod>(PaymentMethod.IDLE)
     val selectedPaymentMethod = _selectedPaymentMethod.asStateFlow()
 
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent: SharedFlow<String> = _toastEvent
+
     init {
         getAddresses()
     }
@@ -67,6 +74,10 @@ class OrderViewModel(
         }
     }
 
+    suspend fun showToast(message: String) {
+        _toastEvent.emit(message)
+    }
+
     fun updateAddressSelection(address: Address) {
         _orderUiState.update { it.copy(selectedAddress = address) }
     }
@@ -75,14 +86,37 @@ class OrderViewModel(
         _selectedPaymentMethod.value = paymentMethod
     }
 
+    fun onPlaceOrderClick(context: Context) {
+        viewModelScope.launch {
+            if (orderUiState.value.selectedAddress == null) {
+                showToast("Please select an address")
+            } else if (selectedPaymentMethod.value == PaymentMethod.IDLE) {
+                showToast("Please select a payment method")
+            } else {
+                when (selectedPaymentMethod.value) {
+                    PaymentMethod.COD -> createCodOrder()
+                    PaymentMethod.ONLINE -> createOrderAndStartPayment(context)
+                    else -> {}
+                }
+            }
+
+        }
+    }
+
     fun createCodOrder() {
         viewModelScope.launch {
             try {
                 _orderUiState.update { it.copy(isLoading = true) }
                 when (val result = orderRepository.createCodOrder()) {
                     is Result.Success -> {
-                        _orderUiState.update { it.copy(isLoading = false) }
-                        orderEventManager.sendEvent(OrderEvent.orderPlaced)
+                        _orderUiState.update {
+                            it.copy(
+                                orderId = result.data.id,
+                                isLoading = false,
+                                showSuccessDialog = true
+                            )
+                        }
+                        orderEventManager.sendEvent(OrderEvent.OrderConfirmed(result.data.id))
                     }
 
                     is Result.Error -> {
@@ -115,6 +149,7 @@ class OrderViewModel(
                                 val paymentResponse = paymentResult.data
                                 _orderUiState.update {
                                     it.copy(
+                                        orderId = order.id,
                                         paymentResponse = paymentResponse,
                                         isLoading = false
                                     )
@@ -125,7 +160,8 @@ class OrderViewModel(
                                     amount = paymentResponse.price,
                                     name = userRepository.getUserName() ?: "",
                                     contact = userRepository.getUserPhoneNumber() ?: "",
-                                    context = context
+                                    context = context,
+                                    email = userRepository.getUserEmail() ?: ""
                                 )
                             }
 
@@ -180,12 +216,14 @@ class OrderViewModel(
                 is Result.Success -> {
                     _paymentUiState.value =
                         PaymentUiState.Success("Payment Verification Successful")
+                    orderEventManager.sendEvent(OrderEvent.OrderConfirmed(orderId))
+                    _orderUiState.update { it.copy(showSuccessDialog = true) }
+
                 }
 
                 is Result.Error -> {
                     _paymentUiState.value =
                         PaymentUiState.Error(R.string.payment_verification_failed.toString())
-                    orderEventManager.sendEvent(OrderEvent.orderPlaced)
                 }
             }
         }
@@ -201,7 +239,8 @@ class OrderViewModel(
         amount: Int,
         name: String,
         contact: String,
-        context: Context
+        context: Context,
+        email: String
     ) {
         val activity = context as Activity
         val checkout = Checkout()
@@ -216,6 +255,7 @@ class OrderViewModel(
 
             put("prefill", JSONObject().apply {
                 put("contact", contact)
+                put("email", email)
             })
             put("method", JSONObject().apply {
                 put("upi", true)
@@ -227,6 +267,19 @@ class OrderViewModel(
         }
 
         checkout.open(activity, options)
+    }
+
+    fun dismissDialog(
+        navController: NavController,
+        route: String,
+        navigationEnabled: Boolean = true
+    ) {
+        _orderUiState.update { it.copy(showSuccessDialog = false) }
+        if (navigationEnabled) {
+            navController.navigate(route) {
+                popUpTo(Screen.CheckoutScreen.route) { inclusive = true }
+            }
+        }
     }
 
 

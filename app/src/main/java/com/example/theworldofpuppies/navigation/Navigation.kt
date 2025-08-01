@@ -269,7 +269,8 @@ fun AppNavigation(
                     navController.popBackStack()
                 },
                 cartUiState = cartUiState,
-                cartViewModel = cartViewModel
+                cartViewModel = cartViewModel,
+                navController = navController
             )
         }
         composable(route = Screen.CheckoutScreen.route) {

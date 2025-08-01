@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -127,7 +126,6 @@ fun DrawerContent(
 ) {
     val drawerItems = listOf(
         DrawerItems.Shop,
-        DrawerItems.Payment,
         DrawerItems.Insurance,
         DrawerItems.Training,
         DrawerItems.PrivacyPolicy,
@@ -145,7 +143,9 @@ fun DrawerContent(
             drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.25f),
             drawerContentColor = Color.Black,
             drawerShape = RectangleShape,
-            modifier = Modifier.fillMaxWidth(0.65f).fillMaxHeight()
+            modifier = Modifier
+                .fillMaxWidth(0.65f)
+                .fillMaxHeight()
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),

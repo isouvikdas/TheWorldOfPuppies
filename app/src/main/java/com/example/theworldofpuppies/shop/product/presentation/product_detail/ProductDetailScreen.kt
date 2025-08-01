@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,6 +57,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
@@ -171,44 +170,53 @@ fun ProductHeader(
             containerColor = Color.Transparent,
         ),
         modifier = modifier
-            .fillMaxWidth()
-            .padding(start = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1.div(4)),
-        navigationIcon = {
-            IconButton(
-                onClick = { onBack() },
-                modifier = Modifier
-                    .size(
-                        MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(3)
-                    )
-            ) {
-                Icon(
-                    painterResource(R.drawable.arrow_left_filled),
-                    contentDescription = "Menu",
-                    modifier = Modifier
-                        .size(21.dp)
-                )
+            .fillMaxWidth(),
 
-            }
-        },
-        title = {
-            Text(
-                text = "Product",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-            )
-        },
+        title = {},
         actions = {
-            IconButton(
-                onClick = { onCartClick() },
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    painterResource(R.drawable.bag_outline),
-                    contentDescription = "Bag",
-                    modifier = Modifier.size(22.dp)
+                IconButton(
+                    onClick = {
+                        onBack()
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = MaterialTheme.dimens.small1)
+                        .size(
+                            MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
+                                3
+                            )
+                        )
+                ) {
+                    Icon(
+                        painterResource(R.drawable.arrow_left_filled),
+                        contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(21.dp)
+                    )
+                }
+                Text(
+                    text = "Product Details",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.W500,
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
                 )
+                IconButton(
+                    onClick = { onCartClick() },
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
+                ) {
+                    Icon(
+                        painterResource(R.drawable.bag_outline),
+                        contentDescription = "Bag",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
+
         }
     )
 }
