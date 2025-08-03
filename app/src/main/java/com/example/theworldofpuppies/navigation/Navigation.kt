@@ -8,6 +8,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.theworldofpuppies.address.presentation.AddressDetailScreen
+import com.example.theworldofpuppies.address.presentation.AddressScreen
+import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.auth.presentation.WelcomeScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
@@ -19,6 +22,7 @@ import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.Botto
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
+import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
@@ -39,6 +43,8 @@ sealed class Screen(val route: String) {
     data object CartScreen : Screen("CartScreen")
     data object SearchScreen : Screen("SearchScreen")
     data object CheckoutScreen : Screen("CheckoutScreen")
+    data object AddressScreen : Screen("AddressScreen")
+    data object AddressDetailScreen : Screen("AddressDetailScreen")
 }
 
 @Composable
@@ -79,6 +85,10 @@ fun AppNavigation(
     val categoryListState by productViewModel.categoryListState.collectAsStateWithLifecycle()
     val featuredProductListState by productViewModel.featuredProductListState.collectAsStateWithLifecycle()
     val productDetailState by productViewModel.productDetailState.collectAsStateWithLifecycle()
+
+    val profileViewModel = koinViewModel<ProfileViewModel>()
+    val addressViewModel = koinViewModel<AddressViewModel>()
+    val addressUiState by addressViewModel.addressUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -201,7 +211,10 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            ProfileScreen()
+            ProfileScreen(
+                navController = navController,
+                profileViewModel = profileViewModel
+            )
         }
 
         composable(route = Screen.SearchScreen.route) {
@@ -287,6 +300,31 @@ fun AppNavigation(
                 cartViewModel = cartViewModel
             )
         }
+        composable(route = Screen.AddressScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            AddressScreen(
+                navController = navController,
+                addressViewModel = addressViewModel,
+                addressUiState = addressUiState
+            )
+        }
+        composable(route = Screen.AddressDetailScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            AddressDetailScreen()
+        }
+
     }
 }
 

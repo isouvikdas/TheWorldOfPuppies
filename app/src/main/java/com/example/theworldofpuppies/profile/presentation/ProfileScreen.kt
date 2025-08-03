@@ -28,15 +28,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
+fun ProfileScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    profileViewModel: ProfileViewModel
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color.Transparent
@@ -48,16 +52,37 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top
         ) {
             item {
-                ProfileSection()
+                ProfileSection(
+                    onUserProfileClick = {},
+                    onPetProfileClick = {}
+                )
             }
             item {
-            AccountAndMembershipSection()
+                AccountAndMembershipSection(
+                    onMembershipClick = {},
+                    onAddressClick = { profileViewModel.onAddressClick(navController) }
+                )
             }
             item {
-                CommunicationAndEngagementSection()
+                CommunicationAndEngagementSection(
+                    onReferClick = {},
+                    onMessageClick = { profileViewModel.onMessageClick(navController) }
+                )
             }
             item {
-                OrderAndRewardSection()
+                OrderAndRewardSection(
+                    onOrderClick = {},
+                    onCouponClick = {},
+                    onBookingClick = { profileViewModel.onBookingClick(navController) }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small1))
+            }
+
+            item {
+                SignOutSection(onClick = {})
             }
             item {
                 Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small1))
@@ -67,7 +92,47 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ProfileSection() {
+fun SignOutSection(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = MaterialTheme.dimens.small1)
+            .clickable { onClick() },
+        color = Color.LightGray.copy(0.4f),
+        shape = RoundedCornerShape(MaterialTheme.dimens.small1)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = MaterialTheme.dimens.small1.times(2))
+                .padding(vertical = MaterialTheme.dimens.small1),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.logout_outline),
+                contentDescription = "logout",
+                tint = Color.Red,
+                modifier = Modifier.size(21.dp)
+            )
+            Text(
+                "Sign Out",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Red,
+                modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
+            )
+        }
+    }
+}
+
+
+@Composable
+fun ProfileSection(
+    onUserProfileClick: () -> Unit,
+    onPetProfileClick: () -> Unit
+) {
     Text(
         modifier = Modifier
             .padding(start = MaterialTheme.dimens.small1)
@@ -94,7 +159,9 @@ fun ProfileSection() {
                 image = R.drawable.profile,
                 title = "Souvik",
                 description = "Personal Info",
-                onClick = {}
+                onClick = {
+                    onUserProfileClick()
+                }
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -104,7 +171,9 @@ fun ProfileSection() {
                 image = R.drawable.pet_profile,
                 title = "Sheru",
                 description = "Personal Info",
-                onClick = {}
+                onClick = {
+                    onPetProfileClick()
+                }
             )
         }
     }
@@ -121,8 +190,7 @@ fun ProfileItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.dimens.small1)
-            .padding(vertical = MaterialTheme.dimens.small1),
+            .padding(MaterialTheme.dimens.small1),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
@@ -164,7 +232,8 @@ fun ProfileItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(MaterialTheme.dimens.small1)
+                    modifier = Modifier
+                        .size(13.dp)
                 )
             }
         }
@@ -172,7 +241,10 @@ fun ProfileItem(
 }
 
 @Composable
-fun AccountAndMembershipSection() {
+fun AccountAndMembershipSection(
+    onMembershipClick: () -> Unit,
+    onAddressClick: () -> Unit
+) {
     Text(
         modifier = Modifier
             .padding(start = MaterialTheme.dimens.small1)
@@ -199,7 +271,9 @@ fun AccountAndMembershipSection() {
             AccountAndMembershipItem(
                 image = R.drawable.membership,
                 title = "Membership",
-                onClick = {}
+                onClick = {
+                    onMembershipClick()
+                }
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -208,7 +282,9 @@ fun AccountAndMembershipSection() {
             AccountAndMembershipItem(
                 image = R.drawable.address,
                 title = "Address",
-                onClick = {}
+                onClick = {
+                    onAddressClick()
+                }
             )
         }
     }
@@ -224,8 +300,7 @@ fun AccountAndMembershipItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.dimens.small1)
-            .padding(vertical = MaterialTheme.dimens.small1),
+            .padding(MaterialTheme.dimens.small1),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
@@ -261,7 +336,8 @@ fun AccountAndMembershipItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(MaterialTheme.dimens.small1)
+                    modifier = Modifier
+                        .size(13.dp)
                 )
             }
         }
@@ -269,7 +345,10 @@ fun AccountAndMembershipItem(
 }
 
 @Composable
-fun CommunicationAndEngagementSection() {
+fun CommunicationAndEngagementSection(
+    onMessageClick: () -> Unit,
+    onReferClick: () -> Unit
+) {
     Text(
         modifier = Modifier
             .padding(start = MaterialTheme.dimens.small1)
@@ -296,7 +375,9 @@ fun CommunicationAndEngagementSection() {
             CommunicationAndMembershipItem(
                 image = R.drawable.message,
                 title = "Messages",
-                onClick = {}
+                onClick = {
+                    onMessageClick()
+                }
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -305,11 +386,14 @@ fun CommunicationAndEngagementSection() {
             CommunicationAndMembershipItem(
                 image = R.drawable.refer,
                 title = "Refer & Earn",
-                onClick = {}
+                onClick = {
+                    onReferClick()
+                }
             )
         }
     }
 }
+
 @Composable
 fun CommunicationAndMembershipItem(
     modifier: Modifier = Modifier,
@@ -320,8 +404,7 @@ fun CommunicationAndMembershipItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.dimens.small1)
-            .padding(vertical = MaterialTheme.dimens.small1),
+            .padding(MaterialTheme.dimens.small1),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
@@ -357,7 +440,7 @@ fun CommunicationAndMembershipItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(MaterialTheme.dimens.small1)
+                    modifier = Modifier.size(13.dp)
                 )
             }
         }
@@ -365,7 +448,11 @@ fun CommunicationAndMembershipItem(
 }
 
 @Composable
-fun OrderAndRewardSection() {
+fun OrderAndRewardSection(
+    onOrderClick: () -> Unit,
+    onBookingClick: () -> Unit,
+    onCouponClick: () -> Unit
+) {
     Text(
         modifier = Modifier
             .padding(start = MaterialTheme.dimens.small1)
@@ -392,7 +479,9 @@ fun OrderAndRewardSection() {
             OrderAndRewardsItem(
                 image = R.drawable.booking,
                 title = "Bookings",
-                onClick = {}
+                onClick = {
+                    onBookingClick()
+                }
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -401,7 +490,9 @@ fun OrderAndRewardSection() {
             OrderAndRewardsItem(
                 image = R.drawable.order,
                 title = "Orders",
-                onClick = {}
+                onClick = {
+                    onOrderClick()
+                }
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -410,11 +501,14 @@ fun OrderAndRewardSection() {
             OrderAndRewardsItem(
                 image = R.drawable.reward,
                 title = "Coupons",
-                onClick = {}
+                onClick = {
+                    onCouponClick()
+                }
             )
         }
     }
 }
+
 @Composable
 fun OrderAndRewardsItem(
     modifier: Modifier = Modifier,
@@ -425,8 +519,7 @@ fun OrderAndRewardsItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.dimens.small1)
-            .padding(vertical = MaterialTheme.dimens.small1),
+            .padding(MaterialTheme.dimens.small1),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
@@ -462,11 +555,13 @@ fun OrderAndRewardsItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(MaterialTheme.dimens.small1)
+                    modifier = Modifier.size(13.dp)
                 )
             }
         }
     }
 }
+
+
 
 

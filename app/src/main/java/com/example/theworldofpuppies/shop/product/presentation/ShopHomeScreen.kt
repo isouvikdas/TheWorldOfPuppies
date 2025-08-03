@@ -291,7 +291,11 @@ fun ProductRowSection(
 }
 
 @Composable
-fun ProductItem(modifier: Modifier = Modifier, product: Product, onProductSelect: () -> Unit) {
+fun ProductItem(
+    modifier: Modifier = Modifier,
+    product: Product,
+    onProductSelect: () -> Unit
+) {
     Surface(
         modifier = modifier
             .width(MaterialTheme.dimens.extraLarge2)
@@ -455,7 +459,7 @@ fun ProductCategorySection(
                 fontStyle = if (categories.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
-                    .clickable(enabled = !categories.isEmpty()) {  }
+                    .clickable(enabled = !categories.isEmpty()) { }
             )
         }
         Box(

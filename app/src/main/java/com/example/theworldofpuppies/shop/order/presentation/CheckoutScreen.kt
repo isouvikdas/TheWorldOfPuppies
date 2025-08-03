@@ -334,7 +334,7 @@ fun OrderSection(
                     method = "Cash On Delivery",
                     methodStartPadding = MaterialTheme.dimens.small2,
                     methodDescription = "Pay using Cash on Delivery",
-                    image = R.drawable.cod,
+                    image = R.drawable.cash,
                     imageSize = 40.dp,
                     selected = selectedPaymentMethod is PaymentMethod.COD,
                     onClick = { orderViewModel.updatePaymentMethodSelection(PaymentMethod.COD) }

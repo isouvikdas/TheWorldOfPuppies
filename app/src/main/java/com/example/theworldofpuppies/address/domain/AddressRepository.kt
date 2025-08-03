@@ -5,4 +5,5 @@ import com.example.theworldofpuppies.core.domain.util.Result
 
 interface AddressRepository {
     fun getAddresses(): Result<List<Address>, NetworkError>
+    fun updateAddressSelection(addressId: Int): Result<List<Address>, NetworkError>
 }

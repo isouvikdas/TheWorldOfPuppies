@@ -18,7 +18,8 @@ class DummyAddressApi {
             city = "Agartala",
             state = "Tripura",
             pinCode = "799003",
-            country = "India"
+            country = "India",
+            isSelected = true
         ),
         Address(
             id = 2,
@@ -31,7 +32,8 @@ class DummyAddressApi {
             city = "Agartala",
             state = "Tripura",
             pinCode = "799003",
-            country = "India"
+            country = "India",
+            isSelected = false
         )
     )
 

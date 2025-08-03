@@ -11,4 +11,16 @@ class AddressRepositoryImpl(private val addressApi: DummyAddressApi): AddressRep
         return addressApi.getAddresses()
     }
 
+    override fun updateAddressSelection(addressId: Int): Result<List<Address>, NetworkError> {
+        val addresses = addressApi.addresses
+        val updatedAddresses = addresses.map { address ->
+            if (address.id == addressId) {
+                address.copy(isSelected = true)
+            } else {
+                address.copy(isSelected = false)
+            }
+        }
+        return Result.Success(updatedAddresses)
+    }
+
 }

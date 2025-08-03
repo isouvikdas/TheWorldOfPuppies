@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -58,7 +57,7 @@ fun BottomAppbar(
     AnimatedNavigationBar(
         selectedIndex = selectedIndex,
         modifier = modifier
-            .height(MaterialTheme.dimens.medium3),
+            .height(MaterialTheme.dimens.medium2),
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
         cornerRadius = ShapeCornerRadius(
@@ -101,9 +100,8 @@ fun BottomAppbar(
                     screen.title?.let {
                         Text(
                             text = it,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.W400,
-                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (currentRoute == screen.route) FontWeight.SemiBold else FontWeight.W500,
+                            style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(top = 5.dp),
                             color = LocalContentColor.current
                         )

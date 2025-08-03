@@ -25,9 +25,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <data
-                    android:host="rzp.io"
-                    android:scheme="rzp" />
             </intent-filter>
         </activity>
     </application>

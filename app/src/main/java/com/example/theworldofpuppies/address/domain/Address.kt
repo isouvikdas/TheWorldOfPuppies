@@ -12,4 +12,5 @@ data class Address(
     val state: String,
     val pinCode: String,
     val country: String,
+    val isSelected: Boolean = false
 )
