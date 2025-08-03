@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,6 +33,7 @@ import com.example.theworldofpuppies.ui.theme.dimens
 import com.exyte.animatednavbar.AnimatedNavigationBar
 import com.exyte.animatednavbar.animation.balltrajectory.Parabolic
 import com.exyte.animatednavbar.animation.indendshape.Height
+import com.exyte.animatednavbar.animation.indendshape.ShapeCornerRadius
 import com.exyte.animatednavbar.utils.noRippleClickable
 
 
@@ -59,9 +61,13 @@ fun BottomAppbar(
             .height(MaterialTheme.dimens.medium3),
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
-        barColor = Color.LightGray.copy(0.55f),
-//        barColor = MaterialTheme.colorScheme.tertiary.copy(0.2f),
-        ballColor = MaterialTheme.colorScheme.tertiary
+        cornerRadius = ShapeCornerRadius(
+            topLeft = 16F, topRight = 16F,
+            bottomRight = 0F,
+            bottomLeft = 0F
+        ),
+        barColor = MaterialTheme.colorScheme.secondaryContainer.copy(0.2f),
+        ballColor = MaterialTheme.colorScheme.secondaryContainer
     ) {
         screens.forEachIndexed { index, screen ->
             Box(
@@ -84,12 +90,12 @@ fun BottomAppbar(
                     if (currentRoute == screen.route) {
                         screen.selectedIcon(
                             Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            MaterialTheme.colorScheme.tertiary
+                            LocalContentColor.current
                         )
                     } else {
                         screen.unselectedIcon(
                             Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            MaterialTheme.colorScheme.tertiary
+                            LocalContentColor.current
                         )
                     }
                     screen.title?.let {

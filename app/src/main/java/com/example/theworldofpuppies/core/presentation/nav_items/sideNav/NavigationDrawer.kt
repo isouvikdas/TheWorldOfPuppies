@@ -59,8 +59,6 @@ fun NavigationDrawer(
     modifier: Modifier = Modifier,
     searchIconVisibility: Boolean,
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
@@ -69,7 +67,8 @@ fun NavigationDrawer(
     ModalNavigationDrawer(
         modifier = Modifier,
         gesturesEnabled = gesturesEnabled,
-        drawerContent = {
+        drawerContent =
+            {
             DrawerContent(
                 navController = navController,
                 onSignOutClick = onSignOutClick,
