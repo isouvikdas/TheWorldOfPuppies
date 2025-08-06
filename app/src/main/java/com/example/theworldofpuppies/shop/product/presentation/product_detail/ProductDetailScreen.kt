@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,13 +27,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -53,9 +55,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.address.presentation.component.TopAppBar
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
@@ -75,10 +80,13 @@ fun ProductDetailScreen(
     modifier: Modifier = Modifier,
     productDetailState: ProductDetailState,
     productViewModel: ProductViewModel? = null,
-    onBack: () -> Unit,
-    onCartClick: () -> Unit,
     cartViewModel: CartViewModel? = null,
+    navController: NavController
 ) {
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState()
+    )
 
     val product = productDetailState.product
     val discount = remember(product?.discount) { product?.discount ?: 0 }
@@ -103,20 +111,13 @@ fun ProductDetailScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
         topBar = {
             ProductHeader(
-                modifier = Modifier,
-                onBack = { onBack() },
-                onCartClick = { onCartClick() })
-        },
-        bottomBar = {
-            ProductBottomSection(
-                modifier = Modifier,
-                cartViewModel = cartViewModel,
-                discountedPrice = discountedPrice,
-                productId = productId,
+                navController = navController,
+                scrollBehavior = scrollBehavior
             )
         }
 
@@ -127,31 +128,41 @@ fun ProductDetailScreen(
                 .padding(innerPadding),
             color = Color.Transparent
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item {
-                    ProductImageSection(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(MaterialTheme.dimens.large3.times(2)),
-                        images = images
-                    )
-                }
-                item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
-                }
-                item {
-                    ProductDetailSection(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
-                        discount = discount,
-                        productName = productName,
-                        description = description,
-                        originalPrice = price,
-                        discountedPrice = discountedPrice
-                    )
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        ProductImageSection(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(MaterialTheme.dimens.large3.times(2)),
+                            images = images
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+                    }
+                    item {
+                        ProductDetailSection(
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .padding(horizontal = MaterialTheme.dimens.small1 + MaterialTheme.dimens.small1 / 4),
+                            discount = discount,
+                            productName = productName,
+                            description = description,
+                            originalPrice = price,
+                            discountedPrice = discountedPrice
+                        )
 
+                    }
                 }
+
+                ProductBottomSection(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    cartViewModel = cartViewModel,
+                    discountedPrice = discountedPrice,
+                    productId = productId,
+                )
+
             }
         }
     }
@@ -161,64 +172,26 @@ fun ProductDetailScreen(
 @Composable
 fun ProductHeader(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
-    onCartClick: () -> Unit
+    navController: NavController,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
-
+//used the custom topappbar from address.presentation.component
     TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-        ),
-        modifier = modifier
-            .fillMaxWidth(),
-
-        title = {},
-        actions = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = {
-                        onBack()
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = MaterialTheme.dimens.small1)
-                        .size(
-                            MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
-                                3
-                            )
-                        )
-                ) {
-                    Icon(
-                        painterResource(R.drawable.arrow_left_filled),
-                        contentDescription = "Menu",
-                        modifier = Modifier
-                            .size(21.dp)
-                    )
+        navController = navController,
+        scrollBehavior = scrollBehavior,
+        title = "Product Details"
+    ) {
+        Icon(
+            painterResource(R.drawable.bag_outline),
+            contentDescription = "Cart",
+            modifier = Modifier
+                .size(21.dp)
+                .bounceClick {
+                    navController.navigate(Screen.CartScreen.route)
                 }
-                Text(
-                    text = "Product Details",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.W500,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-                )
-                IconButton(
-                    onClick = { onCartClick() },
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-                ) {
-                    Icon(
-                        painterResource(R.drawable.bag_outline),
-                        contentDescription = "Bag",
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
+        )
+    }
 
-        }
-    )
 }
 
 @OptIn(ExperimentalPagerApi::class)

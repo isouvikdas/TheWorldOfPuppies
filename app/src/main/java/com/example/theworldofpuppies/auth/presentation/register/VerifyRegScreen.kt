@@ -130,7 +130,7 @@ fun VerifyRegScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .size(22.dp)
-                            .bounceClick()
+                            .bounceClick{}
                     )
                 }
 
@@ -156,7 +156,7 @@ fun VerifyRegScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .size(25.dp)
-                            .bounceClick()
+                            .bounceClick{}
                     )
                 }
 
@@ -215,7 +215,7 @@ fun VerifyRegScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
-                    .bounceClick(),
+                    .bounceClick{},
                 enabled = otp.value.length == 6 && !registrationUiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

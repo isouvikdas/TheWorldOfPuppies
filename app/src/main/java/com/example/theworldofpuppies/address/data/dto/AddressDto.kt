@@ -1,6 +1,10 @@
-package com.example.theworldofpuppies.address.domain
+package com.example.theworldofpuppies.address.data.dto
 
-data class Address(
+import com.example.theworldofpuppies.address.domain.AddressType
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AddressDto(
     val id: String,
     val addressType: AddressType,
     val contactNumber: String,

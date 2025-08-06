@@ -58,7 +58,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.flow.collectLatest
@@ -67,7 +69,6 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun CartScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
     cartUiState: CartUiState,
     cartViewModel: CartViewModel? = null,
     navController: NavController
@@ -93,19 +94,7 @@ fun CartScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
         topBar = {
-            CartHeader(onBack = {
-                onBack()
-            }, scrollBehavior = scrollBehavior)
-        },
-        bottomBar = {
-            CartBottomSection(
-                totalCartPrice = cartUiState.cartTotal,
-                totalSelectedItems = cartUiState.totalSelectedItems,
-                onClick = {
-                    cartViewModel?.onCheckoutClick(navController = navController)
-                }
-
-            )
+            CartHeader(navController = navController, scrollBehavior = scrollBehavior)
         }
     ) { innerPadding ->
         Surface(
@@ -114,35 +103,46 @@ fun CartScreen(
                 .padding(innerPadding),
             color = Color.Transparent
         ) {
-            when {
-                cartItems.isNotEmpty() -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(
-                            MaterialTheme.dimens.small1.div(4).times(5)
-                        ),
-                        state = lazyListSTate
-                    ) {
-                        items(cartItems, key = { it.id }) { cartItem ->
-                            val cartItemId = remember(cartItem.id) { cartItem.id }
-                            val isSelected = remember(cartItem.isSelected) { cartItem.isSelected }
-                            val productName =
-                                remember(cartItem.product?.name) { cartItem.product?.name }
-                            val quantity = remember(cartItem.quantity) { cartItem.quantity }
-                            val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
-                            val productId = remember(cartItem.productId) { cartItem.productId }
-                            CartItemSection(
-                                cartViewModel = cartViewModel,
-                                cartItemId = cartItemId,
-                                isSelected = isSelected,
-                                productName = productName,
-                                totalPrice = totalPrice,
-                                productId = productId,
-                                quantity = quantity
-                            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    cartItems.isNotEmpty() -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(
+                                MaterialTheme.dimens.small1.div(4).times(5)
+                            ),
+                            state = lazyListSTate
+                        ) {
+                            items(cartItems, key = { it.id }) { cartItem ->
+                                val cartItemId = remember(cartItem.id) { cartItem.id }
+                                val isSelected = remember(cartItem.isSelected) { cartItem.isSelected }
+                                val productName =
+                                    remember(cartItem.product?.name) { cartItem.product?.name }
+                                val quantity = remember(cartItem.quantity) { cartItem.quantity }
+                                val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
+                                val productId = remember(cartItem.productId) { cartItem.productId }
+                                CartItemSection(
+                                    cartViewModel = cartViewModel,
+                                    cartItemId = cartItemId,
+                                    isSelected = isSelected,
+                                    productName = productName,
+                                    totalPrice = totalPrice,
+                                    productId = productId,
+                                    quantity = quantity
+                                )
+                            }
                         }
                     }
                 }
+
+                CartBottomSection(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    totalCartPrice = cartUiState.cartTotal,
+                    totalSelectedItems = cartUiState.totalSelectedItems,
+                    onClick = {
+                        cartViewModel?.onCheckoutClick(navController = navController)
+                    }
+                )
             }
         }
     }
@@ -152,63 +152,25 @@ fun CartScreen(
 @Composable
 fun CartHeader(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
+    navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
-    TopAppBar(
+//used the custom topappbar from address.presentation.component
+    com.example.theworldofpuppies.address.presentation.component.TopAppBar(
+        navController = navController,
         scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent
-        ),
-        modifier = modifier
-            .fillMaxWidth(),
-        title = {},
-        actions = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = {
-                        onBack()
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = MaterialTheme.dimens.small1)
-                        .size(
-                            MaterialTheme.dimens.small1 + MaterialTheme.dimens.extraSmall.times(
-                                3
-                            )
-                        )
-                ) {
-                    Icon(
-                        painterResource(R.drawable.arrow_left_filled),
-                        contentDescription = "Menu",
-                        modifier = Modifier
-                            .size(21.dp)
-                    )
+        title = "Cart"
+    ) {
+
+        Icon(
+            painterResource(R.drawable.bag_outline),
+            contentDescription = "Cart",
+            modifier = Modifier
+                .size(21.dp)
+                .bounceClick {
                 }
-                Text(
-                    text = "My Cart",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.W500,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-                )
-                IconButton(
-                    onClick = { /* Bag action */ },
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall)
-                ) {
-                    Icon(
-                        painterResource(R.drawable.bag_outline),
-                        contentDescription = "Bag",
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable
@@ -399,7 +361,7 @@ fun CartBottomSection(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge1)
+            .height(MaterialTheme.dimens.large3)
             .clip(
                 RoundedCornerShape(
                     topStart = MaterialTheme.dimens.small3,

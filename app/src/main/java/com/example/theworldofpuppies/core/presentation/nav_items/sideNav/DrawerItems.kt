@@ -28,6 +28,17 @@ sealed class DrawerItems(
             )
         }
     )
+    data object Checkout : DrawerItems(
+        route = Screen.CheckoutScreen.route,
+        title = "Checkout",
+        icon = { modifier ->
+            Icon(
+                painterResource(id = R.drawable.refer_earn_filled),
+                contentDescription = null,
+                modifier = modifier.then(Modifier.size(20.dp))
+            )
+        }
+    )
 
     data object Support : DrawerItems(
         route = "Support",

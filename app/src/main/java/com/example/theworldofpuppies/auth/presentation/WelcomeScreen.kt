@@ -119,7 +119,7 @@ fun WelcomeScreen(
                         .fillMaxWidth(0.5f)
                         .padding(start = 20.dp, end = 5.dp)
                         .size(50.dp)
-                        .bounceClick(),
+                        .bounceClick{},
                     shape = RoundedCornerShape(15.dp),
                     border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary)
 
@@ -141,7 +141,7 @@ fun WelcomeScreen(
                         .fillMaxWidth()
                         .padding(start = 5.dp, end = 20.dp)
                         .size(50.dp)
-                        .bounceClick(),
+                        .bounceClick{},
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

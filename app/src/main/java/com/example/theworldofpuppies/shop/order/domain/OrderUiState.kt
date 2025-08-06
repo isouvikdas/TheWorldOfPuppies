@@ -10,6 +10,4 @@ data class OrderUiState(
     val error: Error? = null,
     val showSuccessDialog: Boolean = false,
     val paymentResponse: PaymentResponse? = null,
-    val addresses: MutableList<Address> = mutableListOf(),
-    val selectedAddress: Address? = null,
 )

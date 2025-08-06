@@ -129,7 +129,7 @@ fun VerifyLoginScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .size(22.dp)
-                            .bounceClick()
+                            .bounceClick{}
                     )
                 }
 
@@ -155,7 +155,7 @@ fun VerifyLoginScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .size(25.dp)
-                            .bounceClick()
+                            .bounceClick{}
                     )
                 }
 
@@ -214,7 +214,7 @@ fun VerifyLoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
-                    .bounceClick(),
+                    .bounceClick{},
                 enabled = otp.value.length == 6 && !loginUiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

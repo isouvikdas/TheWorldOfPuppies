@@ -29,15 +29,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 
 
-fun Modifier.blurBackground(radius: Float = 20f): Modifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    this.graphicsLayer {
-        renderEffect = RenderEffect
-            .createBlurEffect(radius, radius, Shader.TileMode.CLAMP)
-            .asComposeRenderEffect()
+fun Modifier.blurBackground(radius: Float = 20f): Modifier =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        this.graphicsLayer {
+            renderEffect = RenderEffect
+                .createBlurEffect(radius, radius, Shader.TileMode.CLAMP)
+                .asComposeRenderEffect()
+        }
+    } else {
+        this // fallback: no blur
     }
-} else {
-    this // fallback: no blur
-}
 
 /*========================================*/
 //@Composable
@@ -124,13 +125,13 @@ fun PulsateEffect() {
         onClick = {
         }, shape = RoundedCornerShape(12.dp),
         contentPadding = PaddingValues(16.dp),
-        modifier = Modifier.bounceClick()
+        modifier = Modifier.bounceClick(onClick = {})
     ) {
         Text(text = "Click profile")
     }
 }
 
-fun Modifier.bounceClick() = composed {
+fun Modifier.bounceClick(onClick: () -> Unit) = composed {
     var buttonState by remember { mutableStateOf(ButtonState.Idle) }
     val scale by animateFloatAsState(if (buttonState == ButtonState.Pressed) 0.70f else 1f)
 
@@ -142,7 +143,7 @@ fun Modifier.bounceClick() = composed {
         .clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null,
-            onClick = { }
+            onClick = { onClick() }
         )
         .pointerInput(buttonState) {
             awaitPointerEventScope {

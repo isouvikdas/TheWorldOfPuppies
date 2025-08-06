@@ -51,6 +51,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.product.domain.Category
@@ -239,7 +240,7 @@ fun ProductRowSection(
                 fontStyle = if (products.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
-                    .clickable(enabled = !products.isEmpty()) { onSeeAllClick() }
+                    .bounceClick { if (!products.isEmpty()) onSeeAllClick() }
             )
 
         }
@@ -459,7 +460,7 @@ fun ProductCategorySection(
                 fontStyle = if (categories.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
-                    .clickable(enabled = !categories.isEmpty()) { }
+                    .bounceClick{}
             )
         }
         Box(

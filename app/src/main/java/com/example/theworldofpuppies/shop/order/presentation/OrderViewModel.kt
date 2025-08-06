@@ -36,7 +36,6 @@ class OrderViewModel(
     private val orderRepository: OrderRepository,
     private val paymentRepository: PaymentRepository,
     private val userRepository: UserRepository,
-    private val addressRepository: AddressRepository,
     private val orderEventManager: OrderEventManager
 ) : ViewModel() {
 
@@ -53,42 +52,25 @@ class OrderViewModel(
     val toastEvent: SharedFlow<String> = _toastEvent
 
     init {
-        getAddresses()
-    }
-
-    fun getAddresses() {
-        viewModelScope.launch {
-            try {
-                when (val addressResult = addressRepository.getAddresses()) {
-                    is Result.Success -> {
-                        _orderUiState.update { it.copy(addresses = addressResult.data as MutableList<Address>) }
-                    }
-
-                    is Result.Error -> {
-                        _orderUiState.update { it.copy(error = NetworkError.SERVER_ERROR) }
-                    }
-                }
-            } catch (e: Exception) {
-                _orderUiState.update { it.copy(error = NetworkError.UNKNOWN) }
-            }
-        }
     }
 
     suspend fun showToast(message: String) {
         _toastEvent.emit(message)
     }
 
-    fun updateAddressSelection(address: Address) {
-        _orderUiState.update { it.copy(selectedAddress = address) }
-    }
-
     fun updatePaymentMethodSelection(paymentMethod: PaymentMethod) {
         _selectedPaymentMethod.value = paymentMethod
     }
 
-    fun onPlaceOrderClick(context: Context) {
+    fun onAddressChangeClick(navController: NavController) {
         viewModelScope.launch {
-            if (orderUiState.value.selectedAddress == null) {
+            navController.navigate(Screen.AddressScreen.route)
+        }
+    }
+
+    fun onPlaceOrderClick(context: Context, selectedAddress: Address? = null) {
+        viewModelScope.launch {
+            if (selectedAddress == null) {
                 showToast("Please select an address")
             } else if (selectedPaymentMethod.value == PaymentMethod.IDLE) {
                 showToast("Please select a payment method")

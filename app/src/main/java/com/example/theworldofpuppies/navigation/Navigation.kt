@@ -89,6 +89,7 @@ fun AppNavigation(
     val profileViewModel = koinViewModel<ProfileViewModel>()
     val addressViewModel = koinViewModel<AddressViewModel>()
     val addressUiState by addressViewModel.addressUiState.collectAsStateWithLifecycle()
+    val addressDetailUiState by addressViewModel.addressDetailUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -259,14 +260,9 @@ fun AppNavigation(
             )
             ProductDetailScreen(
                 productDetailState = productDetailState,
-                onBack = {
-                    navController.popBackStack()
-                },
-                onCartClick = {
-                    navController.navigate(Screen.CartScreen.route)
-                },
                 cartViewModel = cartViewModel,
-                productViewModel = productViewModel
+                productViewModel = productViewModel,
+                navController = navController
             )
         }
         composable(route = Screen.CartScreen.route) {
@@ -278,9 +274,6 @@ fun AppNavigation(
                 searchIconVisibilityChanged
             )
             CartScreen(
-                onBack = {
-                    navController.popBackStack()
-                },
                 cartUiState = cartUiState,
                 cartViewModel = cartViewModel,
                 navController = navController
@@ -297,7 +290,9 @@ fun AppNavigation(
             CheckoutScreen(
                 navController = navController,
                 orderViewModel = orderViewModel,
-                cartViewModel = cartViewModel
+                cartViewModel = cartViewModel,
+                addressViewModel = addressViewModel,
+                addressUiState = addressUiState
             )
         }
         composable(route = Screen.AddressScreen.route) {
@@ -322,7 +317,11 @@ fun AppNavigation(
                 onGesturesChanged,
                 searchIconVisibilityChanged
             )
-            AddressDetailScreen()
+            AddressDetailScreen(
+                navController = navController,
+                addressDetailUiState = addressDetailUiState,
+                addressViewModel = addressViewModel
+            )
         }
 
     }

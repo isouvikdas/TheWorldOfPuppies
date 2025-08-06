@@ -85,7 +85,7 @@ fun SignOutDialog(
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
-                            .bounceClick(),
+                            .bounceClick{},
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
                             contentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -107,7 +107,7 @@ fun SignOutDialog(
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
-                            .bounceClick(),
+                            .bounceClick{},
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(
                             width = 1.dp,

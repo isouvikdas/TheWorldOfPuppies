@@ -149,7 +149,7 @@ fun LoginScreen(
                         .padding(horizontal = 20.dp)
                         .fillMaxWidth()
                         .size(50.dp)
-                        .bounceClick(),
+                        .bounceClick{},
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

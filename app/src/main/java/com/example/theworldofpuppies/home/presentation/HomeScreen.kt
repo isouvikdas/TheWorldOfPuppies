@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.domain.Plan
 import com.example.theworldofpuppies.core.domain.Service
+import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.example.theworldofpuppies.ui.theme.dimens
 
@@ -100,7 +101,7 @@ fun PetExpertSection(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.Gray,
                 fontWeight = FontWeight.W500,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.bounceClick { }
             )
         }
 
@@ -279,7 +280,7 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.Gray,
                 fontWeight = FontWeight.W500,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.bounceClick { }
             )
         }
         Box(
