@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,8 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
 import com.example.theworldofpuppies.core.presentation.nav_items.topNav.TopAppbar
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -69,13 +66,13 @@ fun NavigationDrawer(
         gesturesEnabled = gesturesEnabled,
         drawerContent =
             {
-            DrawerContent(
-                navController = navController,
-                onSignOutClick = onSignOutClick,
-                drawerState = drawerState,
-                scope = scope
-            )
-        },
+                DrawerContent(
+                    navController = navController,
+                    onSignOutClick = onSignOutClick,
+                    drawerState = drawerState,
+                    scope = scope
+                )
+            },
         drawerState = drawerState,
         scrimColor = Color.Transparent.copy(0.5f)
     ) {
@@ -99,15 +96,11 @@ fun NavigationDrawer(
                         }
                     )
                 },
-                bottomBar = {
-                    if (bottomBarVisible) {
-                        BottomAppbar(navController = navController)
-                    }
-                },
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f)
             ) { innerPadding ->
                 content(innerPadding)
             }
+
 
         } else {
             content(PaddingValues(0.dp))

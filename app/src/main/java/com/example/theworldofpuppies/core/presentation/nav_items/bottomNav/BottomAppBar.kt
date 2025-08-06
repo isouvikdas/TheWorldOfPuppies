@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -32,7 +31,7 @@ import com.example.theworldofpuppies.ui.theme.dimens
 import com.exyte.animatednavbar.AnimatedNavigationBar
 import com.exyte.animatednavbar.animation.balltrajectory.Parabolic
 import com.exyte.animatednavbar.animation.indendshape.Height
-import com.exyte.animatednavbar.animation.indendshape.ShapeCornerRadius
+import com.exyte.animatednavbar.animation.indendshape.shapeCornerRadius
 import com.exyte.animatednavbar.utils.noRippleClickable
 
 
@@ -57,16 +56,14 @@ fun BottomAppbar(
     AnimatedNavigationBar(
         selectedIndex = selectedIndex,
         modifier = modifier
-            .height(MaterialTheme.dimens.medium2),
+            .height(MaterialTheme.dimens.medium3)
+            .padding(horizontal = MaterialTheme.dimens.small1)
+            .padding(bottom = MaterialTheme.dimens.extraSmall.times(2)),
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
-        cornerRadius = ShapeCornerRadius(
-            topLeft = 16F, topRight = 16F,
-            bottomRight = 0F,
-            bottomLeft = 0F
-        ),
-        barColor = MaterialTheme.colorScheme.secondaryContainer.copy(0.2f),
-        ballColor = MaterialTheme.colorScheme.secondaryContainer
+        cornerRadius = shapeCornerRadius(cornerRadius = MaterialTheme.dimens.small3),
+        barColor = Color.LightGray,
+        ballColor = Color.Gray
     ) {
         screens.forEachIndexed { index, screen ->
             Box(

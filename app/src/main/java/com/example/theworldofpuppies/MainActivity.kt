@@ -12,23 +12,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.signOut.SignOutDialog
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
+import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
 import com.example.theworldofpuppies.core.presentation.nav_items.sideNav.NavigationDrawer
 import com.example.theworldofpuppies.navigation.AppNavigation
 import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
@@ -101,7 +101,6 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                         modifier = Modifier,
                         searchIconVisibility = searchIconVisibility,
                         content = { innerPadding ->
-
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -121,6 +120,14 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                     searchIconVisibilityChanged = { searchIconVisibility = it },
                                     orderViewModel = orderViewModel
                                 )
+                                if (bottomBarVisible) {
+                                    BottomAppbar(
+                                        navController = navController,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .zIndex(1f)
+                                    )
+                                }
 
                                 if (openSignOutDialog) {
                                     SignOutDialog(
@@ -151,6 +158,7 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
             )
         }
     }
+
     override fun onPaymentError(code: Int, message: String?, p2: PaymentData?) {
         orderViewModel.handlePaymentError(code, message ?: "")
     }
