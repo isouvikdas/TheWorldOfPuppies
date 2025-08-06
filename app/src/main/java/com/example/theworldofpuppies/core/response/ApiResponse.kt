@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.core.response
+package com.example.furryroyals.core.response
 
 import kotlinx.serialization.Serializable
 

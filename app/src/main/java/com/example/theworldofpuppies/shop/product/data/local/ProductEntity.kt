@@ -11,14 +11,10 @@ data class ProductEntity(
     val name: String,
     val description: String,
     val price: Double,
-    val discountedPrice: Double,
-    val discount: Int,
     val inventory: Int,
     val categoryName: String,
     val imageIds: List<String> = ArrayList(),
     val firstImageId: String? = null,
     var firstImageUri: String? = null,
-    val isFeatured: Boolean? = false,
-    val isRecommended: Boolean = false,
-    val rating: Double = 0.0
+    val isFeatured: Boolean? = false
 )

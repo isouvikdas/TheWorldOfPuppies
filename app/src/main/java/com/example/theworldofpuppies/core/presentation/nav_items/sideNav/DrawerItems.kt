@@ -2,40 +2,45 @@ package com.example.theworldofpuppies.core.presentation.nav_items.sideNav
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.EventNote
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.automirrored.outlined.Notes
+import androidx.compose.material.icons.filled.CreditScore
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.ManageAccounts
+import androidx.compose.material.icons.outlined.Money
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.PeopleAlt
+import androidx.compose.material.icons.outlined.PeopleOutline
+import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.Redeem
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.theworldofpuppies.R
-import com.example.theworldofpuppies.navigation.Screen
 
 sealed class DrawerItems(
     val route: String,
     val title: String,
-    val icon: @Composable (Modifier) -> Unit
+    val icon: @Composable (Modifier, Color) -> Unit
 ) {
-
     data object Refer : DrawerItems(
         route = "Refer",
         title = "Refer & Earn",
-        icon = { modifier ->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(id = R.drawable.refer_earn_filled),
+                painterResource(id = R.drawable.credit_card_health),
                 contentDescription = null,
-                modifier = modifier.then(Modifier.size(20.dp))
-            )
-        }
-    )
-    data object Checkout : DrawerItems(
-        route = Screen.CheckoutScreen.route,
-        title = "Checkout",
-        icon = { modifier ->
-            Icon(
-                painterResource(id = R.drawable.refer_earn_filled),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(20.dp))
+                tint = tint,
+                modifier = modifier.then(Modifier.size(27.dp))
             )
         }
     )
@@ -43,11 +48,12 @@ sealed class DrawerItems(
     data object Support : DrawerItems(
         route = "Support",
         title = "Support",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.call_outline),
+                Icons.Outlined.Phone,
                 contentDescription = null,
-                modifier = modifier.then(Modifier.size(20.dp))
+                tint = tint,
+                modifier = modifier.then(Modifier.size(27.dp))
             )
         }
     )
@@ -55,10 +61,11 @@ sealed class DrawerItems(
     data object Shop : DrawerItems(
         route = "Shop",
         title = "Shop",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.shop_outline),
+                Icons.Filled.Store,
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -67,10 +74,11 @@ sealed class DrawerItems(
     data object Insurance : DrawerItems(
         route = "Pet insurance",
         title = "Pet Insurance",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.pet_insurance_filled),
+                Icons.Outlined.Pets,
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -79,10 +87,11 @@ sealed class DrawerItems(
     data object Training : DrawerItems(
         route = "Training",
         title = "Dog Training",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(id = R.drawable.dog_outline),
+                painterResource(id = R.drawable.sound_detection_dog_barking),
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -91,10 +100,11 @@ sealed class DrawerItems(
     data object PrivacyPolicy : DrawerItems(
         route = "PrivacyPolicy",
         title = "Privacy & Policy",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.privacy_pollicy_outline),
+                Icons.AutoMirrored.Outlined.EventNote,
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -103,10 +113,11 @@ sealed class DrawerItems(
     data object TermsConditions : DrawerItems(
         route = "TermsConditions",
         title = "T&C",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.terms_conditions_outline),
+                Icons.Outlined.Description,
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -115,10 +126,11 @@ sealed class DrawerItems(
     data object RateUs : DrawerItems(
         route = "Rate Us",
         title = "Rate Us",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.star_outline),
+                Icons.Outlined.StarOutline,
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }
@@ -127,10 +139,11 @@ sealed class DrawerItems(
     data class SignOut(val onSignOutClick: () -> Unit) : DrawerItems(
         route = "SignOut",
         title = "Sign Out",
-        icon = { modifier->
+        icon = { modifier, tint ->
             Icon(
-                painterResource(R.drawable.logout_outline),
+                Icons.AutoMirrored.Outlined.Logout,
                 contentDescription = null,
+                tint = tint,
                 modifier = modifier.then(Modifier.size(27.dp))
             )
         }

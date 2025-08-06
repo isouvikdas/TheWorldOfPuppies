@@ -37,10 +37,9 @@ class LoginViewModel(
     private val _loginUiState = MutableStateFlow(LoginUiState())
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
 
-    init {
-        val token = userRepository.getToken()
-        Log.i("token", token ?: "token not found")
-    }
+
+    private val _events = Channel<Event>()
+    val events = _events.receiveAsFlow()
 
     fun resetState() {
         viewModelScope.launch {
@@ -86,6 +85,7 @@ class LoginViewModel(
                         errorMessage = error.toString()
                     )
                 }
+                _events.send(Event.Error(error))
             }
         }
     }
@@ -141,10 +141,12 @@ class LoginViewModel(
                         errorMessage = error.toString()
                     )
                 }
+                _events.send(Event.Error(error))
 
             }
         }
     }
+
 
 
 }

@@ -2,7 +2,6 @@ package com.example.theworldofpuppies.core.data.networking
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.ANDROID
@@ -29,12 +28,6 @@ object HttpClientFactory {
                         ignoreUnknownKeys = true
                     }
                 )
-            }
-
-            install(HttpTimeout) {
-                connectTimeoutMillis = 10_000
-                requestTimeoutMillis = 30_000
-                socketTimeoutMillis = 30_000
             }
 
             defaultRequest {

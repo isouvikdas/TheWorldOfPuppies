@@ -9,16 +9,12 @@ fun ProductDto.toProductEntity(): ProductEntity {
         id = id,
         name = name,
         price = price,
-        discount = discount,
-        discountedPrice = discountedPrice,
         description = description,
         categoryName = categoryName,
         inventory = inventory,
         firstImageId = firstImageId,
         imageIds = imageIds,
-        isFeatured = isFeatured,
-        isRecommended = isRecommended,
-        rating = rating
+        isFeatured = isFeatured
     )
 }
 
@@ -28,16 +24,12 @@ fun ProductEntity.toProduct(): Product {
         id = id,
         name = name,
         price = price,
-        discountedPrice = discountedPrice,
-        discount = discount,
         description = description,
         categoryName = categoryName,
         inventory = inventory,
         firstImageId = firstImageId,
         imageIds = imageIds,
         firstImageUri = this.firstImageUri,
-        isFeatured = isFeatured,
-        isRecommended = isRecommended,
-        rating = rating
+        isFeatured = isFeatured
     )
 }

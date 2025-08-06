@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -32,7 +30,7 @@ import com.example.theworldofpuppies.ui.theme.dimens
 import com.exyte.animatednavbar.AnimatedNavigationBar
 import com.exyte.animatednavbar.animation.balltrajectory.Parabolic
 import com.exyte.animatednavbar.animation.indendshape.Height
-import com.exyte.animatednavbar.animation.indendshape.ShapeCornerRadius
+import com.exyte.animatednavbar.animation.indendshape.shapeCornerRadius
 import com.exyte.animatednavbar.utils.noRippleClickable
 
 
@@ -42,6 +40,7 @@ fun BottomAppbar(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+
     val screens = listOf(
         BottomNavigationItems.Home,
         BottomNavigationItems.Booking,
@@ -57,16 +56,15 @@ fun BottomAppbar(
     AnimatedNavigationBar(
         selectedIndex = selectedIndex,
         modifier = modifier
-            .height(MaterialTheme.dimens.medium2),
+            .height(MaterialTheme.dimens.medium3)
+            .padding(horizontal = MaterialTheme.dimens.small1)
+            .padding(bottom = MaterialTheme.dimens.extraSmall),
+        cornerRadius = shapeCornerRadius(cornerRadius = MaterialTheme.dimens.small3),
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
-        cornerRadius = ShapeCornerRadius(
-            topLeft = 16F, topRight = 16F,
-            bottomRight = 0F,
-            bottomLeft = 0F
-        ),
-        barColor = MaterialTheme.colorScheme.secondaryContainer.copy(0.2f),
-        ballColor = MaterialTheme.colorScheme.secondaryContainer
+        barColor = MaterialTheme.colorScheme.secondary
+            .copy(0.8f),
+        ballColor = MaterialTheme.colorScheme.tertiaryContainer
     ) {
         screens.forEachIndexed { index, screen ->
             Box(
@@ -88,22 +86,22 @@ fun BottomAppbar(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (currentRoute == screen.route) {
                         screen.selectedIcon(
-                            Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            LocalContentColor.current
+                            Modifier.size(MaterialTheme.dimens.small2),
+                            MaterialTheme.colorScheme.tertiaryContainer
                         )
                     } else {
                         screen.unselectedIcon(
-                            Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            LocalContentColor.current
+                            Modifier.size(MaterialTheme.dimens.small2),
+                            MaterialTheme.colorScheme.tertiaryContainer
                         )
                     }
                     screen.title?.let {
                         Text(
                             text = it,
-                            fontWeight = if (currentRoute == screen.route) FontWeight.SemiBold else FontWeight.W500,
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(top = 5.dp),
-                            color = LocalContentColor.current
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
                 }

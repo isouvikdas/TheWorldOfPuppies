@@ -1,16 +1,13 @@
 package com.example.theworldofpuppies.navigation
 
+import android.content.Context
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.theworldofpuppies.address.presentation.AddressDetailScreen
-import com.example.theworldofpuppies.address.presentation.AddressScreen
-import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.auth.presentation.WelcomeScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
@@ -22,29 +19,23 @@ import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.Botto
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
-import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
-import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
-import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
-import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
-import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
-import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
+import com.example.theworldofpuppies.shop.product.presentation.ProductViewModel
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
-import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
-import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListScreen
-import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
     data object RegistrationScreen : Screen("RegistrationScreen")
     data object LoginScreen : Screen("LoginScreen")
     data object WelcomeScreen : Screen("WelcomeScreen")
-    data object ProductDetailScreen : Screen("ProductDetailScreen")
-    data object ProductListScreen : Screen("ProductListScreen")
-    data object CartScreen : Screen("CartScreen")
-    data object SearchScreen : Screen("SearchScreen")
-    data object CheckoutScreen : Screen("CheckoutScreen")
-    data object AddressScreen : Screen("AddressScreen")
-    data object AddressDetailScreen : Screen("AddressDetailScreen")
+    data object HomeScreen : Screen("HomeScreen")
+    data object ProductList : Screen("ProductList")
+    data object ProductDetail : Screen("ProductDetail")
+    data object AccountDetail : Screen("AccountDetail")
+    data object Address : Screen("Address")
+    data object MyOrders : Screen("MyOrders")
+    data object UpdateEmail : Screen("UpdateEmail")
+    data object ContactInfo : Screen("ContactInfo")
+    data object UpdateUsername : Screen("UpdateUsername")
 }
 
 @Composable
@@ -57,23 +48,16 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     isLoggedIn: Boolean,
     onGesturesChanged: (Boolean) -> Unit,
-    searchIconVisibilityChanged: (Boolean) -> Unit,
-    orderViewModel: OrderViewModel
+    searchIconVisibilityChanged: (Boolean) -> Unit
 ) {
 
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
     val registrationUiState by registrationViewModel.registrationUiState.collectAsStateWithLifecycle()
+    registrationViewModel.resetState()
 
     val loginViewModel = koinViewModel<LoginViewModel>()
     val loginUiState by loginViewModel.loginUiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        registrationViewModel.resetState()
-        loginViewModel.resetState()
-    }
-
-    val cartViewModel = koinViewModel<CartViewModel>()
-    val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
+    loginViewModel.resetState()
 
     val startingRoute = when {
         isLoggedIn -> BottomNavigationItems.Home.route
@@ -84,12 +68,6 @@ fun AppNavigation(
     val productListState by productViewModel.productListState.collectAsStateWithLifecycle()
     val categoryListState by productViewModel.categoryListState.collectAsStateWithLifecycle()
     val featuredProductListState by productViewModel.featuredProductListState.collectAsStateWithLifecycle()
-    val productDetailState by productViewModel.productDetailState.collectAsStateWithLifecycle()
-
-    val profileViewModel = koinViewModel<ProfileViewModel>()
-    val addressViewModel = koinViewModel<AddressViewModel>()
-    val addressUiState by addressViewModel.addressUiState.collectAsStateWithLifecycle()
-    val addressDetailUiState by addressViewModel.addressDetailUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -98,13 +76,10 @@ fun AppNavigation(
     ) {
 
         composable(route = Screen.WelcomeScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
+            onBottomBarVisibilityChanged(false)
+            onTopBarVisibilityChanged(false)
+            onGesturesChanged(false)
+            searchIconVisibilityChanged(false)
             WelcomeScreen(
                 onLoginClick = { navController.navigate(Screen.LoginScreen.route) },
                 onRegisterClick = { navController.navigate(Screen.RegistrationScreen.route) }
@@ -112,13 +87,10 @@ fun AppNavigation(
         }
 
         composable(route = Screen.RegistrationScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
+            onBottomBarVisibilityChanged(false)
+            onTopBarVisibilityChanged(false)
+            onGesturesChanged(false)
+            searchIconVisibilityChanged(false)
             RegisterScreen(
                 registrationViewModel = registrationViewModel,
                 registrationUiState = registrationUiState,
@@ -133,13 +105,10 @@ fun AppNavigation(
         }
 
         composable(route = Screen.LoginScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
+            onBottomBarVisibilityChanged(false)
+            onTopBarVisibilityChanged(false)
+            searchIconVisibilityChanged(false)
+            onGesturesChanged(false)
             LoginScreen(
                 loginUiState = loginUiState,
                 loginViewModel = loginViewModel,
@@ -187,13 +156,10 @@ fun AppNavigation(
                 categoryListState = categoryListState,
                 featuredProductListState = featuredProductListState,
                 productViewModel = productViewModel,
-                onProductSelect = {
-                    navController.navigate(Screen.ProductDetailScreen.route)
-                },
+                onProductSelect = {},
                 getCategories = { productViewModel.fetchCategories() },
                 getProducts = { productViewModel.fetchNextPage() },
-                getFeaturedProducts = { productViewModel.fetchFeaturedProducts() },
-                navController = navController
+                getFeaturedProducts = { productViewModel.fetchFeaturedProducts() }
             )
         }
 
@@ -201,8 +167,8 @@ fun AppNavigation(
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(true)
             onTopBarVisibilityChanged(true)
-            searchIconVisibilityChanged(true)
-            onGesturesChanged(false)
+            searchIconVisibilityChanged(false)
+            onGesturesChanged(true)
             MessageScreen()
         }
 
@@ -212,131 +178,8 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            ProfileScreen(
-                navController = navController,
-                profileViewModel = profileViewModel
-            )
+            ProfileScreen()
         }
-
-        composable(route = Screen.SearchScreen.route) {
-            onBottomBarVisibilityChanged(false)
-            onTopBarVisibilityChanged(false)
-            onProfileButtonVisibilityChanged(false)
-            onGesturesChanged(false)
-            searchIconVisibilityChanged(false)
-            SearchScreen(
-                productViewModel = productViewModel,
-                navController = navController
-            )
-        }
-
-        composable(route = Screen.ProductListScreen.route) {
-            onBottomBarVisibilityChanged(false)
-            onProfileButtonVisibilityChanged(true)
-            onTopBarVisibilityChanged(true)
-            searchIconVisibilityChanged(true)
-            onGesturesChanged(true)
-            val productType = productListState.listType
-
-            ProductListScreen(
-                onProductSelect = {
-                    productViewModel.setProduct(it)
-                    navController.navigate(Screen.ProductDetailScreen.route)
-                },
-                isLoading = productListState.isLoading,
-                onLoadMore = { productViewModel.fetchNextPage() },
-                productTypeLabel = productType,
-                categoryListState = categoryListState,
-                productViewModel = productViewModel
-            )
-        }
-        composable(route = Screen.ProductDetailScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
-            ProductDetailScreen(
-                productDetailState = productDetailState,
-                cartViewModel = cartViewModel,
-                productViewModel = productViewModel,
-                navController = navController
-            )
-        }
-        composable(route = Screen.CartScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
-            CartScreen(
-                cartUiState = cartUiState,
-                cartViewModel = cartViewModel,
-                navController = navController
-            )
-        }
-        composable(route = Screen.CheckoutScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
-            CheckoutScreen(
-                navController = navController,
-                orderViewModel = orderViewModel,
-                cartViewModel = cartViewModel,
-                addressViewModel = addressViewModel,
-                addressUiState = addressUiState
-            )
-        }
-        composable(route = Screen.AddressScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
-            AddressScreen(
-                navController = navController,
-                addressViewModel = addressViewModel,
-                addressUiState = addressUiState
-            )
-        }
-        composable(route = Screen.AddressDetailScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
-            AddressDetailScreen(
-                navController = navController,
-                addressDetailUiState = addressDetailUiState,
-                addressViewModel = addressViewModel
-            )
-        }
-
     }
 }
 
-private fun hideAllChrome(
-    onBottomBar: (Boolean) -> Unit,
-    onTopBar: (Boolean) -> Unit,
-    onProfile: (Boolean) -> Unit,
-    onGestures: (Boolean) -> Unit,
-    onSearchIcon: (Boolean) -> Unit
-) {
-    onBottomBar(false)
-    onTopBar(false)
-    onProfile(false)
-    onGestures(false)
-    onSearchIcon(false)
-}

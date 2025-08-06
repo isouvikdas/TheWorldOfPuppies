@@ -24,12 +24,11 @@ android {
     }
 
     buildTypes {
-        val baseUrl = "\"https://loving-shining-duck.ngrok-free.app\""
         debug {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                baseUrl
+                "\"https://cb2f-2405-201-ac02-d151-abfd-352f-8915-d554.ngrok-free.app\""
             )
         }
         release {
@@ -41,9 +40,8 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                baseUrl
+                "\"https://cb2f-2405-201-ac02-d151-abfd-352f-8915-d554.ngrok-free.app\""
             )
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -125,8 +123,5 @@ dependencies {
     //WindowSizeClass
 //    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
     implementation("androidx.compose.material3:material3-window-size-class")
-
-    //razorpay
-    implementation("com.razorpay:checkout:1.6.40")
 
 }

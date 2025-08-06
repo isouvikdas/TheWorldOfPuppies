@@ -1,20 +1,32 @@
 package com.example.theworldofpuppies.core.presentation.nav_items.bottomNav
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.outlined.Article
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.Store
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.theworldofpuppies.R
 
 sealed class BottomNavigationItems(
     val route: String,
     val title: String? = null,
     val selectedIcon: @Composable (Modifier, Color) -> Unit,
-    val unselectedIcon: @Composable (Modifier, Color) -> Unit,
+    val unselectedIcon: @Composable (Modifier, Color) -> Unit
 ) {
 
     data object Home : BottomNavigationItems(
@@ -22,27 +34,20 @@ sealed class BottomNavigationItems(
         title = "Home",
         selectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.home_filled),
-                contentDescription = null,
-                modifier = modifier.then(
+                Icons.Filled.Home, contentDescription = null, modifier = modifier.then(
                     Modifier.size(
                         26.dp
                     )
-                ),
-                tint = tint
+                ), tint = tint
             )
         },
         unselectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.home_outline),
-                contentDescription = null,
-                modifier = modifier.then(
+                Icons.Outlined.Home, contentDescription = null, modifier = modifier.then(
                     Modifier.size(
                         26.dp
                     )
-                ),
-                tint = tint
-
+                ), tint = tint
             )
         }
     )
@@ -52,7 +57,7 @@ sealed class BottomNavigationItems(
         title = "Booking",
         selectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.note_filled),
+                Icons.AutoMirrored.Filled.Article,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
                 tint = tint
@@ -60,7 +65,7 @@ sealed class BottomNavigationItems(
         },
         unselectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.note_outline),
+                Icons.AutoMirrored.Outlined.Article,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
                 tint = tint
@@ -73,7 +78,7 @@ sealed class BottomNavigationItems(
         title = "Shop",
         selectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.shop_filled),
+                Icons.Filled.Store,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
                 tint = tint
@@ -81,7 +86,7 @@ sealed class BottomNavigationItems(
         },
         unselectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.shop_outline),
+                Icons.Outlined.Store,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
                 tint = tint
@@ -94,7 +99,7 @@ sealed class BottomNavigationItems(
         title = "Messages",
         selectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.message_filled),
+                Icons.AutoMirrored.Filled.Chat,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
                 tint = tint
@@ -102,7 +107,7 @@ sealed class BottomNavigationItems(
         },
         unselectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.message_outline),
+                Icons.AutoMirrored.Outlined.Chat,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(26.dp)),
                 tint = tint
@@ -115,7 +120,7 @@ sealed class BottomNavigationItems(
         title = "Me",
         selectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.user_filled),
+                Icons.Filled.Person,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(28.dp)),
                 tint = tint
@@ -123,11 +128,10 @@ sealed class BottomNavigationItems(
         },
         unselectedIcon = { modifier, tint ->
             Icon(
-                painter = painterResource(R.drawable.user_outline),
+                Icons.Outlined.Person,
                 contentDescription = null,
                 modifier = modifier.then(Modifier.size(28.dp)),
                 tint = tint
-
             )
         }
     )

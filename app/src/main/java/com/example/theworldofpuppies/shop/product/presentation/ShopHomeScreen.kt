@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -26,7 +25,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,32 +38,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
-import com.example.theworldofpuppies.core.presentation.animation.bounceClick
-import com.example.theworldofpuppies.core.presentation.util.formatCurrency
-import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.Product
-import com.example.theworldofpuppies.shop.product.domain.util.ListType
-import com.example.theworldofpuppies.shop.product.presentation.product_list.CategoryListState
-import com.example.theworldofpuppies.shop.product.presentation.product_list.FeaturedProductListState
-import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListState
-import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
-import com.example.theworldofpuppies.shop.product.presentation.util.toString
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,11 +66,10 @@ fun ShopHomeScreen(
     onProductSelect: () -> Unit,
     getCategories: () -> Unit,
     getProducts: () -> Unit,
-    getFeaturedProducts: () -> Unit,
-    navController: NavController
+    getFeaturedProducts: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
-    val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
+    val imageList = List(10) { painterResource(id = R.drawable.flag_india) }
     val productList =
         remember(productListState.productList) { productListState.productList.take(4) }
     val categoryList =
@@ -89,10 +79,11 @@ fun ShopHomeScreen(
 
     Surface(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(Color.White),
         color = Color.Transparent
     ) {
-        when (productListState.isLoading && categoryListState.isLoading && featuredProductListState.isLoading) {
+        when (productListState.isLoading == true && categoryListState.isLoading == true && featuredProductListState.isLoading == true) {
             true -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -134,17 +125,11 @@ fun ShopHomeScreen(
                 item {
                     ProductRowSection(
                         modifier = Modifier,
-                        productListType = ListType.FEATURED,
+                        productListType = "Featured Products",
                         products = featuredProductList,
                         isLoading = featuredProductListState.isLoading,
                         errorMessage = featuredProductListState.errorMessage ?: "",
-                        getProducts = { getFeaturedProducts() },
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            productViewModel?.setListType(ListType.FEATURED)
-                            navController.navigate(Screen.ProductListScreen.route)
-                        }
+                        getProducts = { getFeaturedProducts() }
                     )
                 }
 
@@ -155,18 +140,11 @@ fun ShopHomeScreen(
                 item {
                     ProductRowSection(
                         modifier = Modifier,
-                        productListType = ListType.NEW,
+                        productListType = "New Launches",
                         products = productList,
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            productViewModel?.setListType(ListType.NEW)
-                            navController.navigate(Screen.ProductListScreen.route)
-                        }
-
+                        errorMessage = productListState.errorMessage ?: ""
                     )
                 }
 
@@ -177,20 +155,14 @@ fun ShopHomeScreen(
                 item {
                     ProductRowSection(
                         modifier = Modifier,
-                        productListType = ListType.ALL,
+                        productListType = "Popular Products",
                         products = productList,
                         isLoading = productListState.isLoading,
                         getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            productViewModel?.setListType(ListType.ALL)
-                            navController.navigate(Screen.ProductListScreen.route)
-                        }
-
+                        errorMessage = productListState.errorMessage ?: ""
                     )
                 }
+
                 item {
                     Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
                 }
@@ -202,18 +174,12 @@ fun ShopHomeScreen(
 @Composable
 fun ProductRowSection(
     modifier: Modifier = Modifier,
-    productListType: ListType,
+    productListType: String,
     products: List<Product>,
     isLoading: Boolean? = false,
     errorMessage: String? = null,
     getProducts: () -> Unit,
-    onProductSelect: () -> Unit,
-    productViewModel: ProductViewModel? = null,
-    onSeeAllClick: () -> Unit
 ) {
-
-    val context = LocalContext.current
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -227,23 +193,19 @@ fun ProductRowSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = productListType.toString(context),
+                text = productListType,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
             Text(
-                text = stringResource(R.string.see_all),
-                color = Color.Black.copy(0.5f),
-                style = MaterialTheme.typography.titleSmall,
-                textDecoration = if (products.isEmpty()) TextDecoration.LineThrough else TextDecoration.None,
-                fontStyle = if (products.isEmpty()) FontStyle.Italic else FontStyle.Normal,
+                text = "See all", style = MaterialTheme.typography.titleSmall,
+                color = Color.Gray,
                 fontWeight = FontWeight.W500,
-                modifier = Modifier
-                    .bounceClick { if (!products.isEmpty()) onSeeAllClick() }
+                modifier = Modifier.clickable {}
             )
-
         }
+
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -270,48 +232,41 @@ fun ProductRowSection(
                     ) {
                         items(products, key = { it.id }) { product ->
                             ProductItem(
-                                modifier = Modifier
-                                    .padding(
-                                        start = if (product == products.first()) MaterialTheme.dimens.small1
-                                        else MaterialTheme.dimens.small1.div(2),
-                                        end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
-                                    )
-                                    .padding(vertical = MaterialTheme.dimens.small1),
-                                product = product,
-                                onProductSelect = {
-                                    onProductSelect()
-                                    productViewModel?.setProduct(product)
-                                }
+                                modifier = Modifier.padding(
+                                    start = MaterialTheme.dimens.small1,
+                                    end = if (product == products.last()) MaterialTheme.dimens.small1 else 0.dp
+                                ), product = product
                             )
                         }
                     }
+
                 }
             }
         }
+
+
     }
+
 }
 
 @Composable
-fun ProductItem(
-    modifier: Modifier = Modifier,
-    product: Product,
-    onProductSelect: () -> Unit
-) {
-    Surface(
+fun ProductItem(modifier: Modifier = Modifier, product: Product) {
+    ElevatedCard(
         modifier = modifier
-            .width(MaterialTheme.dimens.extraLarge2)
+            .width(MaterialTheme.dimens.extraLarge1)
             .fillMaxHeight()
-            .clickable { onProductSelect() },
+            .padding(vertical = MaterialTheme.dimens.small1)
+            .clickable {},
         shape = RoundedCornerShape(MaterialTheme.dimens.small1),
-        shadowElevation = 5.dp,
-        color = Color.White
+        elevation = CardDefaults.elevatedCardElevation(3.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Transparent)
         ) {
-            Surface(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.dimens.extraLarge3),
@@ -319,7 +274,7 @@ fun ProductItem(
                     topStart = MaterialTheme.dimens.small1,
                     topEnd = MaterialTheme.dimens.small1
                 ),
-                color = Color.LightGray.copy(0.4f)
+                colors = CardDefaults.cardColors(Color.LightGray.copy(0.2f))
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -333,61 +288,54 @@ fun ProductItem(
                 )
 
             }
-            Column(
+            Text(
+                text = product.name,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall),
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.size(MaterialTheme.dimens.small1))
+
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f))
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+                    .padding(horizontal = MaterialTheme.dimens.extraSmall),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = product.name,
+                    text = "$${product.price}",
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall),
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    modifier = Modifier,
+                    fontWeight = FontWeight.SemiBold
                 )
-                Spacer(modifier = Modifier.size(MaterialTheme.dimens.small1))
-                Row(
+
+                Button(
+                    onClick = { /*TODO*/ },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp)
-                        .padding(horizontal = MaterialTheme.dimens.extraSmall),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .height(35.dp)
+                        .width(80.dp),
+                    shape = RoundedCornerShape(13.dp),
+                    colors = ButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
+                            0.3f
+                        ),
+                        disabledContentColor = Color.White
+                    )
                 ) {
                     Text(
-                        text = formatCurrency(product.price),
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier,
-                        fontWeight = FontWeight.SemiBold
+                        text = "Add",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.W600
                     )
-
-                    Button(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                            .height(35.dp)
-                            .width(80.dp),
-                        shape = RoundedCornerShape(13.dp),
-                        colors = ButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.secondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
-                                0.3f
-                            ),
-                            disabledContentColor = Color.White
-                        )
-                    ) {
-                        Text(
-                            text = "Add",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.W600
-                        )
-                    }
-
                 }
 
             }
-
         }
     }
 
@@ -398,31 +346,26 @@ fun ProductBannerSection(modifier: Modifier = Modifier, imageList: List<Painter>
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge2),
+            .height(MaterialTheme.dimens.extraLarge1),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
         items(imageList) { image ->
-            Surface(
+            Image(
+                painter = image,
+                contentDescription = null,
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .wrapContentWidth()
                     .padding(
                         start = MaterialTheme.dimens.small1,
                         end = if (image == imageList.last()) MaterialTheme.dimens.small1 else 0.dp
                     )
-                    .clickable {},
-                color = Color.White,
-                shape = RoundedCornerShape(MaterialTheme.dimens.small2)
-            ) {
-                Image(
-                    painter = image,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-            }
+                    .clip(RoundedCornerShape(MaterialTheme.dimens.small2))
+                    .shadow(elevation = 10.dp)
+                    .clickable {}
+            )
         }
     }
+
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -453,15 +396,13 @@ fun ProductCategorySection(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = stringResource(R.string.see_all),
-                color = Color.Black.copy(0.5f),
+                text = "See all",
                 style = MaterialTheme.typography.titleSmall,
-                textDecoration = if (categories.isEmpty()) TextDecoration.LineThrough else TextDecoration.None,
-                fontStyle = if (categories.isEmpty()) FontStyle.Italic else FontStyle.Normal,
+                color = Color.Gray,
                 fontWeight = FontWeight.W500,
-                modifier = Modifier
-                    .bounceClick{}
+                modifier = Modifier.clickable {}
             )
+
         }
         Box(
             modifier = Modifier
@@ -498,12 +439,15 @@ fun ProductCategorySection(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Surface(
+                                Card(
                                     modifier = Modifier
                                         .size(MaterialTheme.dimens.medium2)
                                         .clip(CircleShape),
-                                    color = Color.Gray.copy(0.3f)
-
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary.copy(
+                                            0.2f
+                                        )
+                                    )
                                 ) {
                                     // Put your Image/Icon here
                                 }
