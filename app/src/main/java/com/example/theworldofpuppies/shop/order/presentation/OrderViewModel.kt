@@ -94,7 +94,6 @@ class OrderViewModel(
                         _orderUiState.update {
                             it.copy(
                                 orderId = result.data.id,
-                                isLoading = false,
                                 showSuccessDialog = true
                             )
                         }
@@ -108,6 +107,8 @@ class OrderViewModel(
             } catch (e: Exception) {
                 Log.e("cod error", e.toString())
                 _orderUiState.update { it.copy(error = NetworkError.UNKNOWN) }
+            } finally {
+                _orderUiState.update { it.copy(isLoading = false) }
             }
         }
     }

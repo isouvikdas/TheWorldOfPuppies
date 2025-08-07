@@ -86,12 +86,12 @@ fun BottomAppbar(
                     if (currentRoute == screen.route) {
                         screen.selectedIcon(
                             Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            LocalContentColor.current
+                            Color.Black
                         )
                     } else {
                         screen.unselectedIcon(
                             Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            LocalContentColor.current
+                            Color.Black
                         )
                     }
                     screen.title?.let {
@@ -100,7 +100,7 @@ fun BottomAppbar(
                             fontWeight = if (currentRoute == screen.route) FontWeight.SemiBold else FontWeight.W500,
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(top = 5.dp),
-                            color = LocalContentColor.current
+                            color = Color.Black
                         )
                     }
                 }

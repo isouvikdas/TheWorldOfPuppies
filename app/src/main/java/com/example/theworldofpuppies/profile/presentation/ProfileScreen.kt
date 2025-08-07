@@ -85,7 +85,7 @@ fun ProfileScreen(
                 SignOutSection(onClick = {})
             }
             item {
-                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small1))
+                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.large2))
             }
         }
     }
