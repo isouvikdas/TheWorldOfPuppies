@@ -1,7 +1,6 @@
 package com.example.theworldofpuppies.shop.product.data.remote
 
 import android.content.Context
-import android.util.Log
 import androidx.room.withTransaction
 import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.domain.util.NetworkError
@@ -10,6 +9,7 @@ import com.example.theworldofpuppies.core.domain.util.onError
 import com.example.theworldofpuppies.core.domain.util.onSuccess
 import com.example.theworldofpuppies.shop.product.data.local.ProductEntity
 import com.example.theworldofpuppies.shop.product.data.mappers.toProductEntity
+import com.example.theworldofpuppies.shop.product.domain.ProductApi
 import com.example.theworldofpuppies.shop.product.domain.ProductRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

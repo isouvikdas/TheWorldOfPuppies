@@ -305,15 +305,5 @@ fun AddressHeader(
         scrollBehavior = scrollBehavior,
         title = "Address"
     ) {
-
-        Icon(
-            painterResource(R.drawable.bag_outline),
-            contentDescription = "Cart",
-            modifier = Modifier
-                .size(21.dp)
-                .bounceClick {
-                    navController.navigate(Screen.CartScreen.route)
-                }
-        )
     }
 }

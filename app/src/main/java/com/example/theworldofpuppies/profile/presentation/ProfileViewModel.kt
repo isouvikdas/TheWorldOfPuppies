@@ -28,15 +28,22 @@ class ProfileViewModel() : ViewModel() {
         }
 
     }
+
     fun onBookingClick(navController: NavController) {
         viewModelScope.launch {
-            navController.navigate(BottomNavigationItems.Booking.route){
+            navController.navigate(BottomNavigationItems.Booking.route) {
                 popUpTo(navController.graph.findStartDestination().id) {
                     saveState = true
                 }
                 launchSingleTop = true
                 restoreState = true
             }
+        }
+    }
+
+    fun onOrderClick(navController: NavController) {
+        viewModelScope.launch {
+            navController.navigate(Screen.OrderHistoryScreen.route)
         }
     }
 }

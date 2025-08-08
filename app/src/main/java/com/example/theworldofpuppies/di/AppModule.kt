@@ -31,9 +31,10 @@ import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
 import com.example.theworldofpuppies.shop.product.data.remote.CategoryRepositoryImpl
 import com.example.theworldofpuppies.shop.product.data.remote.DummyApi
-import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
+import com.example.theworldofpuppies.shop.product.data.remote.ProductApiImpl
 import com.example.theworldofpuppies.shop.product.data.remote.ProductRepositoryImpl
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
+import com.example.theworldofpuppies.shop.product.domain.ProductApi
 import com.example.theworldofpuppies.shop.product.domain.ProductRepository
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import io.ktor.client.engine.cio.CIO
@@ -56,7 +57,7 @@ val appModule = module {
     }
     single { get<Database>().productDao }
     single { get<Database>().categoryDao }
-    singleOf(::ProductApi)
+    singleOf(::ProductApiImpl).bind<ProductApi>()
     singleOf(::PaymentApi)
     singleOf(::DummyAddressApi)
     singleOf(::AddressApi)

@@ -6,6 +6,7 @@ import com.example.theworldofpuppies.shop.order.data.response.PaymentResponse
 
 data class OrderUiState(
     val orderId: String? = null,
+    val publicOrderId: String? = null,
     val isLoading: Boolean = false,
     val error: Error? = null,
     val showSuccessDialog: Boolean = false,

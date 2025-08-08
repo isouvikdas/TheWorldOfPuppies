@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class PaymentRequest(
     val price: Double,
     val orderId: String,
+    val publicOrderId: String,
     val userId: String
     )

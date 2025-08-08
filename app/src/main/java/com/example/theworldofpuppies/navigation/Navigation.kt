@@ -1,5 +1,7 @@
 package com.example.theworldofpuppies.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +29,7 @@ import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
 import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
+import com.example.theworldofpuppies.shop.order.presentation.order_history.OrderHistoryScreen
 import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
@@ -45,8 +48,11 @@ sealed class Screen(val route: String) {
     data object CheckoutScreen : Screen("CheckoutScreen")
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
+
+    data object OrderHistoryScreen: Screen("OrderHistoryScreen")
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -90,6 +96,9 @@ fun AppNavigation(
     val addressViewModel = koinViewModel<AddressViewModel>()
     val addressUiState by addressViewModel.addressUiState.collectAsStateWithLifecycle()
     val addressDetailUiState by addressViewModel.addressDetailUiState.collectAsStateWithLifecycle()
+
+    val orderUiState by orderViewModel.orderUiState.collectAsStateWithLifecycle()
+    val orderHistoryUiState by orderViewModel.orderHistoryUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -292,7 +301,8 @@ fun AppNavigation(
                 orderViewModel = orderViewModel,
                 cartViewModel = cartViewModel,
                 addressViewModel = addressViewModel,
-                addressUiState = addressUiState
+                addressUiState = addressUiState,
+                orderUiState = orderUiState
             )
         }
         composable(route = Screen.AddressScreen.route) {
@@ -321,6 +331,19 @@ fun AppNavigation(
                 navController = navController,
                 addressDetailUiState = addressDetailUiState,
                 addressViewModel = addressViewModel
+            )
+        }
+        composable(route = Screen.OrderHistoryScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            OrderHistoryScreen(
+                navController = navController,
+                orderHistoryUiState = orderHistoryUiState
             )
         }
 

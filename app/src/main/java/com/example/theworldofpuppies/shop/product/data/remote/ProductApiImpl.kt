@@ -8,14 +8,15 @@ import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.remote.dto.CategoryDto
 import com.example.theworldofpuppies.shop.product.data.remote.dto.PagedData
 import com.example.theworldofpuppies.shop.product.data.remote.dto.ProductDto
+import com.example.theworldofpuppies.shop.product.domain.ProductApi
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-class ProductApi(
+class ProductApiImpl(
     private val httpClient: HttpClient
-) {
-    suspend fun getAllProducts(cursor: String? = null):
+): ProductApi {
+    override suspend fun getAllProducts(cursor: String?):
             Result<ApiResponse<PagedData<ProductDto>>, NetworkError> {
         return safeCall {
             httpClient.get(
@@ -26,7 +27,7 @@ class ProductApi(
         }
     }
 
-    suspend fun getAllFeaturedProducts() : Result<ApiResponse<List<ProductDto>>, NetworkError> {
+    override suspend fun getAllFeaturedProducts() : Result<ApiResponse<List<ProductDto>>, NetworkError> {
         return safeCall {
             httpClient.get(
                 urlString = constructUrl("products/featured")
@@ -34,7 +35,7 @@ class ProductApi(
         }
     }
 
-    suspend fun fetchFirstImage(imageId: String):
+    override suspend fun fetchFirstImage(imageId: String):
             Result<ByteArray, NetworkError> {
         return safeCall {
             httpClient.get(
@@ -43,7 +44,7 @@ class ProductApi(
         }
     }
 
-    suspend fun getAllCategories():
+    override suspend fun getAllCategories():
             Result<ApiResponse<List<CategoryDto>>, NetworkError> {
         return safeCall {
             httpClient.get(
@@ -52,13 +53,24 @@ class ProductApi(
         }
     }
 
-    suspend fun getAllImagesOfProduct(imageId: String):
+    override suspend fun getAllImagesOfProduct(imageId: String):
             Result<ByteArray, NetworkError> {
         return safeCall {
             httpClient.get(
                 urlString = constructUrl("products/images/load")
             ) {
                 parameter("imageId", imageId)
+            }
+        }
+    }
+
+    override suspend fun getProductsByIds(productIds: List<String>)
+            : Result<ApiResponse<List<ProductDto>>, NetworkError> {
+        return safeCall {
+            httpClient.get(
+                urlString = constructUrl("products/productIds")
+            ) {
+                parameter("productIds", productIds)
             }
         }
     }

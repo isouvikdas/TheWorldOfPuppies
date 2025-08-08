@@ -497,47 +497,5 @@ fun AddressDetailHeader(
         scrollBehavior = scrollBehavior,
         title = "Address Details"
     ) {
-
-        Icon(
-            painterResource(R.drawable.bag_outline),
-            contentDescription = "Cart",
-            modifier = Modifier
-                .size(21.dp)
-                .bounceClick {
-                    navController.navigate(Screen.CartScreen.route)
-                }
-        )
     }
 }
-
-fun validateFields(
-    contactName: String,
-    contactNumber: String,
-    city: String,
-    pinCode: String
-): Boolean {
-    var isValid = true
-
-    if (contactName.isBlank()) {
-        isValid = false
-        "Name cannot be empty"
-    } else null
-
-    if (contactNumber.isBlank()) {
-        isValid = false
-        "Contact number is required"
-    } else null
-
-    if (city.isBlank()) {
-        isValid = false
-        "City is required"
-    } else null
-
-    if (pinCode.isBlank()) {
-        isValid = false
-        "Pin code is required"
-    } else null
-
-    return isValid
-}
-

@@ -71,7 +71,7 @@ fun ProfileScreen(
             }
             item {
                 OrderAndRewardSection(
-                    onOrderClick = {},
+                    onOrderClick = { profileViewModel.onOrderClick(navController = navController) },
                     onCouponClick = {},
                     onBookingClick = { profileViewModel.onBookingClick(navController) }
                 )

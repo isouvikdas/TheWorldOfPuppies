@@ -67,17 +67,6 @@ class CartApi(
         }
     }
 
-    suspend fun getProductsByIds(productIds: List<String>)
-            : Result<ApiResponse<List<ProductDto>>, NetworkError> {
-        return safeCall {
-            httpClient.get(
-                urlString = constructUrl("products/productIds")
-            ) {
-                parameter("productIds", productIds)
-            }
-        }
-    }
-
     suspend fun removeCartItem(token: String, cartItemId: String)
             : Result<ApiResponse<Unit>, NetworkError> {
         return safeCall {
