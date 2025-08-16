@@ -5,6 +5,7 @@ import com.example.theworldofpuppies.core.data.networking.safeCall
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.response.ApiResponse
+import com.example.theworldofpuppies.shop.order.data.response.ChargesDto
 import com.example.theworldofpuppies.shop.order.data.response.OrderDto
 import com.example.theworldofpuppies.shop.order.data.response.OrderFetchResponse
 import com.example.theworldofpuppies.shop.order.data.response.OrderItemDto
@@ -58,6 +59,16 @@ class OrderApi(
             ) {
                 header("Authorization", token)
                 parameter("orderId", orderId)
+            }
+        }
+    }
+
+    suspend fun getCharges(token: String): Result<ApiResponse<ChargesDto>, NetworkError> {
+        return safeCall {
+            httpClient.get(
+                urlString = constructUrl("orders/charges")
+            ) {
+                header("Authorization", token)
             }
         }
     }

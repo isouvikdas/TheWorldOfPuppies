@@ -13,6 +13,7 @@ data class OrderDto(
     val publicOrderId: String,
     val userId: String,
     val orderItemIds: List<String>,
+    val shippingFee: Double,
     val totalAmount: Double,
     val cartTotalAmount: Double,
     val orderStatus: OrderStatus,

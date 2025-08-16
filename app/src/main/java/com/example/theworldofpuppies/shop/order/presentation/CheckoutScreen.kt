@@ -90,7 +90,7 @@ fun CheckoutScreen(
 
     val selectedPaymentMethod by orderViewModel.selectedPaymentMethod.collectAsStateWithLifecycle()
 
-    val shippingFee = 30.00
+    val shippingFee = orderUiState.shippingFee ?: 0.0
     val cartTotal = remember(cartUiState.cartTotal) { cartUiState.cartTotal }
     val total = cartTotal + shippingFee
 

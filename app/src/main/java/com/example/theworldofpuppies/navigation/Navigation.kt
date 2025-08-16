@@ -25,6 +25,7 @@ import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
@@ -48,8 +49,9 @@ sealed class Screen(val route: String) {
     data object CheckoutScreen : Screen("CheckoutScreen")
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
-
     data object OrderHistoryScreen: Screen("OrderHistoryScreen")
+
+    data object GroomingScreen: Screen("GroomingScreen")
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -344,6 +346,19 @@ fun AppNavigation(
             OrderHistoryScreen(
                 navController = navController,
                 orderHistoryUiState = orderHistoryUiState
+            )
+        }
+
+        composable(route = Screen.GroomingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            GroomingScreen(
+                navController = navController
             )
         }
 

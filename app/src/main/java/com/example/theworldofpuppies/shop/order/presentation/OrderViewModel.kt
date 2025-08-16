@@ -59,6 +59,7 @@ class OrderViewModel(
 
     init {
         if (!userRepository.getUserId().isNullOrEmpty()) {
+            getCharges()
             getOrders()
         }
         observeAuthEvents()
@@ -76,6 +77,27 @@ class OrderViewModel(
     fun onAddressChangeClick(navController: NavController) {
         viewModelScope.launch {
             navController.navigate(Screen.AddressScreen.route)
+        }
+    }
+
+    fun getCharges() {
+        viewModelScope.launch {
+            try {
+                _orderUiState.update { it.copy(isLoading = true) }
+                when (val result = orderRepository.getCharges()) {
+                    is Result.Success -> {
+                        _orderUiState.update { it.copy(shippingFee = result.data.shippingFee) }
+                    }
+                    is Result.Error -> {
+                        _orderUiState.update { it.copy(error = result.error) }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("orders fetching error", e.toString())
+                _orderUiState.update { it.copy(error = NetworkError.UNKNOWN) }
+            } finally {
+                _orderUiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 
@@ -354,7 +376,7 @@ class OrderViewModel(
         viewModelScope.launch {
             orderEventManager.events.collect { event ->
                 if (event is OrderEvent.OrderConfirmed) {
-                        getOrderById(event.orderId)
+                    getOrderById(event.orderId)
                 }
             }
         }

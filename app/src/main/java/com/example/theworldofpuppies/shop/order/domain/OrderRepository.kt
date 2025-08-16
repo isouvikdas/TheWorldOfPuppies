@@ -8,4 +8,6 @@ interface OrderRepository {
     suspend fun createCodOrder(): Result<Order, NetworkError>
     suspend fun getOrders(): Result<List<Order>, NetworkError>
     suspend fun getOrderById(orderId: String): Result<Order, NetworkError>
+
+    suspend fun getCharges(): Result<Charges, NetworkError>
 }

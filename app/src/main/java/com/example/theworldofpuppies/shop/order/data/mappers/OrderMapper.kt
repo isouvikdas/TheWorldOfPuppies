@@ -1,8 +1,10 @@
 package com.example.theworldofpuppies.shop.order.data.mappers
 
 import com.example.theworldofpuppies.address.data.mappers.toAddress
+import com.example.theworldofpuppies.shop.order.data.response.ChargesDto
 import com.example.theworldofpuppies.shop.order.data.response.OrderDto
 import com.example.theworldofpuppies.shop.order.data.response.OrderItemDto
+import com.example.theworldofpuppies.shop.order.domain.Charges
 import com.example.theworldofpuppies.shop.order.domain.Order
 import com.example.theworldofpuppies.shop.order.domain.OrderItem
 import java.time.Instant
@@ -20,7 +22,8 @@ fun OrderDto.toOrder(): Order {
         createdDate = createdDate,
         updatedDate = updatedDate,
         deliveryDate = deliveryDate,
-        address = address.toAddress()
+        address = address.toAddress(),
+        shippingFee = shippingFee
     )
 }
 
@@ -36,5 +39,13 @@ fun OrderItemDto.toOrderItem(): OrderItem {
         orderStatus = orderStatus,
         price = price,
         totalPrice = totalPrice
+    )
+}
+
+
+fun ChargesDto.toCharges(): Charges {
+    return Charges(
+        id = id,
+        shippingFee = shippingFee
     )
 }

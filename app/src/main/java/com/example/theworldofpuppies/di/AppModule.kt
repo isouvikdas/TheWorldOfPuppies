@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.theworldofpuppies.address.data.AddressRepositoryImpl
 import com.example.theworldofpuppies.address.data.local.DummyAddressApi
-import com.example.theworldofpuppies.address.data.networking.AddressApi
+import com.example.theworldofpuppies.address.data.remote.AddressApi
 import com.example.theworldofpuppies.address.domain.AddressRepository
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.auth.data.AuthApiImpl

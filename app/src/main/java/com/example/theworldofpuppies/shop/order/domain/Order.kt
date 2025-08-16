@@ -10,6 +10,7 @@ data class Order(
     val userId: String,
     val orderItemIds: List<String>,
     val totalAmount: Double,
+    val shippingFee: Double,
     val cartTotalAmount: Double,
     val orderStatus: OrderStatus,
     val returnStatus: ReturnStatus,
