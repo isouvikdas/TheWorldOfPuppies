@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.address.data.networking
+package com.example.theworldofpuppies.address.data.remote
 
 import com.example.theworldofpuppies.address.data.dto.AddressDto
 import com.example.theworldofpuppies.core.data.networking.constructUrl

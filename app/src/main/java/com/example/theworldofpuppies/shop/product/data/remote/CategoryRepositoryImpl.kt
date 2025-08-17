@@ -14,7 +14,7 @@ import java.io.IOException
 
 class CategoryRepositoryImpl(
     private val db: Database,
-    private val productApi: DummyApi
+    private val productApi: ProductApiImpl
 ) : CategoryRepository {
 
     override suspend fun fetchAllCategories(): List<CategoryEntity> = withContext(Dispatchers.IO) {

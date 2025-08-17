@@ -7,5 +7,6 @@ data class PaymentResponse(
     val razorpayOrderId: String,
     val orderId: String,
     val price: Int,
-    val keyId: String
+    val keyId: String,
+    val publicOrderId: String
 )

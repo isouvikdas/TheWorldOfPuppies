@@ -17,6 +17,7 @@ import com.example.theworldofpuppies.shop.cart.domain.CartRepository
 import com.example.theworldofpuppies.shop.product.data.local.ProductEntity
 import com.example.theworldofpuppies.shop.product.data.mappers.toProduct
 import com.example.theworldofpuppies.shop.product.data.mappers.toProductEntity
+import com.example.theworldofpuppies.shop.product.domain.ProductApi
 import com.example.theworldofpuppies.shop.product.domain.ProductRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -27,6 +28,7 @@ import java.io.IOException
 
 class CartRepositoryImpl(
     private val cartApi: CartApi,
+    private val productApi: ProductApi,
     private val userRepository: UserRepository,
     private val db: Database,
     private val productRepository: ProductRepository,
@@ -216,7 +218,7 @@ class CartRepositoryImpl(
     }
 
     private suspend fun fetchProductsFromApi(productIds: List<String>): List<ProductEntity> {
-        val result = cartApi.getProductsByIds(productIds)
+        val result = productApi.getProductsByIds(productIds)
         result.onSuccess { apiResponse ->
             if (!apiResponse.success) {
                 throw IOException(apiResponse.message)

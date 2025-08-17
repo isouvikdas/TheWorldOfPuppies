@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -32,7 +31,7 @@ import com.example.theworldofpuppies.ui.theme.dimens
 import com.exyte.animatednavbar.AnimatedNavigationBar
 import com.exyte.animatednavbar.animation.balltrajectory.Parabolic
 import com.exyte.animatednavbar.animation.indendshape.Height
-import com.exyte.animatednavbar.animation.indendshape.ShapeCornerRadius
+import com.exyte.animatednavbar.animation.indendshape.shapeCornerRadius
 import com.exyte.animatednavbar.utils.noRippleClickable
 
 
@@ -57,16 +56,14 @@ fun BottomAppbar(
     AnimatedNavigationBar(
         selectedIndex = selectedIndex,
         modifier = modifier
-            .height(MaterialTheme.dimens.medium2),
+            .height(MaterialTheme.dimens.medium3)
+            .padding(horizontal = MaterialTheme.dimens.small1)
+            .padding(bottom = MaterialTheme.dimens.extraSmall.times(2)),
         ballAnimation = Parabolic(tween(300)),
         indentAnimation = Height(tween(300)),
-        cornerRadius = ShapeCornerRadius(
-            topLeft = 16F, topRight = 16F,
-            bottomRight = 0F,
-            bottomLeft = 0F
-        ),
-        barColor = MaterialTheme.colorScheme.secondaryContainer.copy(0.2f),
-        ballColor = MaterialTheme.colorScheme.secondaryContainer
+        cornerRadius = shapeCornerRadius(cornerRadius = MaterialTheme.dimens.small3),
+        barColor = Color.LightGray,
+        ballColor = Color.Gray
     ) {
         screens.forEachIndexed { index, screen ->
             Box(
@@ -89,12 +86,12 @@ fun BottomAppbar(
                     if (currentRoute == screen.route) {
                         screen.selectedIcon(
                             Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            LocalContentColor.current
+                            Color.Black
                         )
                     } else {
                         screen.unselectedIcon(
                             Modifier.size(MaterialTheme.dimens.small1.div(4).times(5)),
-                            LocalContentColor.current
+                            Color.Black
                         )
                     }
                     screen.title?.let {
@@ -103,7 +100,7 @@ fun BottomAppbar(
                             fontWeight = if (currentRoute == screen.route) FontWeight.SemiBold else FontWeight.W500,
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(top = 5.dp),
-                            color = LocalContentColor.current
+                            color = Color.Black
                         )
                     }
                 }

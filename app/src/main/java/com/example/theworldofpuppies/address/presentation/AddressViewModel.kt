@@ -10,6 +10,7 @@ import com.example.theworldofpuppies.address.domain.AddressRepository
 import com.example.theworldofpuppies.address.domain.AddressType
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.util.normalizeIndianPhoneNumber
+import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.navigation.Screen
@@ -22,7 +23,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddressViewModel(
-    private val addressRepository: AddressRepository
+    private val addressRepository: AddressRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _addressUiState = MutableStateFlow(AddressUiState())
@@ -35,7 +37,10 @@ class AddressViewModel(
     val toastEvent: SharedFlow<String> = _toastEvent
 
     init {
-        getAddresses()
+        if (!userRepository.getUserId().isNullOrEmpty()) { // ✅ user already logged in
+            getAddresses()
+        }
+
     }
 
     fun onEditAddressClick(navController: NavController, address: Address) {

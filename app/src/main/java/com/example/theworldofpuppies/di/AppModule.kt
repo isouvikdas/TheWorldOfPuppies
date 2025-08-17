@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.theworldofpuppies.address.data.AddressRepositoryImpl
 import com.example.theworldofpuppies.address.data.local.DummyAddressApi
-import com.example.theworldofpuppies.address.data.networking.AddressApi
+import com.example.theworldofpuppies.address.data.remote.AddressApi
 import com.example.theworldofpuppies.address.domain.AddressRepository
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.auth.data.AuthApiImpl
@@ -17,6 +17,10 @@ import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.services.grooming.data.GroomingRepositoryImpl
+import com.example.theworldofpuppies.services.grooming.data.remote.GroomingApi
+import com.example.theworldofpuppies.services.grooming.domain.GroomingRepository
+import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.shop.cart.data.CartApi
 import com.example.theworldofpuppies.shop.cart.data.CartRepositoryImpl
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
@@ -31,9 +35,10 @@ import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
 import com.example.theworldofpuppies.shop.product.data.remote.CategoryRepositoryImpl
 import com.example.theworldofpuppies.shop.product.data.remote.DummyApi
-import com.example.theworldofpuppies.shop.product.data.remote.ProductApi
+import com.example.theworldofpuppies.shop.product.data.remote.ProductApiImpl
 import com.example.theworldofpuppies.shop.product.data.remote.ProductRepositoryImpl
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
+import com.example.theworldofpuppies.shop.product.domain.ProductApi
 import com.example.theworldofpuppies.shop.product.domain.ProductRepository
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import io.ktor.client.engine.cio.CIO
@@ -56,12 +61,13 @@ val appModule = module {
     }
     single { get<Database>().productDao }
     single { get<Database>().categoryDao }
-    singleOf(::ProductApi)
+    singleOf(::ProductApiImpl).bind<ProductApi>()
     singleOf(::PaymentApi)
     singleOf(::DummyAddressApi)
     singleOf(::AddressApi)
     singleOf(::OrderApi)
     singleOf(::DummyApi)
+    singleOf(::GroomingApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -73,6 +79,7 @@ val appModule = module {
     singleOf(::OrderRepositoryImpl).bind<OrderRepository>()
     singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
     singleOf(::AddressRepositoryImpl).bind<AddressRepository>()
+    singleOf(::GroomingRepositoryImpl).bind<GroomingRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -82,4 +89,5 @@ val appModule = module {
     viewModelOf(::OrderViewModel)
     viewModelOf(::AddressViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::GroomingViewModel)
 }

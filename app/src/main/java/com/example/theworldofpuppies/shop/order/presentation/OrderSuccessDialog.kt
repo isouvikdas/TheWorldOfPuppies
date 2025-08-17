@@ -104,7 +104,7 @@ fun OrderSuccessDialog(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Button(
-                            onClick = onViewOrder,
+                            onClick = onContinueShopping,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = MaterialTheme.dimens.medium1),
@@ -124,7 +124,7 @@ fun OrderSuccessDialog(
 
                         }
                         OutlinedButton(
-                            onClick = onContinueShopping,
+                            onClick = onViewOrder,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = MaterialTheme.dimens.medium1),

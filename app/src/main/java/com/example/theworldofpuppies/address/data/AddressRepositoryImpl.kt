@@ -1,9 +1,8 @@
 package com.example.theworldofpuppies.address.data
 
-import com.example.theworldofpuppies.address.data.local.DummyAddressApi
 import com.example.theworldofpuppies.address.data.mappers.toAddress
 import com.example.theworldofpuppies.address.data.mappers.toAddressDto
-import com.example.theworldofpuppies.address.data.networking.AddressApi
+import com.example.theworldofpuppies.address.data.remote.AddressApi
 import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.address.domain.AddressRepository
 import com.example.theworldofpuppies.core.domain.UserRepository

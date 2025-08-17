@@ -28,9 +28,9 @@ sealed class DrawerItems(
             )
         }
     )
-    data object Checkout : DrawerItems(
-        route = Screen.CheckoutScreen.route,
-        title = "Checkout",
+    data object Grooming : DrawerItems(
+        route = Screen.GroomingScreen.route,
+        title = "Grooming",
         icon = { modifier ->
             Icon(
                 painterResource(id = R.drawable.refer_earn_filled),

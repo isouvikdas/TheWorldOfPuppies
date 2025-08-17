@@ -78,11 +78,11 @@ fun CheckoutScreen(
     orderViewModel: OrderViewModel,
     cartViewModel: CartViewModel,
     addressViewModel: AddressViewModel,
-    addressUiState: AddressUiState
+    addressUiState: AddressUiState,
+    orderUiState: OrderUiState
 ) {
 
     val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
-    val orderUiState by orderViewModel.orderUiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
@@ -90,11 +90,11 @@ fun CheckoutScreen(
 
     val selectedPaymentMethod by orderViewModel.selectedPaymentMethod.collectAsStateWithLifecycle()
 
-    val shippingFee = 30.00
+    val shippingFee = orderUiState.shippingFee ?: 0.0
     val cartTotal = remember(cartUiState.cartTotal) { cartUiState.cartTotal }
     val total = cartTotal + shippingFee
 
-    val orderId = orderUiState.orderId
+    val publicOrderId = orderUiState.publicOrderId
 
 
     val context = LocalContext.current
@@ -104,21 +104,23 @@ fun CheckoutScreen(
         }
     }
 
-    if (orderUiState.showSuccessDialog && orderId != null) {
+    if (orderUiState.showSuccessDialog && publicOrderId != null) {
 
         OrderSuccessDialog(
-            orderId = orderId,
+            orderId = publicOrderId,
             onViewOrder = {
                 orderViewModel.dismissDialog(
                     navController = navController,
-                    route = BottomNavigationItems.Home.route
+                    route = Screen.OrderHistoryScreen.route,
+                    popUpToRoute = BottomNavigationItems.Shop.route,
                 )
 
             },
             onContinueShopping = {
                 orderViewModel.dismissDialog(
                     navController = navController,
-                    route = BottomNavigationItems.Shop.route
+                    route = BottomNavigationItems.Shop.route,
+                    popUpToRoute = BottomNavigationItems.Shop.route,
                 )
             },
             onDismiss = {
@@ -181,7 +183,7 @@ fun CheckoutScreen(
                     }
 
                     item {
-                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.large3.times(2)))
                     }
                 }
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
+import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.navigation.Screen
@@ -24,7 +25,8 @@ import kotlinx.coroutines.launch
 class CartViewModel(
     private val cartRepository: CartRepository,
     private val orderEventManager: OrderEventManager,
-    private val authEventManager: AuthEventManager
+    private val authEventManager: AuthEventManager,
+    private val userRepository: UserRepository
 ) : ViewModel() {
     private val _cartUiState = MutableStateFlow(CartUiState())
     val cartUiState: StateFlow<CartUiState> = _cartUiState.asStateFlow()
@@ -33,7 +35,10 @@ class CartViewModel(
     val toastEvent: SharedFlow<String> = _toastEvent
 
     init {
-        getUserCart()
+        if (!userRepository.getUserId().isNullOrEmpty()) {
+            getUserCart()
+        }
+
         observeAuthEvents()
         observeOrderEvents()
     }

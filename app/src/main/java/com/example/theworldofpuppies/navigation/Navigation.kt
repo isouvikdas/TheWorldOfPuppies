@@ -1,5 +1,7 @@
 package com.example.theworldofpuppies.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,10 +25,13 @@ import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
+import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
 import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
+import com.example.theworldofpuppies.shop.order.presentation.order_history.OrderHistoryScreen
 import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
@@ -45,8 +50,12 @@ sealed class Screen(val route: String) {
     data object CheckoutScreen : Screen("CheckoutScreen")
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
+    data object OrderHistoryScreen: Screen("OrderHistoryScreen")
+
+    data object GroomingScreen: Screen("GroomingScreen")
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -90,6 +99,12 @@ fun AppNavigation(
     val addressViewModel = koinViewModel<AddressViewModel>()
     val addressUiState by addressViewModel.addressUiState.collectAsStateWithLifecycle()
     val addressDetailUiState by addressViewModel.addressDetailUiState.collectAsStateWithLifecycle()
+
+    val orderUiState by orderViewModel.orderUiState.collectAsStateWithLifecycle()
+    val orderHistoryUiState by orderViewModel.orderHistoryUiState.collectAsStateWithLifecycle()
+
+    val groomingViewModel = koinViewModel<GroomingViewModel>()
+    val groomingUiState by groomingViewModel.groomingUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -292,7 +307,8 @@ fun AppNavigation(
                 orderViewModel = orderViewModel,
                 cartViewModel = cartViewModel,
                 addressViewModel = addressViewModel,
-                addressUiState = addressUiState
+                addressUiState = addressUiState,
+                orderUiState = orderUiState
             )
         }
         composable(route = Screen.AddressScreen.route) {
@@ -321,6 +337,34 @@ fun AppNavigation(
                 navController = navController,
                 addressDetailUiState = addressDetailUiState,
                 addressViewModel = addressViewModel
+            )
+        }
+        composable(route = Screen.OrderHistoryScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            OrderHistoryScreen(
+                navController = navController,
+                orderHistoryUiState = orderHistoryUiState
+            )
+        }
+
+        composable(route = Screen.GroomingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            GroomingScreen(
+                navController = navController,
+                groomingUiState = groomingUiState,
+                groomingViewModel = groomingViewModel
             )
         }
 
