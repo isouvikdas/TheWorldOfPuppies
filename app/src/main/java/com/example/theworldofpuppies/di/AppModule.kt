@@ -17,6 +17,10 @@ import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.services.grooming.data.GroomingRepositoryImpl
+import com.example.theworldofpuppies.services.grooming.data.remote.GroomingApi
+import com.example.theworldofpuppies.services.grooming.domain.GroomingRepository
+import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.shop.cart.data.CartApi
 import com.example.theworldofpuppies.shop.cart.data.CartRepositoryImpl
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
@@ -63,6 +67,7 @@ val appModule = module {
     singleOf(::AddressApi)
     singleOf(::OrderApi)
     singleOf(::DummyApi)
+    singleOf(::GroomingApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -74,6 +79,7 @@ val appModule = module {
     singleOf(::OrderRepositoryImpl).bind<OrderRepository>()
     singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
     singleOf(::AddressRepositoryImpl).bind<AddressRepository>()
+    singleOf(::GroomingRepositoryImpl).bind<GroomingRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -83,4 +89,5 @@ val appModule = module {
     viewModelOf(::OrderViewModel)
     viewModelOf(::AddressViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::GroomingViewModel)
 }

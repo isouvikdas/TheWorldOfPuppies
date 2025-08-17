@@ -129,4 +129,6 @@ dependencies {
     //razorpay
     implementation("com.razorpay:checkout:1.6.40")
 
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.24.13-rc")
+
 }

@@ -19,11 +19,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,8 +36,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,175 +56,246 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
-import com.example.theworldofpuppies.services.grooming.domain.GroomingFeature
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
+import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
+    ExperimentalMaterialApi::class
+)
 @Composable
 fun GroomingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    groomingUiState: GroomingUiState = GroomingUiState()
+    groomingViewModel: GroomingViewModel,
+    groomingUiState: GroomingUiState
 ) {
+    val grooming = groomingUiState.grooming
+    val discount = grooming?.discount
+    val description = grooming?.description
+    val isLoading = groomingUiState.isLoading
+    val isRefreshing = groomingUiState.isLoading
 
-    val serviceFeatures = groomingUiState.serviceFeatures
-    val discount = groomingUiState.discount
+    val pullToRefreshState = rememberPullToRefreshState()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
 
-    Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
-        topBar = {
-            GroomingHeader(
-                navController = navController,
-                scrollBehavior = scrollBehavior
-            )
+    LaunchedEffect(Unit) {
+        if (grooming == null) {
+            groomingViewModel.loadGrooming()
         }
-    ) {
-        Surface(
-            modifier = Modifier
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(it), color = Color.Transparent
+                .navigationBarsPadding()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
+            topBar = {
+                GroomingHeader(
+                    navController = navController,
+                    scrollBehavior = scrollBehavior
+                )
+            }
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = MaterialTheme.dimens.small1)
-                                .padding(top = MaterialTheme.dimens.extraSmall),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    modifier = Modifier.size(48.dp),
-                                    color = Color.White,
-                                    shape = CircleShape
-                                ) {
-                                    Image(
-                                        painterResource(R.drawable.grooming_icon),
-                                        contentDescription = null
-                                    )
-                                }
-                                Text(
-                                    text = "Clean Grooming service without parabens, phthalates and chemical dyes.",
-                                    fontWeight = FontWeight.W500,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(start = 5.dp)
-                                )
-                            }
-
-                        }
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it), color = Color.Transparent
+            ) {
+                if (groomingUiState.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent)
+                            .zIndex(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
                     }
-
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .fillMaxWidth()
-                                .padding(horizontal = MaterialTheme.dimens.small1)
-                                .padding(top = MaterialTheme.dimens.extraSmall),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                } else if (groomingUiState.error != null && grooming == null) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painterResource(R.drawable.dog_sad),
+                            contentDescription = "dog",
+                            modifier = Modifier.size(100.dp)
+                        )
+                        Text(
+                            "Oops! Something went wrong",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        PullToRefreshBox(
+                            isRefreshing = isRefreshing,
+                            onRefresh = { groomingViewModel.loadGrooming(forceRefresh = true) },
+                            state = pullToRefreshState
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(MaterialTheme.dimens.small1.times(3) / 2)
-                                )
-                                Text(
-                                    text = "(4.2)",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.W500
-                                )
-                                Text(
-                                    "~",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    fontWeight = FontWeight.W400,
-                                    modifier = Modifier.padding(horizontal = 3.dp)
-                                )
-                                Text(
-                                    text = "(1,268 ratings)",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = Color.Gray
-                                )
-                            }
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                item {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1)
+                                            .padding(top = MaterialTheme.dimens.extraSmall),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        description?.let {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Surface(
+                                                    modifier = Modifier.size(48.dp),
+                                                    color = Color.White,
+                                                    shape = CircleShape
+                                                ) {
+                                                    Image(
+                                                        painterResource(R.drawable.grooming_icon),
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                                Text(
+                                                    text = description,
+                                                    fontWeight = FontWeight.W500,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    modifier = Modifier.padding(start = 5.dp)
+                                                )
+                                            }
 
-                            Box(
-                                modifier = Modifier.size(55.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.discount_badge),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.tertiary
-                                )
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = "24%",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.secondary
-                                    )
-                                    Text(
-                                        text = "OFF",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.secondary
-                                    )
+                                        }
 
+                                    }
                                 }
 
+                                item {
+                                    Row(
+                                        modifier = Modifier
+                                            .wrapContentHeight()
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1)
+                                            .padding(top = MaterialTheme.dimens.extraSmall),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                Icons.Default.Star,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.size(
+                                                    MaterialTheme.dimens.small1.times(
+                                                        3
+                                                    ) / 2
+                                                )
+                                            )
+                                            Text(
+                                                text = "(4.2)",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.W500
+                                            )
+                                            Text(
+                                                "~",
+                                                style = MaterialTheme.typography.displaySmall,
+                                                fontWeight = FontWeight.W400,
+                                                modifier = Modifier.padding(horizontal = 3.dp)
+                                            )
+                                            Text(
+                                                text = "(1,268 ratings)",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = Color.Gray
+                                            )
+                                        }
+
+                                        discount?.let {
+                                            Box(
+                                                modifier = Modifier.size(55.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.discount_badge),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.tertiary
+                                                )
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.Center
+                                                ) {
+                                                    Text(
+                                                        text = "$discount%",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                    Text(
+                                                        text = "OFF",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+
+                                                }
+
+                                            }
+
+                                        }
+
+
+                                    }
+                                }
+
+                                item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1)) }
+                                if (groomingUiState.subServices.isNotEmpty()) {
+                                    items(groomingUiState.subServices) { serviceFeature ->
+                                        ServiceFeatureItem(
+                                            serviceFeature = serviceFeature,
+                                            modifier = Modifier.padding(vertical = 8.dp)
+                                        )
+                                    }
+                                    item {
+                                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
+                                    }
+                                }
                             }
-
                         }
-                    }
 
-                    item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1)) }
 
-                    items(serviceFeatures) { serviceFeature ->
-                        ServiceFeatureItem(serviceFeature = serviceFeature, modifier = Modifier.padding(vertical = 8.dp))
-                    }
 
-                    item {
-                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
+                        GroomingBottomSection(modifier = Modifier.align(Alignment.BottomCenter))
                     }
 
                 }
-
-                GroomingBottomSection(modifier = Modifier.align(Alignment.BottomCenter))
             }
         }
+
     }
 }
 
 @Composable
 fun ServiceFeatureItem(
     modifier: Modifier = Modifier,
-    serviceFeature: GroomingFeature
+    serviceFeature: SubService
 ) {
     val features = serviceFeature.features
     val price = serviceFeature.price
     val discountedPrice = serviceFeature.discountedPrice
-    val title = serviceFeature.title
+    val name = serviceFeature.name
 
     Surface(
         modifier = modifier
@@ -262,7 +339,7 @@ fun ServiceFeatureItem(
                             )
                         }
                         Text(
-                            text = title,
+                            text = name,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(
@@ -274,7 +351,7 @@ fun ServiceFeatureItem(
                         )
                     }
 
-                    Column {
+                    Column(horizontalAlignment = Alignment.End) {
                         Text(
                             text = formatCurrency(discountedPrice),
                             style = MaterialTheme.typography.titleLarge,
@@ -283,9 +360,9 @@ fun ServiceFeatureItem(
                         )
                         Text(
                             text = formatCurrency(price),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.W600,
-                            color = MaterialTheme.colorScheme.secondaryContainer.copy(0.8f),
+                            color = Color.Gray.copy(0.8f),
                             textDecoration = TextDecoration.LineThrough,
                             fontStyle = FontStyle.Italic
                         )
@@ -406,6 +483,7 @@ fun GroomingHeader(
             modifier = Modifier
                 .size(21.dp)
                 .bounceClick {
+                    navController.navigate(Screen.CartScreen.route)
                 }
         )
     }
