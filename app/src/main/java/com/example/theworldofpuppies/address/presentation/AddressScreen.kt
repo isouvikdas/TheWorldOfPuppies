@@ -231,7 +231,8 @@ fun AddressCard(
                         if (!isCheckoutScreen && isSelected) {
                             Icon(
                                 Icons.Default.CheckCircle,
-                                contentDescription = "checked"
+                                contentDescription = "checked",
+                                tint = MaterialTheme.colorScheme.tertiaryContainer
                             )
                         }
                         Icon(

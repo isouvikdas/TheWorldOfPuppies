@@ -23,6 +23,7 @@ import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
+import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
@@ -50,9 +51,10 @@ sealed class Screen(val route: String) {
     data object CheckoutScreen : Screen("CheckoutScreen")
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
-    data object OrderHistoryScreen: Screen("OrderHistoryScreen")
+    data object OrderHistoryScreen : Screen("OrderHistoryScreen")
+    data object GroomingScreen : Screen("GroomingScreen")
 
-    data object GroomingScreen: Screen("GroomingScreen")
+    data object PetProfileScreen : Screen("PetProfileScreen")
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -365,6 +367,18 @@ fun AppNavigation(
                 navController = navController,
                 groomingUiState = groomingUiState,
                 groomingViewModel = groomingViewModel
+            )
+        }
+        composable(route = Screen.PetProfileScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            PetProfileScreen(
+                navController = navController
             )
         }
 

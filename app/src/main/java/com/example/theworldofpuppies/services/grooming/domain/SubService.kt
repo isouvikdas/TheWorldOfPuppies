@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SubService(
+    val id: String,
     val name: String,
     val features: MutableList<String> = mutableListOf(),
     val price: Double = 0.0,
