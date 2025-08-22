@@ -1,30 +1,46 @@
 package com.example.theworldofpuppies.profile.pet.presentation
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -34,42 +50,84 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.profile.pet.domain.PetUiState
+import com.example.theworldofpuppies.profile.pet.domain.enums.Aggression
+import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
+import com.example.theworldofpuppies.profile.pet.domain.enums.Gender
+import com.example.theworldofpuppies.profile.pet.presentation.utils.toString
 import com.example.theworldofpuppies.ui.theme.dimens
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController) {
-
+fun PetProfileScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    petProfileViewModel: PetProfileViewModel,
+    petUiState: PetUiState,
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
 
-    val genders = listOf("Female", "Male")
-    var selectedGender by rememberSaveable { mutableStateOf("") }
+    val changedBreed by petProfileViewModel.changedBreed.collectAsStateWithLifecycle()
+    val changedGender by petProfileViewModel.changeGender.collectAsStateWithLifecycle()
+    val changedAggression by petProfileViewModel.changeAggression.collectAsStateWithLifecycle()
+    val changedWeight by petProfileViewModel.changeWeight.collectAsStateWithLifecycle()
+    val changedAge by petProfileViewModel.changeAge.collectAsStateWithLifecycle()
+    val changedName by petProfileViewModel.changeName.collectAsStateWithLifecycle()
+    val changeVaccinated by petProfileViewModel.changeVaccinated.collectAsStateWithLifecycle()
 
-    val aggressions = listOf("Low", "Medium", "High")
-    var selectedAggression by rememberSaveable { mutableStateOf("") }
+
+    val context = LocalContext.current
+
+    val petPicture = petUiState.petPicture
+    val name = petUiState.name
+    val breed = petUiState.breed
+    val age = petUiState.age
+    val gender = petUiState.gender
+    val aggression = petUiState.aggression
+    val isVaccinated = petUiState.isVaccinated
+    val weight = petUiState.weight
+
+    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { selectedImageUri = it }
+    )
+
+    val genders = listOf(Gender.FEMALE, Gender.MALE)
+
+    val aggressions = listOf(Aggression.LOW, Aggression.MEDIUM, Aggression.HIGH)
 
     var checked by rememberSaveable { mutableStateOf(true) }
 
@@ -85,6 +143,7 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
             )
         }
     ) {
+        BreedSheet(petProfileViewModel = petProfileViewModel)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -106,6 +165,26 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
                     ) {
 
                         item {
+                            ProfileCircle(
+                                onClick = {
+                                    imagePicker.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                },
+                                selectedImageUri = selectedImageUri,
+                                errorImage = R.drawable.pet_profile
+                            )
+                        }
+
+                        item {
+                            ProfileScreenField(
+                                heading = "Name",
+                                value = name,
+                                onValueChange = {petProfileViewModel.onNameChange(it)}
+                            )
+                        }
+
+                        item {
                             Column(verticalArrangement = Arrangement.Center) {
                                 Text(
                                     "Gender",
@@ -114,52 +193,32 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
                                 )
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    genders.forEach { gender ->
-                                        val isSelected = gender == selectedGender
-                                        FilterChip(
+                                    genders.forEach { it ->
+                                        val isSelected = it == (changedGender ?: gender)
+                                        ProfileFilterItem<Gender>(
+                                            type = it.toString(context),
+                                            isSelected = isSelected,
                                             onClick = {
-                                                selectedGender = gender
-                                            },
-                                            label = {
-                                                Text(
-                                                    gender,
-                                                    style = MaterialTheme.typography.titleMedium
-                                                )
-                                            },
-                                            selected = isSelected,
-                                            shape = RoundedCornerShape(16.dp),
-                                            modifier = Modifier
-                                                .padding(end = MaterialTheme.dimens.small1.div(2))
-                                                .animateItem(),
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                                    0.8f
-                                                ),
-                                                selectedLabelColor = Color.White
-                                            ),
-                                            border = BorderStroke(0.5.dp, color = Color.Gray)
+                                                petProfileViewModel.onGenderChange(it)
+                                            }
                                         )
 
                                     }
-
                                 }
-
                             }
                         }
 
                         item {
-                            ProfileScreenField(
-                                heading = "Name",
-                                value = "",
-                            )
-                        }
-
-                        item {
-                            ProfileScreenField(
+                            PetBreedField(
                                 heading = "Breed",
-                                value = "",
+                                value = changedBreed?.breedName ?: breed?.breedName ?: "",
+                                readOnly = true,
+                                onToggleClick = {
+                                    petProfileViewModel.toggleModalBottomSheet()
+                                }
                             )
                         }
 
@@ -176,7 +235,8 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
                                     ProfileScreenField(
                                         modifier = Modifier.padding(end = 2.dp),
                                         heading = "Age",
-                                        value = "",
+                                        value = age,
+                                        onValueChange = {petProfileViewModel.onAgeChange(it)},
                                         placeHolder = "Age in months",
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                     )
@@ -184,7 +244,8 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
                                 ProfileScreenField(
                                     modifier = Modifier.padding(start = 2.dp),
                                     heading = "Weight",
-                                    value = "",
+                                    value = changedWeight ?: weight ?: "",
+                                    onValueChange = {petProfileViewModel.onWeightChange(it)},
                                     placeHolder = "Weight in kg",
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
@@ -202,30 +263,15 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
-                                    aggressions.forEach { aggression ->
-                                        val isSelected = aggression == selectedAggression
-                                        FilterChip(
+                                    aggressions.forEach { it ->
+                                        val isSelected = it == (changedAggression ?: aggression)
+
+                                        ProfileFilterItem<Aggression>(
+                                            type = it.toString(context),
+                                            isSelected = isSelected,
                                             onClick = {
-                                                selectedAggression = aggression
-                                            },
-                                            label = {
-                                                Text(
-                                                    aggression,
-                                                    style = MaterialTheme.typography.titleMedium
-                                                )
-                                            },
-                                            selected = isSelected,
-                                            shape = RoundedCornerShape(16.dp),
-                                            modifier = Modifier
-                                                .padding(end = MaterialTheme.dimens.small1.div(2))
-                                                .animateItem(),
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                                    0.8f
-                                                ),
-                                                selectedLabelColor = Color.White
-                                            ),
-                                            border = BorderStroke(0.5.dp, color = Color.Gray)
+                                                petProfileViewModel.onAggressionChange(it)
+                                            }
                                         )
 
                                     }
@@ -247,35 +293,15 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
                                     fontWeight = FontWeight.SemiBold
                                 )
 
-                                Switch(
-                                    checked = checked,
-                                    onCheckedChange = { it ->
+                                VaccinationSwitch(
+                                    checked = changeVaccinated ?: checked,
+                                    onClick = { it ->
                                         checked = it
-                                    },
-                                    thumbContent = if (checked) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                                            )
-                                        }
-                                    } else {
-                                        null
-                                    },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = MaterialTheme.colorScheme.tertiary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.tertiary.copy(
-                                            0.3f
-                                        ),
-                                        uncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
-                                        uncheckedTrackColor = MaterialTheme.colorScheme.onTertiary,
-                                    )
+                                    }
                                 )
+
                             }
                         }
-
-
                     }
 
                     PetProfileBottomSection(modifier = Modifier.align(Alignment.BottomCenter))
@@ -287,49 +313,226 @@ fun PetProfileScreen(modifier: Modifier = Modifier, navController: NavController
 }
 
 @Composable
-fun <T> ProfileFilterItem(modifier: Modifier = Modifier, heading: String, types: List<T>, selectedType: MutableState<T>) {
-    Column(verticalArrangement = Arrangement.Center) {
-        Text(
-            heading,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            types.forEach { type ->
-                val isSelected = type == selectedType.value
-                FilterChip(
-                    onClick = {
-                        selectedType.value = type
-                    },
-                    label = {
-                        Text(
-                            type.toString(),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    },
-                    selected = isSelected,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = modifier
-                        .padding(end = MaterialTheme.dimens.small1.div(2)),
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                            0.8f
-                        ),
-                        selectedLabelColor = Color.White
-                    ),
-                    border = BorderStroke(0.5.dp, color = Color.Gray)
+fun VaccinationSwitch(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    onClick: (Boolean) -> Unit = { Boolean }
+) {
+    Switch(
+        checked = checked,
+        onCheckedChange = onClick,
+        thumbContent = {
+            if (checked) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
                 )
-
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                )
             }
+        },
+        colors = SwitchDefaults.colors(
+            checkedThumbColor = MaterialTheme.colorScheme.tertiary,
+            checkedTrackColor = MaterialTheme.colorScheme.tertiary.copy(
+                0.3f
+            ),
+            uncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+            uncheckedTrackColor = MaterialTheme.colorScheme.onTertiary,
+        )
+    )
 
+}
+
+@Composable
+fun ProfileCircle(
+    modifier: Modifier = Modifier,
+    radius: Dp = 60.dp,
+    onClick: () -> Unit,
+    selectedImageUri: Uri? = null,
+    errorImage: Int
+) {
+    Box(
+        modifier = modifier
+            .size(radius.times(2f))
+            .background(Color.Transparent),
+    ) {
+        if (selectedImageUri != null) {
+            AsyncImage(
+                model = selectedImageUri,
+                contentDescription = "Pet Profile Pic",
+                modifier = modifier.clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Image(
+                painterResource(errorImage),
+                contentDescription = "Pet profile pic",
+                modifier = Modifier.clip(CircleShape)
+            )
         }
-
+        Surface(
+            modifier = Modifier
+                .size(radius.times(0.4f))
+                .offset(
+                    x = radius.times(1.5f),
+                    y = radius.times(1.5f)
+                )
+                .clickable {
+                    onClick()
+                },
+            shape = CircleShape,
+            color = Color.White
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                    0.2f
+                )
+            ) {
+                Icon(
+                    Icons.Outlined.Camera,
+                    contentDescription = null,
+                    modifier = Modifier.padding(1.dp)
+                )
+            }
+        }
     }
 
 }
+
+
+@Composable
+fun <T> ProfileFilterItem(
+    modifier: Modifier = Modifier,
+    type: String,
+    isSelected: Boolean = false,
+    onClick: () -> Unit
+
+) {
+    FilterChip(
+        onClick = {
+            onClick()
+        },
+        label = {
+            Text(
+                type,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        selected = isSelected,
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier
+            .padding(end = MaterialTheme.dimens.small1.div(2)),
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
+                0.8f
+            ),
+            selectedLabelColor = Color.White
+        ),
+        border = BorderStroke(0.5.dp, color = Color.Gray)
+    )
+}
+
+@Composable
+fun PetBreedField(
+    modifier: Modifier = Modifier,
+    heading: String,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    maxLines: Int = 1,
+    readOnly: Boolean = false,
+    defaultValue: String = "",
+    isOptional: Boolean = false,
+    value: String = "",
+    onValueChange: (String) -> Unit = { "" },
+    errorMessage: String? = null,
+    placeHolder: String = "",
+    onToggleClick: () -> Unit
+) {
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = heading,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            if (isOptional) {
+                Text(
+                    text = "(Optional)",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        OutlinedTextField(
+            isError = errorMessage != null,
+            supportingText = {
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.W500
+                    )
+                }
+            },
+            value = value,
+            onValueChange = onValueChange,
+            keyboardOptions = keyboardOptions,
+            readOnly = readOnly,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                errorBorderColor = Color.Transparent,
+                focusedContainerColor = Color.LightGray.copy(0.4f),
+                unfocusedContainerColor = Color.LightGray.copy(0.4f),
+                errorContainerColor = Color.LightGray.copy(0.4f)
+            ),
+            maxLines = maxLines,
+            textStyle = MaterialTheme.typography.titleMedium,
+            placeholder = {
+                if (placeHolder.isNotEmpty())
+                    Text(
+                        text = placeHolder,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.Gray
+                    )
+                else Text(
+                    text = "Enter $heading",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Gray
+                )
+            },
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        onToggleClick()
+                    }
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(26.dp)
+                    )
+
+                }
+            }
+        )
+
+    }
+}
+
 
 @Composable
 fun ProfileScreenField(
@@ -491,3 +694,164 @@ fun PetProfileBottomSection(modifier: Modifier = Modifier) {
     }
 
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BreedSheet(modifier: Modifier = Modifier, petProfileViewModel: PetProfileViewModel) {
+
+    val searchUiState by petProfileViewModel.searchUiState.collectAsStateWithLifecycle()
+    val searchQuery = searchUiState.query
+    val breedList by remember(searchUiState.results) {
+        derivedStateOf {
+            searchUiState.results
+        }
+    }
+    var showModalBottomSheet by petProfileViewModel.showModalSheet
+    var skipPartially by rememberSaveable { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartially)
+
+    if (showModalBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                petProfileViewModel.toggleModalBottomSheet()
+            },
+            sheetState = bottomSheetState,
+            containerColor = Color.White
+        ) {
+            BreedSearchingScreen(
+                searchQuery = searchQuery,
+                onSearchTextChange = { petProfileViewModel.onSearchTextChange(it) },
+                breedList = breedList,
+                onBreedSelect = { petProfileViewModel.selectBreed(it) }
+            )
+        }
+    }
+
+}
+
+@Composable
+fun BreedSearchingScreen(
+    modifier: Modifier = Modifier,
+    searchQuery: String,
+    onSearchTextChange: (String) -> Unit = { "" },
+    breedList: List<DogBreed>?,
+    onBreedSelect: (DogBreed) -> Unit
+) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = Color.Transparent
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = MaterialTheme.dimens.small1),
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = searchQuery,
+                onValueChange = onSearchTextChange,
+                singleLine = true,
+                placeholder = {
+                    Text(
+                        "Search Breed",
+                        color = Color.Black.copy(0.9f)
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painterResource(R.drawable.search_dens),
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .size(21.dp)
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchTextChange("") }) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(MaterialTheme.dimens.small2),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color.LightGray.copy(0.4f),
+                    unfocusedContainerColor = Color.LightGray.copy(0.4f)
+                )
+            )
+
+            BreedSearchView(breedList = breedList, onBreedSelect = { onBreedSelect(it) })
+
+        }
+
+    }
+}
+
+@Composable
+fun BreedSearchView(
+    modifier: Modifier = Modifier,
+    breedList: List<DogBreed>?,
+    onBreedSelect: (DogBreed) -> Unit = {}
+) {
+    if (!breedList.isNullOrEmpty()) {
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            items(breedList) { breed ->
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+
+                ) {
+                    Text(
+                        breed.breedName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.W500,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onBreedSelect(breed)
+                            }
+                    )
+                    if (breed != breedList.last()) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            thickness = 0.2.dp
+                        )
+                    }
+
+                }
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 50.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "\uD83D\uDE3F",
+                style = MaterialTheme.typography.displayLarge
+            )
+            Text(
+                "Oops! No Matching result found",
+                style = MaterialTheme.typography.bodyMedium,
+
+                )
+            Text(
+                "Please try a different search query :)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+        }
+    }
+}
+
+
+

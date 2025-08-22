@@ -24,6 +24,7 @@ import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.Botto
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
+import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
@@ -107,6 +108,9 @@ fun AppNavigation(
 
     val groomingViewModel = koinViewModel<GroomingViewModel>()
     val groomingUiState by groomingViewModel.groomingUiState.collectAsStateWithLifecycle()
+
+    val petProfileViewModel = koinViewModel<PetProfileViewModel>()
+    val petProfileUiState by petProfileViewModel.petUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -378,7 +382,10 @@ fun AppNavigation(
                 searchIconVisibilityChanged
             )
             PetProfileScreen(
-                navController = navController
+                navController = navController,
+                petUiState = petProfileUiState,
+                petProfileViewModel = petProfileViewModel
+
             )
         }
 

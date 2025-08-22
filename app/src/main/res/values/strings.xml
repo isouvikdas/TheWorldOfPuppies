@@ -19,4 +19,9 @@
     <string name="see_all">See All</string>
     <string name="payment_verification_failed">Payment Verification Failed</string>
     <string name="invalid_phone_number">Invalid Phone Number\n</string>
+    <string name="low">Low</string>
+    <string name="medium">Medium</string>
+    <string name="high">High</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
 </resources>
