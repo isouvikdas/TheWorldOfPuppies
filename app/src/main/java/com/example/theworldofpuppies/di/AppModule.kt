@@ -16,6 +16,7 @@ import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
+import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.services.grooming.data.GroomingRepositoryImpl
 import com.example.theworldofpuppies.services.grooming.data.remote.GroomingApi
@@ -90,4 +91,5 @@ val appModule = module {
     viewModelOf(::AddressViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::GroomingViewModel)
+    viewModelOf(::PetProfileViewModel)
 }

@@ -6,5 +6,6 @@ data class GroomingUiState(
     val isLoading: Boolean = false,
     val error: Error? = null,
     val grooming: Grooming? = null,
-    val subServices: List<SubService> = mutableListOf()
+    val subServices: List<SubService> = mutableListOf(),
+    val selectedSubServiceId: String = ""
 )

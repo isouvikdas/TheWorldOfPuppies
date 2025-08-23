@@ -34,17 +34,27 @@ class GroomingViewModel(
         }
     }
 
+    fun selectSubService(subServiceId: String) {
+        _groomingUiSate.update { it.copy(selectedSubServiceId = subServiceId) }
+    }
+
     fun getGrooming() {
         viewModelScope.launch {
             if (groomingUiState.value.isLoading) return@launch
             Log.i("grooming", "grooming")
-            _groomingUiSate.update { it.copy(isLoading = true) }
+            _groomingUiSate.update { it.copy(isLoading = true, error = null) }
             try {
                 when (val result = groomingRepository.getGrooming()) {
                     is Result.Success -> {
+                        val subServices = result.data.subServices
+                        val isAlreadyThere =
+                            subServices.any { it.id == groomingUiState.value.selectedSubServiceId }
+                        if (!isAlreadyThere) {
+                            selectSubService("")
+                        }
                         _groomingUiSate.update {
                             val discount = result.data.discount
-                            val subServices = result.data.subServices
+                            val subServices = subServices
                             val updatedServices = subServices.stream()
                                 .map { service ->
                                     service.copy(

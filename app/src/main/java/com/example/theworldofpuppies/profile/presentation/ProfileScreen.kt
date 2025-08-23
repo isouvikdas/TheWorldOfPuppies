@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.profile.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -18,9 +20,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,7 +58,7 @@ fun ProfileScreen(
             item {
                 ProfileSection(
                     onUserProfileClick = {},
-                    onPetProfileClick = {}
+                    onPetProfileClick = { profileViewModel.onPetProfileClick(navController) }
                 )
             }
             item {
@@ -78,54 +82,83 @@ fun ProfileScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small1))
+                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small3))
             }
 
             item {
-                SignOutSection(onClick = {})
+                SignOutSection()
             }
+
             item {
-                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.large2))
+                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.large3))
             }
         }
     }
 }
+
 
 @Composable
-fun SignOutSection(onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier
+fun SignOutSection(modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = { },
+        modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = MaterialTheme.dimens.small1)
-            .clickable { onClick() },
-        color = Color.LightGray.copy(0.4f),
-        shape = RoundedCornerShape(MaterialTheme.dimens.small1)
+            .height(MaterialTheme.dimens.buttonHeight)
+            .padding(horizontal = MaterialTheme.dimens.small1),
+        shape = RoundedCornerShape(26.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.errorContainer,
+            containerColor = Color.Transparent
+        ),
+        border = BorderStroke(
+            width = 1.3.dp,
+            color = MaterialTheme.colorScheme.errorContainer
+        )
+
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = MaterialTheme.dimens.small1.times(2))
-                .padding(vertical = MaterialTheme.dimens.small1),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.logout_outline),
-                contentDescription = "logout",
-                tint = Color.Red,
-                modifier = Modifier.size(21.dp)
-            )
-            Text(
-                "Sign Out",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.Red,
-                modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
-            )
-        }
+        Text(
+            "Sign Out",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
+
+//@Composable
+//fun SignOutSection(onClick: () -> Unit) {
+//    Surface(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .wrapContentHeight()
+//            .padding(horizontal = MaterialTheme.dimens.small1)
+//            .clickable { onClick() },
+//        color = Color.LightGray.copy(0.4f),
+//        shape = RoundedCornerShape(MaterialTheme.dimens.small1)
+//    ) {
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(start = MaterialTheme.dimens.small1.times(2))
+//                .padding(vertical = MaterialTheme.dimens.small1),
+//            horizontalArrangement = Arrangement.Start,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Icon(
+//                painter = painterResource(R.drawable.logout_outline),
+//                contentDescription = "logout",
+//                tint = Color.Red,
+//                modifier = Modifier.size(21.dp)
+//            )
+//            Text(
+//                "Sign Out",
+//                style = MaterialTheme.typography.titleMedium,
+//                fontWeight = FontWeight.SemiBold,
+//                color = Color.Red,
+//                modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
+//            )
+//        }
+//    }
+//}
 
 
 @Composable

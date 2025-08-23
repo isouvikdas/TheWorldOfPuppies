@@ -2,6 +2,7 @@ package com.example.theworldofpuppies.services.grooming.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +24,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,10 +61,9 @@ import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
 import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
     ExperimentalMaterialApi::class
 )
 @Composable
@@ -77,8 +76,11 @@ fun GroomingScreen(
     val grooming = groomingUiState.grooming
     val discount = grooming?.discount
     val description = grooming?.description
-    val isLoading = groomingUiState.isLoading
-    val isRefreshing = groomingUiState.isLoading
+    val showFullscreenLoader = grooming == null && groomingUiState.isLoading
+    val isRefreshing = grooming != null && groomingUiState.isLoading
+
+    val selectedServiceId = groomingUiState.selectedSubServiceId
+
 
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -111,19 +113,7 @@ fun GroomingScreen(
                     .fillMaxSize()
                     .padding(it), color = Color.Transparent
             ) {
-                if (groomingUiState.isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Transparent)
-                            .zIndex(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                } else if (groomingUiState.error != null && grooming == null) {
+                if (groomingUiState.error != null && grooming == null) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -233,7 +223,11 @@ fun GroomingScreen(
                                                 Column(
                                                     modifier = Modifier
                                                         .fillMaxSize()
-                                                        .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
+                                                        .padding(
+                                                            MaterialTheme.dimens.extraSmall.times(
+                                                                3
+                                                            ) / 2
+                                                        ),
                                                     horizontalAlignment = Alignment.CenterHorizontally,
                                                     verticalArrangement = Arrangement.Center
                                                 ) {
@@ -263,9 +257,14 @@ fun GroomingScreen(
                                 item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1)) }
                                 if (groomingUiState.subServices.isNotEmpty()) {
                                     items(groomingUiState.subServices) { serviceFeature ->
+                                        val isSelected = selectedServiceId == serviceFeature.id
                                         ServiceFeatureItem(
                                             serviceFeature = serviceFeature,
-                                            modifier = Modifier.padding(vertical = 8.dp)
+                                            modifier = Modifier.padding(vertical = 16.dp),
+                                            isSelected = isSelected,
+                                            onClick = {
+                                                groomingViewModel.selectSubService(serviceFeature.id)
+                                            }
                                         )
                                     }
                                     item {
@@ -284,13 +283,29 @@ fun GroomingScreen(
             }
         }
 
+        if (showFullscreenLoader) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent.copy(0.2f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        }
+
     }
 }
 
 @Composable
 fun ServiceFeatureItem(
     modifier: Modifier = Modifier,
-    serviceFeature: SubService
+    serviceFeature: SubService,
+    onClick: () -> Unit = {},
+    isSelected: Boolean
 ) {
     val features = serviceFeature.features
     val price = serviceFeature.price
@@ -301,10 +316,13 @@ fun ServiceFeatureItem(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(horizontal = MaterialTheme.dimens.small1),
+            .padding(horizontal = MaterialTheme.dimens.small1)
+            .clickable {
+                onClick()
+            },
         color = Color.White,
         shape = RoundedCornerShape(16.dp),
-        shadowElevation = 1.dp
+        shadowElevation = if (isSelected) 8.dp else 0.dp
     ) {
         Surface(color = Color.Transparent) {
             Column(
