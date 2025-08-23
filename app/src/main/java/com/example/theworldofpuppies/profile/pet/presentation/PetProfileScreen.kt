@@ -50,6 +50,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -104,14 +106,14 @@ fun PetProfileScreen(
 
     val context = LocalContext.current
 
-    val petPictureUri = petUiState.petPicture
-    val name = petUiState.name
-    val breed = petUiState.breed
-    val age = petUiState.age
-    val gender = petUiState.gender
-    val aggression = petUiState.aggression
-    val isVaccinated = petUiState.isVaccinated
-    val weight = petUiState.weight
+    val petPictureUri = editState.petPictureUri ?: petUiState.petPicture
+    val name = editState.name ?: petUiState.name
+    val breed = editState.breed ?: petUiState.breed
+    val age = editState.age ?: petUiState.age
+    val gender = editState.gender ?: petUiState.gender
+    val aggression = editState.aggression ?: petUiState.aggression
+    val isVaccinated = editState.isVaccinated ?: petUiState.isVaccinated
+    val weight = editState.weight ?: petUiState.weight
 
     val breedError = petUiState.breedError
     val nameError = petUiState.nameError
@@ -120,6 +122,9 @@ fun PetProfileScreen(
     val aggressionError = petUiState.aggressionError
     val petPictureError = petUiState.petPictureError
     val weightError = petUiState.weightError
+
+    val isRefreshing = petUiState.isLoading
+    val pullToRefreshState = rememberPullToRefreshState()
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -153,169 +158,176 @@ fun PetProfileScreen(
                 color = Color.Transparent
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = MaterialTheme.dimens.small1),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = { petProfileViewModel.loadPetProfile(forceRefresh = true) },
+                        state = pullToRefreshState
                     ) {
-                        // Profile picture
-                        item {
-                            ProfileCircle(
-                                onClick = {
-                                    imagePicker.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                },
-                                selectedImageUri = editState.petPictureUri ?: petPictureUri,
-                                errorImage = R.drawable.pet_profile,
-                                errorMessage = petPictureError
-                            )
-                        }
-
-                        // Name
-                        item {
-                            ProfileScreenField(
-                                heading = "Name",
-                                value = editState.name ?: name,
-                                onValueChange = { petProfileViewModel.onNameChange(it) },
-                                errorMessage = nameError
-                            )
-                        }
-
-                        // Gender
-                        item {
-                            Column(verticalArrangement = Arrangement.Center) {
-                                Text(
-                                    "Gender",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = MaterialTheme.dimens.small1),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Profile picture
+                            item {
+                                ProfileCircle(
+                                    onClick = {
+                                        imagePicker.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    },
+                                    selectedImageUri = petPictureUri,
+                                    errorImage = R.drawable.pet_profile,
+                                    errorMessage = petPictureError
                                 )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    genders.forEach { g ->
-                                        val isSelected = g == (editState.gender ?: gender)
-                                        ProfileFilterItem<Gender>(
-                                            type = g.toString(context),
-                                            isSelected = isSelected,
-                                            onClick = { petProfileViewModel.onGenderChange(g) }
+                            }
+
+                            // Name
+                            item {
+                                ProfileScreenField(
+                                    heading = "Name",
+                                    value = name,
+                                    onValueChange = { petProfileViewModel.onNameChange(it) },
+                                    errorMessage = nameError
+                                )
+                            }
+
+                            // Gender
+                            item {
+                                Column(verticalArrangement = Arrangement.Center) {
+                                    Text(
+                                        "Gender",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        genders.forEach { g ->
+                                            val isSelected = g == gender
+                                            ProfileFilterItem<Gender>(
+                                                type = g.toString(context),
+                                                isSelected = isSelected,
+                                                onClick = { petProfileViewModel.onGenderChange(g) }
+                                            )
+                                        }
+                                    }
+                                    genderError?.let { error ->
+                                        Text(
+                                            text = error,
+                                            color = MaterialTheme.colorScheme.error,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.W500
                                         )
                                     }
                                 }
-                                genderError?.let { error ->
-                                    Text(
-                                        text = error,
-                                        color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.W500
-                                    )
-                                }
                             }
-                        }
 
-                        // Breed
-                        item {
-                            PetBreedField(
-                                heading = "Breed",
-                                value = editState.breed?.breedName ?: breed?.breedName.orEmpty(),
-                                readOnly = true,
-                                onToggleClick = { petProfileViewModel.toggleModalBottomSheet() },
-                                errorMessage = breedError
-                            )
-                        }
-
-                        // Age + Weight
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.Top,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(0.5f),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    ProfileScreenField(
-                                        modifier = Modifier.padding(end = 2.dp),
-                                        heading = "Age",
-                                        value = editState.age ?: age,
-                                        onValueChange = { petProfileViewModel.onAgeChange(it) },
-                                        placeHolder = "Age in months",
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        errorMessage = ageError
-                                    )
-                                }
-                                ProfileScreenField(
-                                    modifier = Modifier.padding(start = 2.dp),
-                                    heading = "Weight",
-                                    value = editState.weight ?: weight.orEmpty(),
-                                    onValueChange = { petProfileViewModel.onWeightChange(it) },
-                                    placeHolder = "Weight in kg",
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    errorMessage = weightError
+                            // Breed
+                            item {
+                                PetBreedField(
+                                    heading = "Breed",
+                                    value = breed?.breedName.orEmpty(),
+                                    readOnly = true,
+                                    onToggleClick = { petProfileViewModel.toggleModalBottomSheet() },
+                                    errorMessage = breedError
                                 )
                             }
-                        }
 
-                        // Aggression
-                        item {
-                            Column(verticalArrangement = Arrangement.Center) {
-                                Text(
-                                    "Aggression",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                            // Age + Weight
+                            item {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.Top,
                                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
-                                    aggressions.forEach { a ->
-                                        val isSelected = a == (editState.aggression ?: aggression)
-                                        ProfileFilterItem<Aggression>(
-                                            type = a.toString(context),
-                                            isSelected = isSelected,
-                                            onClick = { petProfileViewModel.onAggressionChange(a) }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(0.5f),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        ProfileScreenField(
+                                            modifier = Modifier.padding(end = 2.dp),
+                                            heading = "Age",
+                                            value = age,
+                                            onValueChange = { petProfileViewModel.onAgeChange(it) },
+                                            placeHolder = "Age in months",
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                            errorMessage = ageError
                                         )
                                     }
-                                }
-                                aggressionError?.let { error ->
-                                    Text(
-                                        text = error,
-                                        color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.W500
+                                    ProfileScreenField(
+                                        modifier = Modifier.padding(start = 2.dp),
+                                        heading = "Weight",
+                                        value = weight,
+                                        onValueChange = { petProfileViewModel.onWeightChange(it) },
+                                        placeHolder = "Weight in kg",
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        errorMessage = weightError
                                     )
                                 }
                             }
-                        }
 
-                        // Vaccination
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    "Is Vaccinated",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                            // Aggression
+                            item {
+                                Column(verticalArrangement = Arrangement.Center) {
+                                    Text(
+                                        "Aggression",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                    ) {
+                                        aggressions.forEach { a ->
+                                            val isSelected = a == aggression
+                                            ProfileFilterItem<Aggression>(
+                                                type = a.toString(context),
+                                                isSelected = isSelected,
+                                                onClick = { petProfileViewModel.onAggressionChange(a) }
+                                            )
+                                        }
+                                    }
+                                    aggressionError?.let { error ->
+                                        Text(
+                                            text = error,
+                                            color = MaterialTheme.colorScheme.error,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.W500
+                                        )
+                                    }
+                                }
+                            }
 
-                                VaccinationSwitch(
-                                    checked = editState.isVaccinated ?: isVaccinated,
-                                    onClick = { petProfileViewModel.onVaccinatedChange(it) }
-                                )
+                            // Vaccination
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "Is Vaccinated",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+
+                                    VaccinationSwitch(
+                                        checked = isVaccinated,
+                                        onClick = { petProfileViewModel.onVaccinatedChange(it) }
+                                    )
+                                }
+                            }
+
+                            item {
+                                Spacer(modifier = Modifier.height(MaterialTheme.dimens.large3))
                             }
                         }
 
-                        item {
-                            Spacer(modifier = Modifier.height(MaterialTheme.dimens.large3))
-                        }
                     }
 
                     PetProfileBottomSection(

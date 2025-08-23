@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.profile.pet.presentation
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 class PetProfileViewModel() : ViewModel() {
 
@@ -180,6 +182,33 @@ class PetProfileViewModel() : ViewModel() {
         return isValid
     }
 
+    fun loadPetProfile(forceRefresh: Boolean = false) {
+        val state = petUiState.value
+        if (forceRefresh || (!state.isLoading && state.name.isEmpty())) {
+            getPetProfile()
+        }
+    }
+
+    // load pet profile
+    fun getPetProfile() {
+        viewModelScope.launch {
+            _petUiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                delay(1000)
+                resetPetUiState()
+            } catch (e : Exception) {
+                Log.i("pet", e.message.toString())
+            } finally {
+                _petUiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun resetPetUiState() {
+        _petUiState.update { PetUiState() }
+        _editState.update { PetEditUiState() }
+    }
+
     // ---------- save profile ----------
     fun saveProfile() {
         viewModelScope.launch {
@@ -203,7 +232,7 @@ class PetProfileViewModel() : ViewModel() {
             }
 
         }
-
-
     }
+
+
 }
