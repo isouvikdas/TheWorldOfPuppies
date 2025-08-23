@@ -99,18 +99,12 @@ fun PetProfileScreen(
         state = rememberTopAppBarState()
     )
 
-    val changedBreed by petProfileViewModel.changedBreed.collectAsStateWithLifecycle()
-    val changedGender by petProfileViewModel.changeGender.collectAsStateWithLifecycle()
-    val changedAggression by petProfileViewModel.changeAggression.collectAsStateWithLifecycle()
-    val changedWeight by petProfileViewModel.changeWeight.collectAsStateWithLifecycle()
-    val changedAge by petProfileViewModel.changeAge.collectAsStateWithLifecycle()
-    val changedName by petProfileViewModel.changeName.collectAsStateWithLifecycle()
-    val changeVaccinated by petProfileViewModel.changeVaccinated.collectAsStateWithLifecycle()
-
+    // collect edit state instead of many changedX
+    val editState by petProfileViewModel.editState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
 
-    val petPicture = petUiState.petPicture
+    val petPictureUri = petUiState.petPicture
     val name = petUiState.name
     val breed = petUiState.breed
     val age = petUiState.age
@@ -119,17 +113,21 @@ fun PetProfileScreen(
     val isVaccinated = petUiState.isVaccinated
     val weight = petUiState.weight
 
-    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    val breedError = petUiState.breedError
+    val nameError = petUiState.nameError
+    val ageError = petUiState.ageError
+    val genderError = petUiState.genderError
+    val aggressionError = petUiState.aggressionError
+    val petPictureError = petUiState.petPictureError
+    val weightError = petUiState.weightError
+
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { selectedImageUri = it }
+        onResult = { petProfileViewModel.onPetPictureChange(it) }
     )
 
-    val genders = listOf(Gender.FEMALE, Gender.MALE)
-
-    val aggressions = listOf(Aggression.LOW, Aggression.MEDIUM, Aggression.HIGH)
-
-    var checked by rememberSaveable { mutableStateOf(true) }
+    val genders = Gender.entries
+    val aggressions = Aggression.entries
 
     Scaffold(
         modifier = Modifier
@@ -144,18 +142,17 @@ fun PetProfileScreen(
         }
     ) {
         BreedSheet(petProfileViewModel = petProfileViewModel)
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 color = Color.Transparent
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -163,7 +160,7 @@ fun PetProfileScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-
+                        // Profile picture
                         item {
                             ProfileCircle(
                                 onClick = {
@@ -171,19 +168,23 @@ fun PetProfileScreen(
                                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                     )
                                 },
-                                selectedImageUri = selectedImageUri,
-                                errorImage = R.drawable.pet_profile
+                                selectedImageUri = editState.petPictureUri ?: petPictureUri,
+                                errorImage = R.drawable.pet_profile,
+                                errorMessage = petPictureError
                             )
                         }
 
+                        // Name
                         item {
                             ProfileScreenField(
                                 heading = "Name",
-                                value = name,
-                                onValueChange = {petProfileViewModel.onNameChange(it)}
+                                value = editState.name ?: name,
+                                onValueChange = { petProfileViewModel.onNameChange(it) },
+                                errorMessage = nameError
                             )
                         }
 
+                        // Gender
                         item {
                             Column(verticalArrangement = Arrangement.Center) {
                                 Text(
@@ -196,36 +197,42 @@ fun PetProfileScreen(
                                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    genders.forEach { it ->
-                                        val isSelected = it == (changedGender ?: gender)
+                                    genders.forEach { g ->
+                                        val isSelected = g == (editState.gender ?: gender)
                                         ProfileFilterItem<Gender>(
-                                            type = it.toString(context),
+                                            type = g.toString(context),
                                             isSelected = isSelected,
-                                            onClick = {
-                                                petProfileViewModel.onGenderChange(it)
-                                            }
+                                            onClick = { petProfileViewModel.onGenderChange(g) }
                                         )
-
                                     }
+                                }
+                                genderError?.let { error ->
+                                    Text(
+                                        text = error,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.W500
+                                    )
                                 }
                             }
                         }
 
+                        // Breed
                         item {
                             PetBreedField(
                                 heading = "Breed",
-                                value = changedBreed?.breedName ?: breed?.breedName ?: "",
+                                value = editState.breed?.breedName ?: breed?.breedName.orEmpty(),
                                 readOnly = true,
-                                onToggleClick = {
-                                    petProfileViewModel.toggleModalBottomSheet()
-                                }
+                                onToggleClick = { petProfileViewModel.toggleModalBottomSheet() },
+                                errorMessage = breedError
                             )
                         }
 
+                        // Age + Weight
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.Top,
                                 horizontalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
                                 Row(
@@ -235,23 +242,26 @@ fun PetProfileScreen(
                                     ProfileScreenField(
                                         modifier = Modifier.padding(end = 2.dp),
                                         heading = "Age",
-                                        value = age,
-                                        onValueChange = {petProfileViewModel.onAgeChange(it)},
+                                        value = editState.age ?: age,
+                                        onValueChange = { petProfileViewModel.onAgeChange(it) },
                                         placeHolder = "Age in months",
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        errorMessage = ageError
                                     )
                                 }
                                 ProfileScreenField(
                                     modifier = Modifier.padding(start = 2.dp),
                                     heading = "Weight",
-                                    value = changedWeight ?: weight ?: "",
-                                    onValueChange = {petProfileViewModel.onWeightChange(it)},
+                                    value = editState.weight ?: weight.orEmpty(),
+                                    onValueChange = { petProfileViewModel.onWeightChange(it) },
                                     placeHolder = "Weight in kg",
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    errorMessage = weightError
                                 )
                             }
                         }
 
+                        // Aggression
                         item {
                             Column(verticalArrangement = Arrangement.Center) {
                                 Text(
@@ -263,24 +273,27 @@ fun PetProfileScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
-                                    aggressions.forEach { it ->
-                                        val isSelected = it == (changedAggression ?: aggression)
-
+                                    aggressions.forEach { a ->
+                                        val isSelected = a == (editState.aggression ?: aggression)
                                         ProfileFilterItem<Aggression>(
-                                            type = it.toString(context),
+                                            type = a.toString(context),
                                             isSelected = isSelected,
-                                            onClick = {
-                                                petProfileViewModel.onAggressionChange(it)
-                                            }
+                                            onClick = { petProfileViewModel.onAggressionChange(a) }
                                         )
-
                                     }
-
                                 }
-
+                                aggressionError?.let { error ->
+                                    Text(
+                                        text = error,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.W500
+                                    )
+                                }
                             }
                         }
 
+                        // Vaccination
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -294,20 +307,23 @@ fun PetProfileScreen(
                                 )
 
                                 VaccinationSwitch(
-                                    checked = changeVaccinated ?: checked,
-                                    onClick = { it ->
-                                        checked = it
-                                    }
+                                    checked = editState.isVaccinated ?: isVaccinated,
+                                    onClick = { petProfileViewModel.onVaccinatedChange(it) }
                                 )
-
                             }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(MaterialTheme.dimens.large3))
                         }
                     }
 
-                    PetProfileBottomSection(modifier = Modifier.align(Alignment.BottomCenter))
+                    PetProfileBottomSection(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        petProfileViewModel = petProfileViewModel
+                    )
                 }
             }
-
         }
     }
 }
@@ -353,53 +369,70 @@ fun ProfileCircle(
     modifier: Modifier = Modifier,
     radius: Dp = 60.dp,
     onClick: () -> Unit,
-    selectedImageUri: Uri? = null,
-    errorImage: Int
+    selectedImageUri: Uri,
+    errorImage: Int,
+    errorMessage: String? = null
 ) {
-    Box(
-        modifier = modifier
-            .size(radius.times(2f))
-            .background(Color.Transparent),
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (selectedImageUri != null) {
-            AsyncImage(
-                model = selectedImageUri,
-                contentDescription = "Pet Profile Pic",
-                modifier = modifier.clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Image(
-                painterResource(errorImage),
-                contentDescription = "Pet profile pic",
-                modifier = Modifier.clip(CircleShape)
-            )
-        }
-        Surface(
-            modifier = Modifier
-                .size(radius.times(0.4f))
-                .offset(
-                    x = radius.times(1.5f),
-                    y = radius.times(1.5f)
-                )
-                .clickable {
-                    onClick()
-                },
-            shape = CircleShape,
-            color = Color.White
+        Box(
+            modifier = modifier
+                .size(radius.times(2f))
+                .background(Color.Transparent),
         ) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                    0.2f
+            if (selectedImageUri != Uri.EMPTY) {
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = "Pet Profile Pic",
+                    modifier = modifier.clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
-            ) {
-                Icon(
-                    Icons.Outlined.Camera,
-                    contentDescription = null,
-                    modifier = Modifier.padding(1.dp)
+            } else {
+                Image(
+                    painterResource(errorImage),
+                    contentDescription = "Pet profile pic",
+                    modifier = Modifier.clip(CircleShape)
                 )
             }
+            Surface(
+                modifier = Modifier
+                    .size(radius.times(0.4f))
+                    .offset(
+                        x = radius.times(1.5f),
+                        y = radius.times(1.5f)
+                    ),
+                shape = CircleShape,
+                color = Color.White
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                        0.2f
+                    ),
+                    modifier = Modifier.clickable {
+                        onClick()
+                    }
+                ) {
+                    Icon(
+                        Icons.Outlined.Camera,
+                        contentDescription = null,
+                        modifier = Modifier.padding(1.dp)
+                    )
+                }
+            }
         }
+
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.W500
+            )
+
+        }
+
     }
 
 }
@@ -444,7 +477,6 @@ fun PetBreedField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     maxLines: Int = 1,
     readOnly: Boolean = false,
-    defaultValue: String = "",
     isOptional: Boolean = false,
     value: String = "",
     onValueChange: (String) -> Unit = { "" },
@@ -474,9 +506,9 @@ fun PetBreedField(
         OutlinedTextField(
             isError = errorMessage != null,
             supportingText = {
-                if (errorMessage != null) {
+                errorMessage?.let {
                     Text(
-                        text = errorMessage,
+                        text = it,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.W500
@@ -570,9 +602,9 @@ fun ProfileScreenField(
         OutlinedTextField(
             isError = errorMessage != null,
             supportingText = {
-                if (errorMessage != null) {
+                errorMessage?.let {
                     Text(
-                        text = errorMessage,
+                        text = it,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.W500
@@ -647,7 +679,10 @@ fun PetProfileHeader(
 }
 
 @Composable
-fun PetProfileBottomSection(modifier: Modifier = Modifier) {
+fun PetProfileBottomSection(
+    modifier: Modifier = Modifier,
+    petProfileViewModel: PetProfileViewModel
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -670,6 +705,7 @@ fun PetProfileBottomSection(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             Button(
                 onClick = {
+                    petProfileViewModel.saveProfile()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -704,9 +740,10 @@ fun BreedSheet(modifier: Modifier = Modifier, petProfileViewModel: PetProfileVie
     val searchQuery = searchUiState.query
     val breedList by remember(searchUiState.results) {
         derivedStateOf {
-            searchUiState.results
+            searchUiState.results.sortedBy { it.name.lowercase() }
         }
     }
+
     var showModalBottomSheet by petProfileViewModel.showModalSheet
     var skipPartially by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartially)

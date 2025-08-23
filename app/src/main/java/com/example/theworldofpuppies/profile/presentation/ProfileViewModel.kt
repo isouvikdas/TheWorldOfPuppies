@@ -12,13 +12,7 @@ class ProfileViewModel() : ViewModel() {
 
     fun onPetProfileClick(navController: NavController) {
         viewModelScope.launch {
-            navController.navigate(Screen.PetProfileScreen.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(Screen.PetProfileScreen.route)
         }
     }
 

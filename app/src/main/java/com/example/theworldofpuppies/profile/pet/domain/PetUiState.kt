@@ -1,12 +1,13 @@
 package com.example.theworldofpuppies.profile.pet.domain
 
+import android.net.Uri
 import com.example.theworldofpuppies.core.domain.util.Error
 import com.example.theworldofpuppies.profile.pet.domain.enums.Aggression
 import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
 import com.example.theworldofpuppies.profile.pet.domain.enums.Gender
 
 data class PetUiState(
-    val petPicture: String = "",
+    val petPicture: Uri = Uri.EMPTY,
     val name: String = "",
     val breed: DogBreed? = null,
     val age: String ="",

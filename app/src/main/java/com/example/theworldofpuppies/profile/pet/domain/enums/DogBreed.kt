@@ -109,12 +109,6 @@ enum class DogBreed(val breedName: String) {
     TIBETAN_MASTIFF("Tibetan Mastiff"),
     XL_BULLY("XL Bully"); // newly popular breed
 
-    companion object {
-        fun fromName(name: String): DogBreed? {
-            return entries.find { it.breedName.equals(name, ignoreCase = true) }
-        }
-    }
-
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombinations = listOf(
             name,

@@ -1,9 +1,11 @@
 package com.example.theworldofpuppies.profile.pet.presentation
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.theworldofpuppies.core.presentation.SearchUiState
+import com.example.theworldofpuppies.profile.pet.domain.PetEditUiState
 import com.example.theworldofpuppies.profile.pet.domain.PetUiState
 import com.example.theworldofpuppies.profile.pet.domain.enums.Aggression
 import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
@@ -19,75 +21,69 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class PetProfileViewModel() : ViewModel() {
+
+    // Original fetched data
     private val _petUiState = MutableStateFlow(PetUiState())
     val petUiState: StateFlow<PetUiState> = _petUiState.asStateFlow()
 
+    // User edits (all fields grouped in one state)
+    private val _editState = MutableStateFlow(PetEditUiState())
+    val editState: StateFlow<PetEditUiState> = _editState.asStateFlow()
+
+    // UI states
     private val _isEditing = MutableStateFlow(false)
     val isEditing: StateFlow<Boolean> = _isEditing.asStateFlow()
-
-    private val _changedBreed = MutableStateFlow<DogBreed?>(null)
-    val changedBreed: StateFlow<DogBreed?> = _changedBreed.asStateFlow()
-
-    private val _changeVaccinated = MutableStateFlow(false)
-    val changeVaccinated: StateFlow<Boolean> = _changeVaccinated.asStateFlow()
-
-    private val _changeAggression = MutableStateFlow<Aggression?>(null)
-    val changeAggression: StateFlow<Aggression?> = _changeAggression.asStateFlow()
-
-    private val _changeGender = MutableStateFlow<Gender?>(null)
-    val changeGender: StateFlow<Gender?> = _changeGender.asStateFlow()
-
-    private val _changeWeight = MutableStateFlow("")
-    val changeWeight: StateFlow<String> = _changeWeight.asStateFlow()
-
-    private val _changeAge = MutableStateFlow("")
-    val changeAge: StateFlow<String> = _changeAge.asStateFlow()
-
-    private val _changeName = MutableStateFlow("")
-    val changeName: StateFlow<String> = _changeName.asStateFlow()
 
     private val _showModalBottomSheet = mutableStateOf(false)
     val showModalSheet = _showModalBottomSheet
 
     private val _searchText = MutableStateFlow("")
-    val searchText = _searchText.asStateFlow()
+    val searchText: StateFlow<String> = _searchText.asStateFlow()
 
     private val _isSearching = MutableStateFlow(false)
-    val isSearching = _isSearching.asStateFlow()
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
     private val _breedList = MutableStateFlow(DogBreed.entries)
 
+    // ---------- field change handlers ----------
+
+    fun onPetPictureChange(uri: Uri?) {
+        _editState.update { it.copy(petPictureUri = uri) }
+    }
+
     fun onNameChange(name: String) {
-        _changeName.value = name
+        _editState.update { it.copy(name = name) }
     }
 
     fun onAgeChange(age: String) {
-        _changeAge.value = age
+        _editState.update { it.copy(age = age) }
     }
 
     fun onWeightChange(weight: String) {
-        _changeWeight.value = weight
+        _editState.update { it.copy(weight = weight) }
     }
 
     fun onAggressionChange(aggression: Aggression) {
-        _changeAggression.value = aggression
+        _editState.update { it.copy(aggression = aggression) }
     }
 
     fun onGenderChange(gender: Gender) {
-        _changeGender.value = gender
+        _editState.update { it.copy(gender = gender) }
     }
 
     fun onVaccinatedChange(vaccinated: Boolean) {
-        _changeVaccinated.value = vaccinated
+        _editState.update { it.copy(isVaccinated = vaccinated) }
     }
 
     fun selectBreed(breed: DogBreed) {
-        _changedBreed.value = breed
+        _editState.update { it.copy(breed = breed) }
         toggleModalBottomSheet()
     }
 
+    // ---------- search ----------
     fun onSearchTextChange(text: String) {
         _searchText.value = text
     }
@@ -106,9 +102,7 @@ class PetProfileViewModel() : ViewModel() {
                         _breedList.value
                     } else {
                         delay(300L)
-                        _breedList.value.filter {
-                            it.doesMatchSearchQuery(query)
-                        }
+                        _breedList.value.filter { it.doesMatchSearchQuery(query) }
                     }
                     emit(filtered)
                 } finally {
@@ -138,51 +132,40 @@ class PetProfileViewModel() : ViewModel() {
         SearchUiState()
     )
 
+    // ---------- validation ----------
     fun validateFields(): Boolean {
         var isValid = true
+        val current = petUiState.value
+        val edits = editState.value
 
-        val breedError = if (petUiState.value.breedError.isNullOrBlank()) {
-            isValid = false
-            "Please select a breed"
-        } else {
-            null
-        }
-        val nameError = if (petUiState.value.nameError.isNullOrBlank()) {
-            isValid = false
-            "Name cannot be empty"
-        } else {
-            null
-        }
-        val ageError = if (petUiState.value.ageError.isNullOrBlank()) {
-            isValid = false
-            "Age cannot be empty"
-        } else {
-            null
-        }
-        val genderError = if (petUiState.value.genderError.isNullOrBlank()) {
-            isValid = false
-            "Please select the gender"
-        } else {
-            null
-        }
-        val aggressionError = if (petUiState.value.aggressionError.isNullOrBlank()) {
-            isValid = false
-            "Please select the aggression level"
-        } else {
-            null
-        }
-        val petPictureError = if (petUiState.value.petPictureError.isNullOrBlank()) {
-            isValid = false
-            "Please put a profile picture"
-        } else {
-            null
-        }
-        val weightError = if (petUiState.value.weightError.isNullOrBlank()) {
-            isValid = false
-            "Weight cannot be empty"
-        } else {
-            null
-        }
+        val breedError = if ((edits.breed ?: current.breed) == null) {
+            isValid = false; "Please select a breed"
+        } else null
+
+        val nameError = if ((edits.name ?: current.name).isBlank()) {
+            isValid = false; "Name cannot be empty"
+        } else null
+
+        val ageError = if ((edits.age ?: current.age).isBlank()) {
+            isValid = false; "Age cannot be empty"
+        } else null
+
+        val genderError = if ((edits.gender ?: current.gender) == null) {
+            isValid = false; "Please select the gender"
+        } else null
+
+        val aggressionError = if ((edits.aggression ?: current.aggression) == null) {
+            isValid = false; "Please select the aggression level"
+        } else null
+
+        val petPictureError = if (current.petPicture == Uri.EMPTY) {
+            isValid = false; "Please put a profile picture"
+        } else null
+
+        val weightError = if ((edits.weight ?: current.weight).isBlank()) {
+            isValid = false; "Weight cannot be empty"
+        } else null
+
         _petUiState.update {
             it.copy(
                 breedError = breedError,
@@ -195,6 +178,32 @@ class PetProfileViewModel() : ViewModel() {
             )
         }
         return isValid
+    }
+
+    // ---------- save profile ----------
+    fun saveProfile() {
+        viewModelScope.launch {
+            if (validateFields()) {
+                val current = _petUiState.value
+                val edits = _editState.value
+                val updatedPet = current.copy(
+                    name = edits.name ?: current.name,
+                    age = edits.age ?: current.age,
+                    weight = edits.weight ?: current.weight,
+                    breed = edits.breed ?: current.breed,
+                    gender = edits.gender ?: current.gender,
+                    aggression = edits.aggression ?: current.aggression,
+                    isVaccinated = edits.isVaccinated ?: current.isVaccinated,
+                )
+                _petUiState.value = updatedPet
+                _editState.value = PetEditUiState() // reset edits
+
+            } else {
+                return@launch
+            }
+
+        }
+
 
     }
 }
