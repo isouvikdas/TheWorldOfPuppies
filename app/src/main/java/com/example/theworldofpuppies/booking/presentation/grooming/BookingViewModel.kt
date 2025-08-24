@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 class BookingViewModel(
@@ -33,11 +34,11 @@ class BookingViewModel(
         }
     }
 
-    fun onDateSelect(date: LocalDate, context: Context) {
+    fun onDateSelect(date: LocalDateTime, context: Context) {
         viewModelScope.launch {
             _bookingTimeUiState.update { it.copy(
                 selectedDate = date,
-                currentTime = LocalTime.now(),
+                currentTime = LocalDateTime.now(),
                 selectedSlot = null
             ) }
         }
@@ -99,7 +100,7 @@ class BookingViewModel(
                 _bookingTimeUiState.update {
                     it.copy(
                         isLoading = false,
-                        currentTime = LocalTime.now()
+                        currentTime = LocalDateTime.now()
                     )
                 }
             }

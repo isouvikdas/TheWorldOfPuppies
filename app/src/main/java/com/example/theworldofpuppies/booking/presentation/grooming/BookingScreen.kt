@@ -70,18 +70,18 @@ import com.example.theworldofpuppies.booking.domain.enums.Category
 import com.example.theworldofpuppies.booking.domain.grooming.GroomingSlot
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.core.presentation.util.formatDayOfMonth
 import com.example.theworldofpuppies.core.presentation.util.formatDayOfWeek
-import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
-import com.example.theworldofpuppies.core.presentation.util.toLocalDate
+import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
-import java.time.Instant
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,15 +115,27 @@ fun BookingScreen(
     val filteredTimeSlots = timeSlots.find { it.date == selectedDate }
     val currentTime = bookingTimeUiState.currentTime
     Log.i("time", currentTime.toString())
-    val finalTimeSlots =
-        filteredTimeSlots?.slots?.filter { it.startTime.isAfter(currentTime.plusHours(1)) }
+
+    val isItToday = selectedDate.toLocalDate() == currentTime.toLocalDate()
+    val finalTimeSlots = if (isItToday) {
+        filteredTimeSlots?.slots
+            ?.filter { it.startTime.isAfter(currentTime.plusHours(1)) }
             ?: emptyList()
+    } else {
+        filteredTimeSlots?.slots ?: emptyList()
+    }
+
     finalTimeSlots.forEach {
         Log.i("time", it.startTime.toString())
     }
     val selectedSlot = bookingTimeUiState.selectedSlot
 
-
+    val dateDisplayPattern = when (selectedDate.toLocalDate()) {
+        currentTime.toLocalDate() -> "'Today', dd MMM yyyy"
+        currentTime.toLocalDate().plusDays(1) -> "'Tomorrow', dd MMM yyyy"
+        currentTime.toLocalDate().minusDays(1) -> "'Yesterday', dd MMM yyyy"
+        else -> "EEEE, dd MMM yyyy"
+    }
 
     Scaffold(
         modifier = modifier
@@ -163,9 +175,9 @@ fun BookingScreen(
                                     horizontal = MaterialTheme.dimens.small1,
                                     vertical = MaterialTheme.dimens.extraSmall
                                 ),
-                            heading = formatEpochMillis(
-                                Instant.now().toEpochMilli(),
-                                pattern = "'Today', dd MMM yyyy"
+                            heading = formatDateTime(
+                                selectedDate,
+                                pattern = dateDisplayPattern
                             ),
                             bookingViewModel = bookingViewModel,
                             onShowDateDialogChange = { showDateDialog = it },
@@ -221,7 +233,7 @@ fun SelectDateSection(
     bookingViewModel: BookingViewModel,
     onShowDateDialogChange: (Boolean) -> Unit = {},
     timeSlots: List<GroomingSlot>,
-    selectedDate: LocalDate,
+    selectedDate: LocalDateTime,
     error: String? = null,
     context: Context,
     isLoading: Boolean,
@@ -293,7 +305,7 @@ fun SelectDateSection(
                             val isSelected = slot == selectedSlot
                             val isAvailable = slot.isAvailable
 
-                            val modifier = if (isAvailable) {
+                            val finalModifier = if (isAvailable) {
                                 Modifier
                                     .width(MaterialTheme.dimens.extraLarge1)
                                     .padding(vertical = 10.dp)
@@ -313,7 +325,7 @@ fun SelectDateSection(
                                 if (isSelected) Color.White else MaterialTheme.colorScheme.primary
 
                             Surface(
-                                modifier = modifier,
+                                modifier = finalModifier,
                                 color = containerColor,
                                 shape = RoundedCornerShape(16.dp)
                             ) {
@@ -324,7 +336,7 @@ fun SelectDateSection(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        "${slot.startTime} - ${slot.endTime}",
+                                        "${slot.startTime.toLocalTime()} - ${slot.endTime.toLocalTime()}",
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.SemiBold,
                                         color = contentColor
@@ -366,11 +378,11 @@ fun SelectDateSection(
 @Composable
 private fun DaySelectorCard(
     modifier: Modifier = Modifier,
-    selectedDate: LocalDate,
-    onDateSelect: (LocalDate) -> Unit = {}
+    selectedDate: LocalDateTime,
+    onDateSelect: (LocalDateTime) -> Unit = {}
 ) {
 
-    val today = LocalDate.now()
+    val today = LocalDateTime.now()
     val next7Days = (0..6).map { today.plusDays(it.toLong()) }
 
     LazyRow(
@@ -382,7 +394,7 @@ private fun DaySelectorCard(
     ) {
         items(next7Days) { date ->
 
-            val isSelected = date == selectedDate
+            val isSelected = date.toLocalDate() == selectedDate.toLocalDate()
             Surface(
                 modifier = Modifier
                     .wrapContentSize()
@@ -399,7 +411,7 @@ private fun DaySelectorCard(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        formatDayOfWeek(date),
+                        formatDayOfWeek(date.toLocalDate()),
                         style = MaterialTheme.typography.titleMedium,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -418,7 +430,7 @@ private fun DaySelectorCard(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                formatDayOfMonth(date),
+                                formatDayOfMonth(date.toLocalDate()),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -437,11 +449,11 @@ private fun DaySelectorCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerModal(
-    onDateSelected: (LocalDate?) -> Unit,
+    onDateSelected: (LocalDateTime?) -> Unit,
     onDismiss: () -> Unit,
-    selectedDate: LocalDate
+    selectedDate: LocalDateTime
 ) {
-    val initialMillis = selectedDate.toEpochMillis()
+    val initialMillis = selectedDate.toEpochMillis(zone = ZoneOffset.UTC)
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialMillis
     )
@@ -451,7 +463,7 @@ fun DatePickerModal(
         confirmButton = {
             TextButton(onClick = {
                 val selected = datePickerState.selectedDateMillis
-                    ?.toLocalDate()
+                    ?.toLocalDateTime()
                 onDateSelected(selected)
                 onDismiss()
             }) {

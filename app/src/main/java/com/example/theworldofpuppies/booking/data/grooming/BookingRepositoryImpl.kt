@@ -8,6 +8,7 @@ import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.core.presentation.util.toLocalTime
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class BookingRepositoryImpl(
     private val api: DummyGroomingBookingApi,
@@ -15,7 +16,7 @@ class BookingRepositoryImpl(
 ) : BookingRepository {
 
     override suspend fun getGroomingTimeSlots(
-        forDate: LocalDate
+        forDate: LocalDateTime
     ): Result<List<GroomingSlot>, NetworkError> {
         val token = userRepository.getToken()
             ?: return Result.Error(NetworkError.UNAUTHORIZED)
@@ -31,11 +32,7 @@ class BookingRepositoryImpl(
                     // Success with slots
                     response.success && response.data != null -> Result.Success(
                         response.data.map { dto ->
-                            GroomingSlot(
-                                startTime = dto.startTime.toLocalTime(),
-                                endTime = dto.endTime.toLocalTime(),
-                                isAvailable = dto.isAvailable
-                            )
+                            dto.toGroomingSlot()
                         }
                     )
 

@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class BookingTimeUiState (
-    val selectedDate: LocalDate = LocalDate.now(),
-    val currentTime: LocalTime = LocalTime.now(),
+    val selectedDate: LocalDateTime = LocalDateTime.now(),
+    val currentTime: LocalDateTime = LocalDateTime.now(),
     val selectedSlot: GroomingSlot? = null,
     val timeSlots: MutableList<GroomingSlotWithDate> = mutableListOf(),
     val isLoading: Boolean = false,

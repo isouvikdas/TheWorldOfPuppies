@@ -19,6 +19,12 @@ fun formatEpochMillis(epochMillis: Long, pattern: String = "dd MMM yyyy"): Strin
     return zonedDateTime.format(formatter)
 }
 
+fun formatDateTime(
+    date: LocalDateTime,
+    pattern: String = "EEEE dd MMM yyyy",
+    zone: ZoneId? = ZoneId.systemDefault()
+): String = date.atZone(zone).format(DateTimeFormatter.ofPattern(pattern))
+
 fun formatDayOfWeek(date: LocalDate): String =
     date.format(DateTimeFormatter.ofPattern("EEEEE")) // Mon, Tue…
 
@@ -29,7 +35,7 @@ fun Long.toLocalDate(): LocalDate =
     Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
 
 fun Long.toLocalDateTime(): LocalDateTime =
-    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDateTime()
+    Instant.ofEpochMilli(this).atZone(zoneId).toLocalDateTime()
 
 fun LocalDate.toEpochMillis(): Long =
     this.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -37,3 +43,10 @@ fun LocalDate.toEpochMillis(): Long =
 fun Long.toLocalTime(): LocalTime =
     Instant.ofEpochMilli(this).atZone(zoneId).toLocalTime()
 
+fun LocalDateTime.toEpochMillis(zone: ZoneId = ZoneId.systemDefault()): Long {
+    return this.atZone(zone).toInstant().toEpochMilli()
+}
+
+fun LocalDateTime.atTimeEpochMillis(time: LocalTime, zone: ZoneId = ZoneId.systemDefault()): Long {
+    return this.toLocalDate().atTime(time).toEpochMillis(zone)
+}
