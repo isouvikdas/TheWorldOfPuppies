@@ -18,7 +18,8 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
-import com.example.theworldofpuppies.booking.presentation.BookingScreen
+import com.example.theworldofpuppies.booking.presentation.grooming.BookingScreen
+import com.example.theworldofpuppies.booking.presentation.grooming.BookingViewModel
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
@@ -53,12 +54,11 @@ sealed class Screen(val route: String) {
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
     data object OrderHistoryScreen : Screen("OrderHistoryScreen")
+    data object BookingScreen : Screen("BookingScreen")
     data object GroomingScreen : Screen("GroomingScreen")
-
     data object PetProfileScreen : Screen("PetProfileScreen")
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -111,6 +111,8 @@ fun AppNavigation(
 
     val petProfileViewModel = koinViewModel<PetProfileViewModel>()
     val petProfileUiState by petProfileViewModel.petUiState.collectAsStateWithLifecycle()
+
+    val bookingViewModel = koinViewModel<BookingViewModel>()
 
     NavHost(
         navController = navController,
@@ -194,7 +196,7 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            BookingScreen()
+            MessageScreen()
         }
 
         composable(route = BottomNavigationItems.Shop.route) {
@@ -386,6 +388,21 @@ fun AppNavigation(
                 petUiState = petProfileUiState,
                 petProfileViewModel = petProfileViewModel
 
+            )
+        }
+        composable(route = Screen.BookingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            BookingScreen(
+                navController = navController,
+                bookingViewModel = bookingViewModel,
+                addressUiState = addressUiState,
+                addressViewModel = addressViewModel
             )
         }
 

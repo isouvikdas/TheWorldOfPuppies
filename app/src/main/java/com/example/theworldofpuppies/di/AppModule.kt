@@ -1,6 +1,8 @@
 package com.example.theworldofpuppies.di
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.Room
 import com.example.theworldofpuppies.address.data.AddressRepositoryImpl
 import com.example.theworldofpuppies.address.data.local.DummyAddressApi
@@ -12,6 +14,10 @@ import com.example.theworldofpuppies.auth.domain.AuthApi
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
+import com.example.theworldofpuppies.booking.data.grooming.BookingRepositoryImpl
+import com.example.theworldofpuppies.booking.data.grooming.DummyGroomingBookingApi
+import com.example.theworldofpuppies.booking.domain.grooming.BookingRepository
+import com.example.theworldofpuppies.booking.presentation.grooming.BookingViewModel
 import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
@@ -49,6 +55,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
+@RequiresApi(Build.VERSION_CODES.O)
 val appModule = module {
     single { HttpClientFactory.create(CIO.create()) }
     single { androidContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
@@ -69,6 +76,7 @@ val appModule = module {
     singleOf(::OrderApi)
     singleOf(::DummyApi)
     singleOf(::GroomingApi)
+    singleOf(::DummyGroomingBookingApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -81,6 +89,7 @@ val appModule = module {
     singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
     singleOf(::AddressRepositoryImpl).bind<AddressRepository>()
     singleOf(::GroomingRepositoryImpl).bind<GroomingRepository>()
+    singleOf(::BookingRepositoryImpl).bind<BookingRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -92,4 +101,5 @@ val appModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::GroomingViewModel)
     viewModelOf(::PetProfileViewModel)
+    viewModelOf(::BookingViewModel)
 }

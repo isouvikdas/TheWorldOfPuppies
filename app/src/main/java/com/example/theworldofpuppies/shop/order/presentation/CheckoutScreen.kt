@@ -81,7 +81,6 @@ fun CheckoutScreen(
     addressUiState: AddressUiState,
     orderUiState: OrderUiState
 ) {
-
     val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
@@ -163,8 +162,11 @@ fun CheckoutScreen(
                                 .padding(horizontal = MaterialTheme.dimens.small1),
                             selectedAddress = selectedAddress,
                             addressViewModel = addressViewModel,
-                            orderViewModel = orderViewModel,
-                            navController = navController
+                            onAddressChangeClick = {
+                                orderViewModel.onAddressChangeClick(navController)
+                            },
+                            navController = navController,
+                            heading = "Shipping Address"
                         )
                     }
 
@@ -214,8 +216,9 @@ fun AddressSection(
     modifier: Modifier = Modifier,
     selectedAddress: Address?,
     addressViewModel: AddressViewModel,
-    orderViewModel: OrderViewModel,
-    navController: NavController
+    onAddressChangeClick: () -> Unit,
+    navController: NavController,
+    heading: String
 ) {
     Column(
         modifier = modifier
@@ -228,7 +231,7 @@ fun AddressSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Shipping Address",
+                text = heading,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -239,7 +242,7 @@ fun AddressSection(
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
                     .bounceClick {
-                        orderViewModel.onAddressChangeClick(navController)
+                        onAddressChangeClick()
                     }
 
             )

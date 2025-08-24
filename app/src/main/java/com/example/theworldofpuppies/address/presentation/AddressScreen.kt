@@ -227,8 +227,7 @@ fun AddressCard(
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
-                        if (!isCheckoutScreen && isSelected) {
+                        if (isSelected) {
                             Icon(
                                 Icons.Default.CheckCircle,
                                 contentDescription = "checked",
