@@ -40,7 +40,7 @@ sealed class DrawerItems(
         }
     )
     data object Booking : DrawerItems(
-        route = Screen.BookingScreen.route,
+        route = Screen.BookingGroomingScreen.route,
         title = "Booking",
         icon = { modifier ->
             Icon(

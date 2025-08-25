@@ -1,7 +1,5 @@
 package com.example.theworldofpuppies.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,8 +16,8 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
-import com.example.theworldofpuppies.booking.presentation.grooming.BookingScreen
-import com.example.theworldofpuppies.booking.presentation.grooming.BookingViewModel
+import com.example.theworldofpuppies.booking.presentation.grooming.BookingGroomingScreen
+import com.example.theworldofpuppies.booking.presentation.grooming.GroomingBookingViewModel
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
@@ -54,7 +52,7 @@ sealed class Screen(val route: String) {
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
     data object OrderHistoryScreen : Screen("OrderHistoryScreen")
-    data object BookingScreen : Screen("BookingScreen")
+    data object BookingGroomingScreen : Screen("BookingGroomingScreen")
     data object GroomingScreen : Screen("GroomingScreen")
     data object PetProfileScreen : Screen("PetProfileScreen")
 }
@@ -112,7 +110,7 @@ fun AppNavigation(
     val petProfileViewModel = koinViewModel<PetProfileViewModel>()
     val petProfileUiState by petProfileViewModel.petUiState.collectAsStateWithLifecycle()
 
-    val bookingViewModel = koinViewModel<BookingViewModel>()
+    val groomingBookingViewModel = koinViewModel<GroomingBookingViewModel>()
 
     NavHost(
         navController = navController,
@@ -390,7 +388,7 @@ fun AppNavigation(
 
             )
         }
-        composable(route = Screen.BookingScreen.route) {
+        composable(route = Screen.BookingGroomingScreen.route) {
             hideAllChrome(
                 onBottomBarVisibilityChanged,
                 onTopBarVisibilityChanged,
@@ -398,11 +396,12 @@ fun AppNavigation(
                 onGesturesChanged,
                 searchIconVisibilityChanged
             )
-            BookingScreen(
+            BookingGroomingScreen(
                 navController = navController,
-                bookingViewModel = bookingViewModel,
+                groomingBookingViewModel = groomingBookingViewModel,
                 addressUiState = addressUiState,
-                addressViewModel = addressViewModel
+                addressViewModel = addressViewModel,
+                groomingUiState = groomingUiState
             )
         }
 

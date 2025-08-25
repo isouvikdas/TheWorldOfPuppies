@@ -64,11 +64,14 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.domain.enums.Category
 import com.example.theworldofpuppies.booking.domain.grooming.GroomingSlot
+import com.example.theworldofpuppies.booking.presentation.component.BookingSuccessDialog
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
+import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.core.presentation.util.formatDayOfMonth
@@ -76,6 +79,7 @@ import com.example.theworldofpuppies.core.presentation.util.formatDayOfWeek
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
 import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
@@ -85,12 +89,13 @@ import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookingScreen(
+fun BookingGroomingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     addressViewModel: AddressViewModel,
     addressUiState: AddressUiState,
-    bookingViewModel: BookingViewModel
+    groomingBookingViewModel: GroomingBookingViewModel,
+    groomingUiState: GroomingUiState
 ) {
     val context = LocalContext.current
 
@@ -98,16 +103,21 @@ fun BookingScreen(
         state = rememberTopAppBarState()
     )
 
+    val groomingBookingUiState by groomingBookingViewModel.groomingBookingUiState.collectAsStateWithLifecycle()
+
     val selectedAddress = addressUiState.addresses.find { it.isSelected }
 
-    val bookingTimeUiState by bookingViewModel.bookingTimeUiState.collectAsStateWithLifecycle()
+    val bookingTimeUiState by groomingBookingViewModel.bookingTimeUiState.collectAsStateWithLifecycle()
 
     val selectedDate = bookingTimeUiState.selectedDate
 
     var showDateDialog by remember { mutableStateOf(false) }
 
+    val selectedSubService =
+        groomingUiState.subServices.find { it.id == groomingUiState.selectedSubServiceId }
+
     LaunchedEffect(Unit) {
-        bookingViewModel.getBookingTimeSlots(context)
+        groomingBookingViewModel.getBookingTimeSlots(context)
     }
 
     val isLoading = bookingTimeUiState.isLoading
@@ -137,6 +147,26 @@ fun BookingScreen(
         else -> "EEEE, dd MMM yyyy"
     }
 
+    if (groomingBookingUiState.showBookingSuccessDialog && groomingBookingUiState.booking != null) {
+        BookingSuccessDialog(
+            bookingId = groomingBookingUiState.booking?.publicBookingId ?: "",
+            onBookingView = {
+                groomingBookingViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Home.route
+                )
+                groomingBookingViewModel.resetUiStates()
+            },
+            onDismiss = {
+                groomingBookingViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Home.route
+                )
+                groomingBookingViewModel.resetUiStates()
+            }
+        )
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -151,7 +181,7 @@ fun BookingScreen(
             DatePickerModal(
                 onDateSelected = { date ->
                     date?.let { it ->
-                        bookingViewModel.onDateSelect(it, context)
+                        groomingBookingViewModel.onDateSelect(it, context)
                     }
                 },
                 onDismiss = { showDateDialog = false },
@@ -179,7 +209,7 @@ fun BookingScreen(
                                 selectedDate,
                                 pattern = dateDisplayPattern
                             ),
-                            bookingViewModel = bookingViewModel,
+                            groomingBookingViewModel = groomingBookingViewModel,
                             onShowDateDialogChange = { showDateDialog = it },
                             timeSlots = finalTimeSlots,
                             selectedDate = selectedDate,
@@ -188,7 +218,7 @@ fun BookingScreen(
                             isLoading = isLoading,
                             selectedSlot = selectedSlot,
                             onTimeSlotSelection = { slot ->
-                                bookingViewModel.onTimeSlotSelection(
+                                groomingBookingViewModel.onTimeSlotSelection(
                                     slot
                                 )
                             }
@@ -202,12 +232,13 @@ fun BookingScreen(
                             selectedAddress = selectedAddress,
                             addressViewModel = addressViewModel,
                             onAddressChangeClick = {
-                                bookingViewModel.onAddressChangeClick(
+                                groomingBookingViewModel.onAddressChangeClick(
                                     navController
                                 )
                             },
                             navController = navController,
-                            heading = "Service Address"
+                            heading = "Service Address",
+                            addressList = addressUiState.addresses
                         )
                     }
                     item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.large2.times(2))) }
@@ -217,7 +248,12 @@ fun BookingScreen(
                 BookingBottomSection(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .zIndex(1f)
+                        .zIndex(1f),
+                    subService = selectedSubService,
+                    selectedAddress = selectedAddress,
+                    selectedSlot = selectedSlot,
+                    context = context,
+                    groomingBookingViewModel = groomingBookingViewModel
                 )
 
             }
@@ -230,7 +266,7 @@ fun BookingScreen(
 fun SelectDateSection(
     modifier: Modifier = Modifier,
     heading: String,
-    bookingViewModel: BookingViewModel,
+    groomingBookingViewModel: GroomingBookingViewModel,
     onShowDateDialogChange: (Boolean) -> Unit = {},
     timeSlots: List<GroomingSlot>,
     selectedDate: LocalDateTime,
@@ -274,7 +310,7 @@ fun SelectDateSection(
         DaySelectorCard(
             selectedDate = selectedDate,
             onDateSelect = {
-                bookingViewModel.onDateSelect(it, context)
+                groomingBookingViewModel.onDateSelect(it, context)
             }
         )
 
@@ -292,7 +328,12 @@ fun SelectDateSection(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.padding(100.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(
+                                vertical = 50.dp,
+                                horizontal = MaterialTheme.dimens.small1
+                            )
+                        )
                     }
                 } else if (timeSlots.isNotEmpty()) {
                     FlowRow(
@@ -361,9 +402,11 @@ fun SelectDateSection(
                         Text(
                             error ?: "No slots available for the selected date",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            modifier = Modifier.padding(vertical = 100.dp, horizontal = 10.dp)
+                            fontWeight = FontWeight.W500,
+                            modifier = Modifier.padding(
+                                vertical = 50.dp,
+                                horizontal = MaterialTheme.dimens.small1
+                            )
                         )
 
                     }
@@ -492,7 +535,7 @@ fun DatePickerModal(
 }
 
 @Composable
-fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService? = null) {
+fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService?) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -511,13 +554,16 @@ fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService? = 
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(end = 5.dp)
             )
-            Text(
-                "(Bath & Basic Grooming)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
+            subService?.name?.let {
+                Text(
+                    "($it)",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+
+            }
 
         }
 
@@ -528,27 +574,39 @@ fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService? = 
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
-            Text(
-                formatCurrency(1199.00),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                textDecoration = TextDecoration.LineThrough,
-                fontStyle = FontStyle.Italic,
-                color = Color.Gray.copy(0.9f),
-                modifier = Modifier.padding(end = 10.dp)
-            )
-            Text(
-                formatCurrency(900.00),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
+            subService?.price?.let {
+                Text(
+                    formatCurrency(it),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    textDecoration = TextDecoration.LineThrough,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray.copy(0.9f),
+                    modifier = Modifier.padding(end = 10.dp)
+                )
+
+            }
+            subService?.discountedPrice?.let {
+                Text(
+                    formatCurrency(it),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
 
         }
     }
 }
 
 @Composable
-fun BookingBottomSection(modifier: Modifier = Modifier) {
+fun BookingBottomSection(
+    modifier: Modifier = Modifier,
+    subService: SubService? = null,
+    selectedSlot: GroomingSlot? = null,
+    selectedAddress: Address? = null,
+    groomingBookingViewModel: GroomingBookingViewModel,
+    context: Context
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -569,9 +627,16 @@ fun BookingBottomSection(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ServiceSummaryCard()
+            ServiceSummaryCard(subService = subService)
             Button(
                 onClick = {
+                    groomingBookingViewModel.bookGrooming(
+                        subService = subService,
+                        selectedSlot = selectedSlot,
+                        selectedDate = selectedSlot?.startTime?.toLocalDate()?.atStartOfDay(),
+                        selectedAddress = selectedAddress,
+                        context = context
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -584,9 +649,10 @@ fun BookingBottomSection(modifier: Modifier = Modifier) {
                     disabledContainerColor = Color.LightGray,
                     disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 ),
+                enabled = subService != null && selectedSlot != null && selectedAddress != null
             ) {
                 Text(
-                    text = "Pay",
+                    text = "Book Now",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.SemiBold
                 )

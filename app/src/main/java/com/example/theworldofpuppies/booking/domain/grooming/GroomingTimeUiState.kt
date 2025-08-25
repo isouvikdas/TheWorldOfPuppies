@@ -1,10 +1,8 @@
 package com.example.theworldofpuppies.booking.domain.grooming
 
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 
-data class BookingTimeUiState (
+data class GroomingTimeUiState (
     val selectedDate: LocalDateTime = LocalDateTime.now(),
     val currentTime: LocalDateTime = LocalDateTime.now(),
     val selectedSlot: GroomingSlot? = null,
