@@ -18,14 +18,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,12 +85,12 @@ fun CheckoutScreen(
     addressUiState: AddressUiState,
     orderUiState: OrderUiState
 ) {
-
     val cartUiState by cartViewModel.cartUiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
     val selectedAddress = addressUiState.addresses.find { it.isSelected }
+    val addressList = addressUiState.addresses
 
     val selectedPaymentMethod by orderViewModel.selectedPaymentMethod.collectAsStateWithLifecycle()
 
@@ -163,8 +167,12 @@ fun CheckoutScreen(
                                 .padding(horizontal = MaterialTheme.dimens.small1),
                             selectedAddress = selectedAddress,
                             addressViewModel = addressViewModel,
-                            orderViewModel = orderViewModel,
-                            navController = navController
+                            onAddressChangeClick = {
+                                orderViewModel.onAddressChangeClick(navController)
+                            },
+                            navController = navController,
+                            heading = "Shipping Address",
+                            addressList = addressList
                         )
                     }
 
@@ -214,8 +222,10 @@ fun AddressSection(
     modifier: Modifier = Modifier,
     selectedAddress: Address?,
     addressViewModel: AddressViewModel,
-    orderViewModel: OrderViewModel,
-    navController: NavController
+    onAddressChangeClick: () -> Unit,
+    navController: NavController,
+    heading: String,
+    addressList: List<Address>? = null
 ) {
     Column(
         modifier = modifier
@@ -228,29 +238,70 @@ fun AddressSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Shipping Address",
+                text = heading,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
-            Text(
-                text = "Change",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier
-                    .bounceClick {
-                        orderViewModel.onAddressChangeClick(navController)
-                    }
-
-            )
+            if (!addressList.isNullOrEmpty()) {
+                Text(
+                    text = "Change",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.W500,
+                    modifier = Modifier
+                        .bounceClick {
+                            onAddressChangeClick()
+                        }
+                )
+            }
         }
-        selectedAddress?.let {
+        if (selectedAddress != null && !addressList.isNullOrEmpty()) {
             AddressCard(
-                address = it,
+                address = selectedAddress,
                 addressViewModel = addressViewModel,
                 isCheckoutScreen = true,
                 navController = navController
             )
+        }
+
+        if (addressList.isNullOrEmpty()) {
+            Surface(
+                modifier = Modifier.wrapContentSize(),
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Surface(color = Color.LightGray.copy(0.4f)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(vertical = 50.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "You haven't added any address yet",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.W500
+                        )
+                        FloatingActionButton(
+                            onClick = {
+                                addressViewModel.onAddAddressClick(navController)
+                            },
+                            shape = CircleShape,
+                            elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null
+                            )
+                        }
+
+                    }
+                }
+            }
         }
     }
 }

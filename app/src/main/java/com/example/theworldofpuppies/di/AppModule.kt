@@ -12,6 +12,10 @@ import com.example.theworldofpuppies.auth.domain.AuthApi
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
+import com.example.theworldofpuppies.booking.data.grooming.BookingGroomingRepositoryImpl
+import com.example.theworldofpuppies.booking.data.grooming.DummyGroomingBookingApi
+import com.example.theworldofpuppies.booking.domain.grooming.BookingGroomingRepository
+import com.example.theworldofpuppies.booking.presentation.grooming.GroomingBookingViewModel
 import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
@@ -69,6 +73,7 @@ val appModule = module {
     singleOf(::OrderApi)
     singleOf(::DummyApi)
     singleOf(::GroomingApi)
+    singleOf(::DummyGroomingBookingApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -81,6 +86,7 @@ val appModule = module {
     singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
     singleOf(::AddressRepositoryImpl).bind<AddressRepository>()
     singleOf(::GroomingRepositoryImpl).bind<GroomingRepository>()
+    singleOf(::BookingGroomingRepositoryImpl).bind<BookingGroomingRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -92,4 +98,5 @@ val appModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::GroomingViewModel)
     viewModelOf(::PetProfileViewModel)
+    viewModelOf(::GroomingBookingViewModel)
 }
