@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.services.grooming.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +54,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
@@ -61,6 +64,7 @@ import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
 import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
@@ -80,6 +84,14 @@ fun GroomingScreen(
     val isRefreshing = grooming != null && groomingUiState.isLoading
 
     val selectedServiceId = groomingUiState.selectedSubServiceId
+
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        groomingViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
     val pullToRefreshState = rememberPullToRefreshState()
@@ -276,7 +288,11 @@ fun GroomingScreen(
 
 
 
-                        GroomingBottomSection(modifier = Modifier.align(Alignment.BottomCenter))
+                        GroomingBottomSection(
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            onBookNowClick = {
+                                groomingViewModel.onBookNowClick(navController)
+                            })
                     }
 
                 }
@@ -435,7 +451,7 @@ fun ServiceFeatureItem(
 }
 
 @Composable
-fun GroomingBottomSection(modifier: Modifier = Modifier) {
+fun GroomingBottomSection(modifier: Modifier = Modifier, onBookNowClick: () -> Unit) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -458,6 +474,7 @@ fun GroomingBottomSection(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             Button(
                 onClick = {
+                    onBookNowClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()

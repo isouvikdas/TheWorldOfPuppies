@@ -12,13 +12,9 @@ import io.ktor.client.request.parameter
 
 class GroomingApi(private val httpClient: HttpClient) {
 
-    suspend fun getServiceById(
-        token: String
-    ): Result<ApiResponse<GroomingDto>, NetworkError> {
+    suspend fun getServiceById(): Result<ApiResponse<GroomingDto>, NetworkError> {
         return safeCall {
-            httpClient.get(constructUrl("bookings/services/id")) {
-                parameter("id", "grooming")
-            }
+            httpClient.get(constructUrl("booking/service/grooming"))
         }
     }
 }

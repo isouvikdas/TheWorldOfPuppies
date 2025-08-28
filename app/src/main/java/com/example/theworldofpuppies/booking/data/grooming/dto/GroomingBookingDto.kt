@@ -10,7 +10,8 @@ import kotlinx.serialization.Serializable
 data class GroomingBookingDto(
     val id: String,
     val publicBookingId: String,
-    val providerId: String,
+    val providerId: String? = null,
+    val petId: String,
     val serviceSnapshot: ServiceSnapshot,
     val address: AddressDto,
     val basePrice: Double,
@@ -21,5 +22,5 @@ data class GroomingBookingDto(
     val paymentStatus: PaymentStatus,
     val creationDate: Long,
     val serviceDate: Long,
-    val serviceSlot: Long
+    val groomingTimeSlot: GroomingSlotDto
 )

@@ -3,13 +3,17 @@ package com.example.theworldofpuppies.services.grooming.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.grooming.domain.GroomingRepository
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,8 +27,26 @@ class GroomingViewModel(
     private val _groomingUiSate = MutableStateFlow(GroomingUiState())
     val groomingUiState = _groomingUiSate.asStateFlow()
 
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent: SharedFlow<String> = _toastEvent
+
     init {
         observeAuthEvents()
+    }
+
+    suspend fun showToast(message: String) {
+        _toastEvent.emit(message)
+    }
+
+    fun onBookNowClick(navController: NavController) {
+        viewModelScope.launch {
+            if (groomingUiState.value.selectedSubServiceId.isNotEmpty()) {
+                navController.navigate(Screen.BookingGroomingScreen.route)
+            } else {
+                showToast("Please select a service")
+                return@launch
+            }
+        }
     }
 
     fun loadGrooming(forceRefresh: Boolean = false) {
