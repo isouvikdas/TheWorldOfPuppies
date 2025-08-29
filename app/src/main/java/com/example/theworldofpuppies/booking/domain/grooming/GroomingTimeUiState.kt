@@ -6,7 +6,8 @@ data class GroomingTimeUiState (
     val selectedDate: LocalDateTime = LocalDateTime.now(),
     val currentTime: LocalDateTime = LocalDateTime.now(),
     val selectedSlot: GroomingSlot? = null,
-    val timeSlots: MutableList<GroomingSlotWithDate> = mutableListOf(),
+    val timeSlots: List<GroomingSlotWithDate> = emptyList(),
+    val slotPerDate: List<GroomingSlot> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )

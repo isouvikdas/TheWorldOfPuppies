@@ -56,8 +56,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -116,28 +118,27 @@ fun BookingGroomingScreen(
     val selectedSubService =
         groomingUiState.subServices.find { it.id == groomingUiState.selectedSubServiceId }
 
+    val serviceId =
+        groomingUiState.grooming?.id ?: Category.GROOMING.name.toLowerCase(locale = Locale("en-US"))
+
     LaunchedEffect(Unit) {
-        groomingBookingViewModel.getBookingTimeSlots(context)
+        if (bookingTimeUiState.timeSlots.isEmpty()) {
+            groomingBookingViewModel.getBookingTimeSlots(context)
+        }
     }
 
     val isLoading = bookingTimeUiState.isLoading
-    val timeSlots = bookingTimeUiState.timeSlots
-    val filteredTimeSlots = timeSlots.find { it.date == selectedDate }
+    val filteredTimeSlots = bookingTimeUiState.slotPerDate
     val currentTime = bookingTimeUiState.currentTime
-    Log.i("time", currentTime.toString())
 
     val isItToday = selectedDate.toLocalDate() == currentTime.toLocalDate()
     val finalTimeSlots = if (isItToday) {
-        filteredTimeSlots?.slots
-            ?.filter { it.startTime.isAfter(currentTime.plusHours(1)) }
-            ?: emptyList()
+        filteredTimeSlots
+            .filter { it.startTime.isAfter(currentTime.plusHours(1)) }
     } else {
-        filteredTimeSlots?.slots ?: emptyList()
+        filteredTimeSlots
     }
 
-    finalTimeSlots.forEach {
-        Log.i("time", it.startTime.toString())
-    }
     val selectedSlot = bookingTimeUiState.selectedSlot
 
     val dateDisplayPattern = when (selectedDate.toLocalDate()) {
@@ -167,98 +168,116 @@ fun BookingGroomingScreen(
         )
     }
 
-    Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
-        topBar = {
-            BookingHeader(scrollBehavior = scrollBehavior, navController = navController)
-        }
-    ) {
-        if (showDateDialog) {
-            DatePickerModal(
-                onDateSelected = { date ->
-                    date?.let { it ->
-                        groomingBookingViewModel.onDateSelect(it, context)
-                    }
-                },
-                onDismiss = { showDateDialog = false },
-                selectedDate = selectedDate,
-            )
-        }
-        Surface(
-            modifier = Modifier
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(it),
-            color = Color.Transparent
+                .navigationBarsPadding()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
+            topBar = {
+                BookingHeader(scrollBehavior = scrollBehavior, navController = navController)
+            }
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    item {
-                        SelectDateSection(
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = MaterialTheme.dimens.small1,
-                                    vertical = MaterialTheme.dimens.extraSmall
+            if (showDateDialog) {
+                DatePickerModal(
+                    onDateSelected = { date ->
+                        date?.let { it ->
+                            groomingBookingViewModel.onDateSelect(it)
+                        }
+                    },
+                    onDismiss = { showDateDialog = false },
+                    selectedDate = selectedDate,
+                )
+            }
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                color = Color.Transparent
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        item {
+                            SelectDateSection(
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = MaterialTheme.dimens.small1,
+                                        vertical = MaterialTheme.dimens.extraSmall
+                                    ),
+                                heading = formatDateTime(
+                                    selectedDate,
+                                    pattern = dateDisplayPattern
                                 ),
-                            heading = formatDateTime(
-                                selectedDate,
-                                pattern = dateDisplayPattern
-                            ),
-                            groomingBookingViewModel = groomingBookingViewModel,
-                            onShowDateDialogChange = { showDateDialog = it },
-                            timeSlots = finalTimeSlots,
-                            selectedDate = selectedDate,
-                            context = context,
-                            error = bookingTimeUiState.errorMessage,
-                            isLoading = isLoading,
-                            selectedSlot = selectedSlot,
-                            onTimeSlotSelection = { slot ->
-                                groomingBookingViewModel.onTimeSlotSelection(
-                                    slot
-                                )
-                            }
-                        )
+                                groomingBookingViewModel = groomingBookingViewModel,
+                                onShowDateDialogChange = { showDateDialog = it },
+                                timeSlots = finalTimeSlots,
+                                selectedDate = selectedDate,
+                                error = bookingTimeUiState.errorMessage,
+                                isLoading = isLoading,
+                                selectedSlot = selectedSlot,
+                                onTimeSlotSelection = { slot ->
+                                    groomingBookingViewModel.onTimeSlotSelection(
+                                        slot
+                                    )
+                                }
+                            )
+                        }
+                        item {
+                            AddressSection(
+                                modifier = Modifier
+                                    .padding(vertical = MaterialTheme.dimens.extraSmall)
+                                    .padding(horizontal = MaterialTheme.dimens.small1),
+                                selectedAddress = selectedAddress,
+                                addressViewModel = addressViewModel,
+                                onAddressChangeClick = {
+                                    groomingBookingViewModel.onAddressChangeClick(
+                                        navController
+                                    )
+                                },
+                                navController = navController,
+                                heading = "Service Address",
+                                addressList = addressUiState.addresses
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.large2.times(2))) }
+
                     }
-                    item {
-                        AddressSection(
-                            modifier = Modifier
-                                .padding(vertical = MaterialTheme.dimens.extraSmall)
-                                .padding(horizontal = MaterialTheme.dimens.small1),
-                            selectedAddress = selectedAddress,
-                            addressViewModel = addressViewModel,
-                            onAddressChangeClick = {
-                                groomingBookingViewModel.onAddressChangeClick(
-                                    navController
-                                )
-                            },
-                            navController = navController,
-                            heading = "Service Address",
-                            addressList = addressUiState.addresses
-                        )
-                    }
-                    item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.large2.times(2))) }
+
+                    BookingBottomSection(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .zIndex(1f),
+                        subService = selectedSubService,
+                        selectedAddress = selectedAddress,
+                        selectedSlot = selectedSlot,
+                        context = context,
+                        groomingBookingViewModel = groomingBookingViewModel,
+                        serviceId = serviceId
+                    )
 
                 }
-
-                BookingBottomSection(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .zIndex(1f),
-                    subService = selectedSubService,
-                    selectedAddress = selectedAddress,
-                    selectedSlot = selectedSlot,
-                    context = context,
-                    groomingBookingViewModel = groomingBookingViewModel
-                )
-
             }
         }
+
+        if (groomingBookingUiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent.copy(0.2f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        }
+
     }
+
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -271,7 +290,6 @@ fun SelectDateSection(
     timeSlots: List<GroomingSlot>,
     selectedDate: LocalDateTime,
     error: String? = null,
-    context: Context,
     isLoading: Boolean,
     selectedSlot: GroomingSlot?,
     onTimeSlotSelection: (GroomingSlot) -> Unit = {}
@@ -310,7 +328,7 @@ fun SelectDateSection(
         DaySelectorCard(
             selectedDate = selectedDate,
             onDateSelect = {
-                groomingBookingViewModel.onDateSelect(it, context)
+                groomingBookingViewModel.onDateSelect(it)
             }
         )
 
@@ -496,7 +514,7 @@ fun DatePickerModal(
     onDismiss: () -> Unit,
     selectedDate: LocalDateTime
 ) {
-    val initialMillis = selectedDate.toEpochMillis(zone = ZoneOffset.UTC)
+    val initialMillis = selectedDate.toEpochMillis()
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialMillis
     )
@@ -605,7 +623,8 @@ fun BookingBottomSection(
     selectedSlot: GroomingSlot? = null,
     selectedAddress: Address? = null,
     groomingBookingViewModel: GroomingBookingViewModel,
-    context: Context
+    context: Context,
+    serviceId: String
 ) {
     Surface(
         modifier = modifier
@@ -635,7 +654,8 @@ fun BookingBottomSection(
                         selectedSlot = selectedSlot,
                         selectedDate = selectedSlot?.startTime?.toLocalDate()?.atStartOfDay(),
                         selectedAddress = selectedAddress,
-                        context = context
+                        context = context,
+                        serviceId = serviceId
                     )
                 },
                 modifier = Modifier

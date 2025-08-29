@@ -14,6 +14,7 @@ import com.example.theworldofpuppies.booking.domain.grooming.GroomingTimeUiState
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.grooming.domain.Grooming
 import com.example.theworldofpuppies.services.grooming.domain.SubService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import kotlin.collections.emptyList
 
 class GroomingBookingViewModel(
     private val bookingGroomingRepository: BookingGroomingRepository
@@ -52,17 +54,19 @@ class GroomingBookingViewModel(
         }
     }
 
-    fun onDateSelect(date: LocalDateTime, context: Context) {
+    fun onDateSelect(date: LocalDateTime) {
         viewModelScope.launch {
+            val timeSlots = _groomingTimeUiState.value.timeSlots
+            val slotPerDate = getSlotPerDate(selectedDate = date, timeSlots = timeSlots)
             _groomingTimeUiState.update {
                 it.copy(
                     selectedDate = date,
                     currentTime = LocalDateTime.now(),
-                    selectedSlot = null
+                    selectedSlot = null,
+                    slotPerDate = slotPerDate
                 )
             }
         }
-        getBookingTimeSlots(context) // refresh slots on date change
     }
 
     fun onTimeSlotSelection(timeSlot: GroomingSlot) {
@@ -75,15 +79,7 @@ class GroomingBookingViewModel(
         viewModelScope.launch {
             _groomingTimeUiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val state = _groomingTimeUiState.value
-                val selectedDate = state.selectedDate
-                val existingTimeSlots = state.timeSlots
-                val alreadyExists = existingTimeSlots.any { it.date == selectedDate }
-                if (alreadyExists) {
-                    return@launch
-                }
-                delay(2000)
-                when (val result = bookingGroomingRepository.getGroomingTimeSlots(selectedDate)) {
+                when (val result = bookingGroomingRepository.getGroomingTimeSlots()) {
                     is Result.Success -> {
                         val slots = result.data
                         if (slots.isEmpty()) {
@@ -94,11 +90,14 @@ class GroomingBookingViewModel(
                             }
                         } else {
                             val timeSlotsWithDate =
-                                GroomingSlotWithDate(date = selectedDate, slots = slots)
-                            val updatedSlots = existingTimeSlots + timeSlotsWithDate
+                                filterDateTime(slots = slots)
+                            val selectedDate = _groomingTimeUiState.value.selectedDate
+                            val slotPerDate = getSlotPerDate(selectedDate = selectedDate, timeSlots = timeSlotsWithDate)
+
                             _groomingTimeUiState.update {
                                 it.copy(
-                                    timeSlots = updatedSlots.toMutableList()
+                                    timeSlots = timeSlotsWithDate,
+                                    slotPerDate = slotPerDate
                                 )
                             }
                         }
@@ -119,8 +118,7 @@ class GroomingBookingViewModel(
             } finally {
                 _groomingTimeUiState.update {
                     it.copy(
-                        isLoading = false,
-                        currentTime = LocalDateTime.now()
+                        isLoading = false
                     )
                 }
             }
@@ -128,6 +126,7 @@ class GroomingBookingViewModel(
     }
 
     fun bookGrooming(
+        serviceId: String,
         subService: SubService?,
         selectedSlot: GroomingSlot?,
         selectedDate: LocalDateTime?,
@@ -150,7 +149,8 @@ class GroomingBookingViewModel(
                     subService = subService,
                     selectedSlot = selectedSlot,
                     selectedDate = selectedDate,
-                    selectedAddress = selectedAddress
+                    selectedAddress = selectedAddress,
+                    serviceId = serviceId
                 )) {
                     is Result.Success -> {
                         _groomingBookingUiState.update {
@@ -184,5 +184,22 @@ class GroomingBookingViewModel(
             _groomingBookingUiState.value = GroomingBookingUiState()
             _groomingTimeUiState.value = GroomingTimeUiState()
         }
+    }
+
+    private fun filterDateTime(slots: List<GroomingSlot>): List<GroomingSlotWithDate> {
+        return slots
+            .groupBy { it.startTime.toLocalDate() }  // group by date
+            .map { (date, slotsForDate) ->
+                GroomingSlotWithDate(
+                    date = date.atStartOfDay(),  // you said date: LocalDateTime
+                    slots = slotsForDate.sortedBy { it.startTime } // sort within date
+                )
+            }
+            .sortedBy { it.date } // sort outer list by date
+    }
+
+    private fun getSlotPerDate(selectedDate: LocalDateTime, timeSlots: List<GroomingSlotWithDate>): List<GroomingSlot>{
+        val filteredSlot = timeSlots.find { it.date.toLocalDate() == selectedDate.toLocalDate() }?.slots ?: emptyList()
+        return filteredSlot
     }
 }

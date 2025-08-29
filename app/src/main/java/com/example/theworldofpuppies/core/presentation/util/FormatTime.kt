@@ -32,13 +32,13 @@ fun formatDayOfMonth(date: LocalDate): String =
     date.format(DateTimeFormatter.ofPattern("dd")) // 23, 24…
 
 fun Long.toLocalDate(): LocalDate =
-    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
+    Instant.ofEpochMilli(this).atZone(zoneId).toLocalDate()
 
 fun Long.toLocalDateTime(): LocalDateTime =
     Instant.ofEpochMilli(this).atZone(zoneId).toLocalDateTime()
 
 fun LocalDate.toEpochMillis(): Long =
-    this.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+    this.atStartOfDay(zoneId).toInstant().toEpochMilli()
 
 fun Long.toLocalTime(): LocalTime =
     Instant.ofEpochMilli(this).atZone(zoneId).toLocalTime()

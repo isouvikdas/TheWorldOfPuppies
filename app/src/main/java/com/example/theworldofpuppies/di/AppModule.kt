@@ -14,6 +14,7 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
 import com.example.theworldofpuppies.booking.data.grooming.BookingGroomingRepositoryImpl
 import com.example.theworldofpuppies.booking.data.grooming.DummyGroomingBookingApi
+import com.example.theworldofpuppies.booking.data.grooming.GroomingBookingApi
 import com.example.theworldofpuppies.booking.domain.grooming.BookingGroomingRepository
 import com.example.theworldofpuppies.booking.presentation.grooming.GroomingBookingViewModel
 import com.example.theworldofpuppies.core.data.local.Database
@@ -74,6 +75,7 @@ val appModule = module {
     singleOf(::DummyApi)
     singleOf(::GroomingApi)
     singleOf(::DummyGroomingBookingApi)
+    singleOf(::GroomingBookingApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)

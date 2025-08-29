@@ -11,6 +11,7 @@ data class GroomingBooking(
     val id: String,
     val publicBookingId: String,
     val providerId: String,
+    val petId: String,
     val serviceSnapshot: ServiceSnapshot,
     val address: AddressDto,
     val basePrice: Double,
@@ -21,5 +22,5 @@ data class GroomingBooking(
     val paymentStatus: PaymentStatus,
     val creationDate: LocalDateTime,
     val serviceDate: LocalDateTime,
-    val serviceSlot: LocalDateTime
+    val groomingSlot: GroomingSlot
 )
