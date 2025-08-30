@@ -27,6 +27,7 @@ import com.example.theworldofpuppies.services.grooming.data.GroomingRepositoryIm
 import com.example.theworldofpuppies.services.grooming.data.remote.GroomingApi
 import com.example.theworldofpuppies.services.grooming.domain.GroomingRepository
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
+import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.shop.cart.data.CartApi
 import com.example.theworldofpuppies.shop.cart.data.CartRepositoryImpl
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
@@ -99,6 +100,7 @@ val appModule = module {
     viewModelOf(::AddressViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::GroomingViewModel)
+    viewModelOf(::PetWalkingViewModel)
     viewModelOf(::PetProfileViewModel)
     viewModelOf(::GroomingBookingViewModel)
 }

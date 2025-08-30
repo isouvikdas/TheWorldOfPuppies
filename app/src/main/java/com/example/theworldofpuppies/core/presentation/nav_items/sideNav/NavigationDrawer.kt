@@ -119,6 +119,7 @@ fun DrawerContent(
     val drawerItems = listOf(
         DrawerItems.Shop,
         DrawerItems.Grooming,
+        DrawerItems.PetWalk,
         DrawerItems.Insurance,
         DrawerItems.Training,
         DrawerItems.PrivacyPolicy,
