@@ -12,7 +12,7 @@ fun NetworkError.toString(context: Context): String {
         NetworkError.SERVER_ERROR -> R.string.error_unknown
         NetworkError.SERIALIZATION -> R.string.error_serialization
         NetworkError.UNKNOWN -> R.string.error_unknown
-        NetworkError.UNAUTHORIZED -> R.string.error_unathorized
+        NetworkError.UNAUTHORIZED -> R.string.error_unauthorized
         NetworkError.PAYMENT_VERIFICATION_FAILED -> R.string.payment_verification_failed
         NetworkError.INVALID_PHONE_NUMBER -> R.string.invalid_phone_number
     }

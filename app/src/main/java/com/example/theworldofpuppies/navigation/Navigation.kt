@@ -28,6 +28,8 @@ import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
+import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
+import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
@@ -52,9 +54,10 @@ sealed class Screen(val route: String) {
     data object AddressScreen : Screen("AddressScreen")
     data object AddressDetailScreen : Screen("AddressDetailScreen")
     data object OrderHistoryScreen : Screen("OrderHistoryScreen")
+    data object PetProfileScreen : Screen("PetProfileScreen")
     data object BookingGroomingScreen : Screen("BookingGroomingScreen")
     data object GroomingScreen : Screen("GroomingScreen")
-    data object PetProfileScreen : Screen("PetProfileScreen")
+    data object PetWalkingScreen: Screen("PetWalkingScreen")
 }
 
 @Composable
@@ -106,6 +109,9 @@ fun AppNavigation(
 
     val groomingViewModel = koinViewModel<GroomingViewModel>()
     val groomingUiState by groomingViewModel.groomingUiState.collectAsStateWithLifecycle()
+
+    val petWalkingViewModel = koinViewModel<PetWalkingViewModel>()
+    val petWalkingUiState by petWalkingViewModel.petWalkingUiState.collectAsStateWithLifecycle()
 
     val petProfileViewModel = koinViewModel<PetProfileViewModel>()
     val petProfileUiState by petProfileViewModel.petUiState.collectAsStateWithLifecycle()
@@ -359,20 +365,6 @@ fun AppNavigation(
             )
         }
 
-        composable(route = Screen.GroomingScreen.route) {
-            hideAllChrome(
-                onBottomBarVisibilityChanged,
-                onTopBarVisibilityChanged,
-                onProfileButtonVisibilityChanged,
-                onGesturesChanged,
-                searchIconVisibilityChanged
-            )
-            GroomingScreen(
-                navController = navController,
-                groomingUiState = groomingUiState,
-                groomingViewModel = groomingViewModel
-            )
-        }
         composable(route = Screen.PetProfileScreen.route) {
             hideAllChrome(
                 onBottomBarVisibilityChanged,
@@ -386,6 +378,20 @@ fun AppNavigation(
                 petUiState = petProfileUiState,
                 petProfileViewModel = petProfileViewModel
 
+            )
+        }
+        composable(route = Screen.GroomingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            GroomingScreen(
+                navController = navController,
+                groomingUiState = groomingUiState,
+                groomingViewModel = groomingViewModel
             )
         }
         composable(route = Screen.BookingGroomingScreen.route) {
@@ -402,6 +408,21 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 groomingUiState = groomingUiState
+            )
+        }
+
+        composable(route = Screen.PetWalkingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            PetWalkingScreen(
+                navController = navController,
+                petWalkingViewModel = petWalkingViewModel,
+                petWalkingUiState = petWalkingUiState
             )
         }
 
