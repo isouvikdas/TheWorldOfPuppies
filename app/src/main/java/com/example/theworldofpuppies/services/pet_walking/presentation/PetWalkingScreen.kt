@@ -1,9 +1,9 @@
 package com.example.theworldofpuppies.services.pet_walking.presentation
 
 import android.content.Context
-import android.health.connect.datatypes.units.Length
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -98,9 +99,17 @@ fun PetWalkingScreen(
 
     val days = petWalkingUiState.days
 
+    val description = petWalkingUiState.description
+
     LaunchedEffect(Unit) {
         petWalkingViewModel.toastEvent.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (description.isNullOrEmpty()) {
+            petWalkingViewModel.getPetWalking(context)
         }
     }
 
@@ -124,82 +133,112 @@ fun PetWalkingScreen(
                     .fillMaxSize()
                     .padding(it)
             ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize(), color = Color.Transparent
-                ) {
-
-                    Column(modifier = Modifier.fillMaxSize()) {
+                if (!petWalkingUiState.errorMessage.isNullOrEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painterResource(R.drawable.dog_emoji_angry),
+                            contentDescription = "dog",
+                            modifier = Modifier.size(100.dp)
+                        )
                         Text(
-                            "Book Dog Walking Near You",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(MaterialTheme.dimens.small1),
-                            textAlign = TextAlign.Center
+                            petWalkingUiState.errorMessage,
+                            style = MaterialTheme.typography.bodyMedium
                         )
 
-                        Text(
-                            "We provide Background-Checked dog walker and real time GPS track of their walk",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.W500,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = MaterialTheme.dimens.small1),
-                            textAlign = TextAlign.Center
-                        )
-
-                        FrequencySection(
-                            frequencies = frequencies,
-                            selectedFrequency = selectedFrequency ?: frequencies.first(),
-                            context = context,
-                            onFrequencySelected = { frequency ->
-                                petWalkingViewModel.onFrequencySelect(frequency)
-                            }
-                        )
-
-                        if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
-                            DateRangePickerSection(
-                                startDate = petWalkingUiState.dateRange?.startDate,
-                                endDate = petWalkingUiState.dateRange?.endDate,
-                                onStartDateSelect = { date ->
-                                    petWalkingViewModel.onStartDateSelect(date)
-                                },
-                                onEndDateSelect = { date ->
-                                    petWalkingViewModel.onEndDateSelect(date)
-                                }
+                    }
+                } else {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize(), color = Color.Transparent
+                    ) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                "Book Dog Walking Near You",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(MaterialTheme.dimens.small1),
+                                textAlign = TextAlign.Center
                             )
-                        } else {
-                            SingleDatePickerSection(
-                                singleDate = petWalkingUiState.singleDate,
-                                onSingleDateSelect = { date ->
-                                    petWalkingViewModel.onSingleDateSelect(date)
-                                }
-                            )
-                        }
 
-                        if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
-                            DaysSelectionSection(
+                            Text(
+                                "We provide Background-Checked dog walker and real time GPS track of their walk",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.W500,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = MaterialTheme.dimens.small1),
+                                textAlign = TextAlign.Center
+                            )
+
+                            FrequencySection(
+                                frequencies = frequencies,
+                                selectedFrequency = selectedFrequency ?: frequencies.first(),
                                 context = context,
-                                days = days,
-                                selectedDays = selectedDays,
-                                onDaysSelected = { day ->
-                                    petWalkingViewModel.onDaySelect(day)
-                                },
-                                onEverythingSelect = { petWalkingViewModel.onEverythingSelected() }
+                                onFrequencySelected = { frequency ->
+                                    petWalkingViewModel.onFrequencySelect(frequency)
+                                }
                             )
+
+                            if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+                                DateRangePickerSection(
+                                    startDate = petWalkingUiState.dateRange?.startDate,
+                                    endDate = petWalkingUiState.dateRange?.endDate,
+                                    onStartDateSelect = { date ->
+                                        petWalkingViewModel.onStartDateSelect(date)
+                                    },
+                                    onEndDateSelect = { date ->
+                                        petWalkingViewModel.onEndDateSelect(date)
+                                    }
+                                )
+                            } else {
+                                SingleDatePickerSection(
+                                    singleDate = petWalkingUiState.singleDate,
+                                    onSingleDateSelect = { date ->
+                                        petWalkingViewModel.onSingleDateSelect(date)
+                                    }
+                                )
+                            }
+
+                            if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+                                DaysSelectionSection(
+                                    context = context,
+                                    days = days,
+                                    selectedDays = selectedDays,
+                                    onDaysSelected = { day ->
+                                        petWalkingViewModel.onDaySelect(day)
+                                    },
+                                    onEverythingSelect = { petWalkingViewModel.onEverythingSelected() }
+                                )
+                            }
                         }
+
                     }
+                    PetWalkBottomSection(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        onBookNowClick = {
+                            petWalkingViewModel.onBookNowClick(navController)
+                        }
+                    )
                 }
-
-                PetWalkBottomSection(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    onBookNowClick = {
-                        petWalkingViewModel.onBookNowClick(navController)
-                    }
+            }
+        }
+        if (petWalkingUiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent.copy(0.2f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary
                 )
-
             }
         }
     }
@@ -323,7 +362,10 @@ fun SingleDatePickerSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             DateField(
-                value = if (singleDate != null) formatDateTime(singleDate, "dd/MM/yyyy") else "",
+                value = formatDateTime(
+                    singleDate ?: LocalDateTime.now(),
+                    "dd/MM/yyyy"
+                ),
                 onValueChange = {},
                 placeHolder = "Date",
                 endPadding = MaterialTheme.dimens.small1,

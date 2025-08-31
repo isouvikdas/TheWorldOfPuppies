@@ -33,5 +33,6 @@
     <string name="fri">Fri</string>
     <string name="sat">Sat</string>
     <string name="sun">Sun</string>
+    <string name="service_not_available">Sorry,This service is not available anymore</string>
 
 </resources>

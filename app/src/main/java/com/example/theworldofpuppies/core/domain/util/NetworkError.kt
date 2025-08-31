@@ -1,8 +1,6 @@
 package com.example.theworldofpuppies.core.domain.util
 
-import com.example.theworldofpuppies.core.domain.util.Error
-
-enum class NetworkError: Error {
+enum class NetworkError : Error {
     REQUEST_TIMEOUT,
     TOO_MANY_REQUESTS,
     NO_INTERNET,
@@ -12,4 +10,5 @@ enum class NetworkError: Error {
     UNAUTHORIZED,
     PAYMENT_VERIFICATION_FAILED,
     INVALID_PHONE_NUMBER,
+    SERVICE_NOT_AVAILABLE,
 }

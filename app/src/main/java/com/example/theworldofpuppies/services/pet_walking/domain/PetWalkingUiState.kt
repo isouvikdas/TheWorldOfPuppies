@@ -12,5 +12,6 @@ data class PetWalkingUiState(
     val selectedDays: List<Days> = emptyList(),
     val dateRange: PetWalkDateRange? = null,
     val singleDate: LocalDateTime? = null,
-    val days: List<Days> = Days.entries
+    val days: List<Days> = Days.entries,
+    val description: String? = null
 )

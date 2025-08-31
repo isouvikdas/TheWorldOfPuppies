@@ -99,9 +99,8 @@ fun OrderHistoryScreen(
                         )
                         Text(
                             "Oops! You haven't placed any orders yet",
-                            style = MaterialTheme.typography.bodyMedium,
-
-                            )
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 } else {
                     LazyColumn(

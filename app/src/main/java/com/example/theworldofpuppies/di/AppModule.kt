@@ -28,6 +28,9 @@ import com.example.theworldofpuppies.services.grooming.data.GroomingRepositoryIm
 import com.example.theworldofpuppies.services.grooming.data.remote.GroomingApi
 import com.example.theworldofpuppies.services.grooming.domain.GroomingRepository
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
+import com.example.theworldofpuppies.services.pet_walking.data.PetWalkRepositoryImpl
+import com.example.theworldofpuppies.services.pet_walking.data.remote.PetWalkApi
+import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkRepository
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.shop.cart.data.CartApi
 import com.example.theworldofpuppies.shop.cart.data.CartRepositoryImpl
@@ -78,6 +81,7 @@ val appModule = module {
     singleOf(::GroomingApi)
     singleOf(::DummyGroomingBookingApi)
     singleOf(::GroomingBookingApi)
+    singleOf(::PetWalkApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -91,6 +95,7 @@ val appModule = module {
     singleOf(::AddressRepositoryImpl).bind<AddressRepository>()
     singleOf(::GroomingRepositoryImpl).bind<GroomingRepository>()
     singleOf(::BookingGroomingRepositoryImpl).bind<BookingGroomingRepository>()
+    singleOf(::PetWalkRepositoryImpl).bind<PetWalkRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)

@@ -1,10 +1,14 @@
 package com.example.theworldofpuppies.services.pet_walking.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.theworldofpuppies.core.domain.util.Result
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkDateRange
+import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkRepository
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkingUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
@@ -16,7 +20,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-class PetWalkingViewModel() : ViewModel() {
+class PetWalkingViewModel(
+    private val petWalkRepository: PetWalkRepository
+) : ViewModel() {
 
     private val _petWalkingUiState = MutableStateFlow(PetWalkingUiState())
     val petWalkingUiState = _petWalkingUiState.asStateFlow()
@@ -28,6 +34,39 @@ class PetWalkingViewModel() : ViewModel() {
         _toastEvent.emit(message)
     }
 
+    fun getPetWalking(context: Context) {
+        viewModelScope.launch {
+            _petWalkingUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                when (val result = petWalkRepository.getPetWalk()) {
+                    is Result.Success -> {
+                        _petWalkingUiState.update {
+                            it.copy(
+                                description = result.data.description
+                            )
+                        }
+                    }
+                    is Result.Error -> {
+                        _petWalkingUiState.update {
+                            it.copy(
+                                errorMessage = result.error.toString(context)
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _petWalkingUiState.update {
+                    it.copy(
+                        errorMessage = e.message
+                    )
+                }
+            } finally {
+                _petWalkingUiState.update {
+                    it.copy(isLoading = false)
+                }
+            }
+        }
+    }
 
     fun onDaySelect(day: Days) {
         viewModelScope.launch {

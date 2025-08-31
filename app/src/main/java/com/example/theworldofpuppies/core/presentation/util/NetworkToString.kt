@@ -15,6 +15,7 @@ fun NetworkError.toString(context: Context): String {
         NetworkError.UNAUTHORIZED -> R.string.error_unauthorized
         NetworkError.PAYMENT_VERIFICATION_FAILED -> R.string.payment_verification_failed
         NetworkError.INVALID_PHONE_NUMBER -> R.string.invalid_phone_number
+        NetworkError.SERVICE_NOT_AVAILABLE -> R.string.service_not_available
     }
     return context.getString(resId)
 }
