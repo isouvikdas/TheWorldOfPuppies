@@ -17,6 +17,7 @@ import com.example.theworldofpuppies.booking.data.grooming.DummyGroomingBookingA
 import com.example.theworldofpuppies.booking.data.grooming.GroomingBookingApi
 import com.example.theworldofpuppies.booking.domain.grooming.BookingGroomingRepository
 import com.example.theworldofpuppies.booking.presentation.grooming.GroomingBookingViewModel
+import com.example.theworldofpuppies.booking.presentation.pet_walk.BookingPetWalkViewModel
 import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
@@ -103,4 +104,5 @@ val appModule = module {
     viewModelOf(::PetWalkingViewModel)
     viewModelOf(::PetProfileViewModel)
     viewModelOf(::GroomingBookingViewModel)
+    viewModelOf(::BookingPetWalkViewModel)
 }

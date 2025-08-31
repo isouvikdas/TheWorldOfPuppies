@@ -18,6 +18,8 @@ import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
 import com.example.theworldofpuppies.booking.presentation.grooming.BookingGroomingScreen
 import com.example.theworldofpuppies.booking.presentation.grooming.GroomingBookingViewModel
+import com.example.theworldofpuppies.booking.presentation.pet_walk.BookingPetWalkScreen
+import com.example.theworldofpuppies.booking.presentation.pet_walk.BookingPetWalkViewModel
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
@@ -56,8 +58,9 @@ sealed class Screen(val route: String) {
     data object OrderHistoryScreen : Screen("OrderHistoryScreen")
     data object PetProfileScreen : Screen("PetProfileScreen")
     data object BookingGroomingScreen : Screen("BookingGroomingScreen")
+    data object BookingPetWalkScreen : Screen("BookingPetWalkScreen")
     data object GroomingScreen : Screen("GroomingScreen")
-    data object PetWalkingScreen: Screen("PetWalkingScreen")
+    data object PetWalkingScreen : Screen("PetWalkingScreen")
 }
 
 @Composable
@@ -117,6 +120,8 @@ fun AppNavigation(
     val petProfileUiState by petProfileViewModel.petUiState.collectAsStateWithLifecycle()
 
     val groomingBookingViewModel = koinViewModel<GroomingBookingViewModel>()
+
+    val bookingPetWalkViewModel = koinViewModel<BookingPetWalkViewModel>()
 
     NavHost(
         navController = navController,
@@ -423,6 +428,22 @@ fun AppNavigation(
                 navController = navController,
                 petWalkingViewModel = petWalkingViewModel,
                 petWalkingUiState = petWalkingUiState
+            )
+        }
+        composable(route = Screen.BookingPetWalkScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            BookingPetWalkScreen(
+                navController = navController,
+                petWalkingUiState = petWalkingUiState,
+                addressUiState = addressUiState,
+                addressViewModel = addressViewModel,
+                bookingPetWalkViewModel = bookingPetWalkViewModel
             )
         }
 

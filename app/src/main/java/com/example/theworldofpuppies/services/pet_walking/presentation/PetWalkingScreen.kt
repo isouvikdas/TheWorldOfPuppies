@@ -1,6 +1,8 @@
 package com.example.theworldofpuppies.services.pet_walking.presentation
 
 import android.content.Context
+import android.health.connect.datatypes.units.Length
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +19,15 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,9 +54,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.booking.presentation.grooming.DatePickerModal
@@ -65,6 +72,7 @@ import com.example.theworldofpuppies.services.pet_walking.domain.enums.getIconRe
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.toString
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,6 +98,12 @@ fun PetWalkingScreen(
 
     val days = petWalkingUiState.days
 
+    LaunchedEffect(Unit) {
+        petWalkingViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -105,74 +119,87 @@ fun PetWalkingScreen(
                 )
             }
         ) {
-            Surface(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it), color = Color.Transparent
+                    .padding(it)
             ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize(), color = Color.Transparent
+                ) {
 
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        "Book Dog Walking Near You",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(MaterialTheme.dimens.small1),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        "We provide Background-Checked dog walker and real time GPS track of their walk",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.W500,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = MaterialTheme.dimens.small1),
-                        textAlign = TextAlign.Center
-                    )
-
-                    FrequencySection(
-                        frequencies = frequencies,
-                        selectedFrequency = selectedFrequency ?: frequencies.first(),
-                        context = context,
-                        onFrequencySelected = { frequency ->
-                            petWalkingViewModel.onFrequencySelect(frequency)
-                        }
-                    )
-
-                    if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
-                        DateRangePickerSection(
-                            startDate = petWalkingUiState.dateRange?.startDate,
-                            endDate = petWalkingUiState.dateRange?.endDate,
-                            onStartDateSelect = { date ->
-                                petWalkingViewModel.onStartDateSelect(date)
-                            },
-                            onEndDateSelect = { date ->
-                                petWalkingViewModel.onEndDateSelect(date)
-                            }
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            "Book Dog Walking Near You",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(MaterialTheme.dimens.small1),
+                            textAlign = TextAlign.Center
                         )
-                    } else {
-                        SingleDatePickerSection(
-                            singleDate = petWalkingUiState.singleDate,
-                            onSingleDateSelect = { date ->
-                                petWalkingViewModel.onSingleDateSelect(date)
-                            }
-                        )
-                    }
 
-                    if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
-                        DaysSelectionSection(
+                        Text(
+                            "We provide Background-Checked dog walker and real time GPS track of their walk",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.W500,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = MaterialTheme.dimens.small1),
+                            textAlign = TextAlign.Center
+                        )
+
+                        FrequencySection(
+                            frequencies = frequencies,
+                            selectedFrequency = selectedFrequency ?: frequencies.first(),
                             context = context,
-                            days = days,
-                            selectedDays = selectedDays,
-                            onDaysSelected = { day ->
-                                petWalkingViewModel.onDaySelect(day)
-                            },
-                            onEverythingSelect = { petWalkingViewModel.onEverythingSelected() }
+                            onFrequencySelected = { frequency ->
+                                petWalkingViewModel.onFrequencySelect(frequency)
+                            }
                         )
+
+                        if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+                            DateRangePickerSection(
+                                startDate = petWalkingUiState.dateRange?.startDate,
+                                endDate = petWalkingUiState.dateRange?.endDate,
+                                onStartDateSelect = { date ->
+                                    petWalkingViewModel.onStartDateSelect(date)
+                                },
+                                onEndDateSelect = { date ->
+                                    petWalkingViewModel.onEndDateSelect(date)
+                                }
+                            )
+                        } else {
+                            SingleDatePickerSection(
+                                singleDate = petWalkingUiState.singleDate,
+                                onSingleDateSelect = { date ->
+                                    petWalkingViewModel.onSingleDateSelect(date)
+                                }
+                            )
+                        }
+
+                        if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+                            DaysSelectionSection(
+                                context = context,
+                                days = days,
+                                selectedDays = selectedDays,
+                                onDaysSelected = { day ->
+                                    petWalkingViewModel.onDaySelect(day)
+                                },
+                                onEverythingSelect = { petWalkingViewModel.onEverythingSelected() }
+                            )
+                        }
                     }
                 }
+
+                PetWalkBottomSection(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onBookNowClick = {
+                        petWalkingViewModel.onBookNowClick(navController)
+                    }
+                )
+
             }
         }
     }
@@ -533,5 +560,75 @@ fun PetWalkingHeader(
                     navController.navigate(Screen.CartScreen.route)
                 }
         )
+    }
+}
+
+@Composable
+fun PetWalkBottomSection(
+    modifier: Modifier = Modifier,
+    onBookNowClick: () -> Unit
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .zIndex(1f),
+        color = Color.White,
+        shape = RoundedCornerShape(
+            topStart = MaterialTheme.dimens.small3,
+            topEnd = MaterialTheme.dimens.small3
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(Color.LightGray.copy(0.55f)),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+            Button(
+                onClick = {
+                    onBookNowClick()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(MaterialTheme.dimens.buttonHeight)
+                    .padding(horizontal = MaterialTheme.dimens.small1),
+                shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    disabledContainerColor = Color.LightGray,
+                    disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                ),
+            ) {
+                Text(
+                    text = "Book Now",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PetWalkBottomSectionPrev() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            PetWalkBottomSection(
+                onBookNowClick = {}
+            )
+        }
     }
 }

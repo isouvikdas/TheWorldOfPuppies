@@ -246,7 +246,7 @@ fun BookingGroomingScreen(
 
                     }
 
-                    BookingBottomSection(
+                    BookingGroomingBottomSection(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .zIndex(1f),
@@ -553,7 +553,10 @@ fun DatePickerModal(
 }
 
 @Composable
-fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService?) {
+fun ServiceSummaryCard(
+    modifier: Modifier = Modifier,
+    subService: SubService?
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -569,14 +572,14 @@ fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService?) {
             Text(
                 Category.GROOMING.name,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.W500,
                 modifier = Modifier.padding(end = 5.dp)
             )
             subService?.name?.let {
                 Text(
-                    "($it)",
+                    it,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.W500,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -596,7 +599,7 @@ fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService?) {
                 Text(
                     formatCurrency(it),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.W500,
                     textDecoration = TextDecoration.LineThrough,
                     fontStyle = FontStyle.Italic,
                     color = Color.Gray.copy(0.9f),
@@ -608,7 +611,7 @@ fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService?) {
                 Text(
                     formatCurrency(it),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
 
@@ -617,7 +620,7 @@ fun ServiceSummaryCard(modifier: Modifier = Modifier, subService: SubService?) {
 }
 
 @Composable
-fun BookingBottomSection(
+fun BookingGroomingBottomSection(
     modifier: Modifier = Modifier,
     subService: SubService? = null,
     selectedSlot: GroomingSlot? = null,
@@ -649,7 +652,7 @@ fun BookingBottomSection(
             ServiceSummaryCard(subService = subService)
             Button(
                 onClick = {
-                    groomingBookingViewModel.bookGrooming(
+                    groomingBookingViewModel.placeBooking(
                         subService = subService,
                         selectedSlot = selectedSlot,
                         selectedDate = selectedSlot?.startTime?.toLocalDate()?.atStartOfDay(),
@@ -668,11 +671,10 @@ fun BookingBottomSection(
                     contentColor = MaterialTheme.colorScheme.secondary,
                     disabledContainerColor = Color.LightGray,
                     disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                ),
-                enabled = subService != null && selectedSlot != null && selectedAddress != null
+                )
             ) {
                 Text(
-                    text = "Book Now",
+                    text = "Place Booking",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.SemiBold
                 )
