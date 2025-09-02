@@ -32,15 +32,20 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.presentation.grooming.BookingHeader
+import com.example.theworldofpuppies.booking.presentation.pet_walk.util.calculateSession
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkingUiState
+import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
+import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +63,14 @@ fun BookingPetWalkScreen(
     )
 
     val selectedAddress = addressUiState.addresses.find { it.isSelected }
+
+    val price = petWalkingUiState.basePrice
+    val discount = petWalkingUiState.discount
+    val name = petWalkingUiState.name
+    val startDate = petWalkingUiState.dateRange?.startDate
+    val endDate = petWalkingUiState.dateRange?.endDate
+    val frequency = petWalkingUiState.selectedFrequency
+    val selectedDays = petWalkingUiState.selectedDays
 
     Scaffold(
         modifier = modifier
@@ -104,7 +117,13 @@ fun BookingPetWalkScreen(
                 onPlaceBookingClick = {
 //                    bookingPetWalkViewModel.onBookNowClick(navController)
                 },
-                numberOfSessions = 10
+                basePrice = price ?: 0.0,
+                discount = discount ?: 0,
+                name = name,
+                startDate = startDate,
+                endDate = endDate,
+                selectedFrequency = frequency,
+                selectedDays = selectedDays
             )
         }
     }
@@ -114,8 +133,31 @@ fun BookingPetWalkScreen(
 fun BookingPetWalkBottomSection(
     modifier: Modifier = Modifier,
     onPlaceBookingClick: () -> Unit,
-    numberOfSessions: Int
+    basePrice: Double = 0.0,
+    discount: Int = 0,
+    name: String?,
+    startDate: LocalDateTime? = null,
+    endDate: LocalDateTime? = null,
+    selectedFrequency: Frequency? = null,
+    selectedDays: List<Days>
 ) {
+
+    val discountedPrice = basePrice.times(100 - discount).div(100)
+
+    var sessionCount = 1
+
+    if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+        if (startDate != null && endDate != null ) {
+            sessionCount = calculateSession(
+                selectedDays = selectedDays,
+                startDate = startDate,
+                endDate = endDate
+            )
+
+        }
+    }
+    val totalPrice = discountedPrice.times(sessionCount)
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -137,19 +179,20 @@ fun BookingPetWalkBottomSection(
         ) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
 
-            PriceRowSection(
-                priceTitle = "Per Session :",
-                price1 = 600.00,
-                price2 = 475.00
+            PetWalkNameSection(
+                name = name,
             )
-
             Spacer(modifier = Modifier.height(6.dp))
-
             PriceRowSection(
-                priceTitle = "Total :",
-                price2 = numberOfSessions * 475.00
+                priceTitle = "Sessions (1)",
+                price1 = basePrice,
+                price2 = discountedPrice
             )
-
+            Spacer(modifier = Modifier.height(6.dp))
+            PriceRowSection(
+                priceTitle = "Sessions ($sessionCount)",
+                price2 = totalPrice
+            )
             Spacer(modifier = Modifier.height(6.dp))
 
             Button(
@@ -175,6 +218,30 @@ fun BookingPetWalkBottomSection(
                 )
             }
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+        }
+    }
+}
+
+@Composable
+fun PetWalkNameSection(modifier: Modifier = Modifier, name: String? = null) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = MaterialTheme.dimens.small1),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            "Service",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.W500
+        )
+        name?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
@@ -208,17 +275,23 @@ fun PriceRowSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            price1?.let {
+            if (price1 != null) {
                 Text(
-                    formatCurrency(it),
+                    formatCurrency(price1),
                     style = priceTitleStyle,
                     fontWeight = priceTitleWeight,
                     color = Color.Gray,
                     textDecoration = TextDecoration.LineThrough,
                     fontStyle = FontStyle.Italic
                 )
-
+            } else {
+                Text(
+                    "Total",
+                    style = priceStyle,
+                    fontWeight = priceTitleWeight
+                )
             }
+
             price2?.let {
                 Text(
                     formatCurrency(it),

@@ -13,5 +13,8 @@ data class PetWalkingUiState(
     val dateRange: PetWalkDateRange? = null,
     val singleDate: LocalDateTime? = null,
     val days: List<Days> = Days.entries,
-    val description: String? = null
+    val name: String? = null,
+    val description: String? = null,
+    val basePrice: Double? = null,
+    val discount: Int? = null,
 )

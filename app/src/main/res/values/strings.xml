@@ -34,5 +34,10 @@
     <string name="sat">Sat</string>
     <string name="sun">Sun</string>
     <string name="service_not_available">Sorry,This service is not available anymore</string>
+    <string name="grooming">Grooming</string>
+    <string name="walking">Dog Walking</string>
+    <string name="veterinary">Vet</string>
+    <string name="dog_training">Dog Training</string>
+    <string name="pet_insurance">Pet insurance</string>
 
 </resources>

@@ -1,7 +1,6 @@
 package com.example.theworldofpuppies.booking.presentation.grooming
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +69,7 @@ import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.domain.enums.Category
+import com.example.theworldofpuppies.booking.domain.enums.toString
 import com.example.theworldofpuppies.booking.domain.grooming.GroomingSlot
 import com.example.theworldofpuppies.booking.presentation.component.BookingSuccessDialog
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
@@ -87,7 +87,6 @@ import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBa
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -555,7 +554,8 @@ fun DatePickerModal(
 @Composable
 fun ServiceSummaryCard(
     modifier: Modifier = Modifier,
-    subService: SubService?
+    subService: SubService?,
+    context: Context
 ) {
     Column(
         modifier = modifier
@@ -567,46 +567,85 @@ fun ServiceSummaryCard(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                Category.GROOMING.name,
+                "Service",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.padding(end = 5.dp)
+                fontWeight = FontWeight.W500
             )
-            subService?.name?.let {
+            Column(verticalArrangement = Arrangement.Top) {
                 Text(
-                    it,
+                    Category.GROOMING.toString(context),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.W500,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
+                    fontWeight = FontWeight.SemiBold
                 )
+                subService?.name?.let {
+                    Text(
+                        "($it)",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+
+                }
 
             }
 
         }
-
+        Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 5.dp),
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                "Session (1)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.W500
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                subService?.price?.let {
+                    Text(
+                        formatCurrency(it),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.W500,
+                        textDecoration = TextDecoration.LineThrough,
+                        fontStyle = FontStyle.Italic,
+                        color = Color.Gray.copy(0.9f),
+                        modifier = Modifier.padding(end = 10.dp)
+                    )
+
+                }
+                subService?.discountedPrice?.let {
+                    Text(
+                        formatCurrency(it),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
-            subService?.price?.let {
-                Text(
-                    formatCurrency(it),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.W500,
-                    textDecoration = TextDecoration.LineThrough,
-                    fontStyle = FontStyle.Italic,
-                    color = Color.Gray.copy(0.9f),
-                    modifier = Modifier.padding(end = 10.dp)
-                )
 
-            }
+            Text(
+                "Total",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.W500,
+                modifier = Modifier.padding(end = 5.dp)
+            )
             subService?.discountedPrice?.let {
                 Text(
                     formatCurrency(it),
@@ -614,7 +653,6 @@ fun ServiceSummaryCard(
                     fontWeight = FontWeight.SemiBold,
                 )
             }
-
         }
     }
 }
@@ -649,7 +687,7 @@ fun BookingGroomingBottomSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ServiceSummaryCard(subService = subService)
+            ServiceSummaryCard(subService = subService, context = context)
             Button(
                 onClick = {
                     groomingBookingViewModel.placeBooking(

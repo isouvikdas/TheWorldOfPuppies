@@ -42,7 +42,10 @@ class PetWalkingViewModel(
                     is Result.Success -> {
                         _petWalkingUiState.update {
                             it.copy(
-                                description = result.data.description
+                                description = result.data.description,
+                                basePrice = result.data.basePrice,
+                                discount = result.data.discount,
+                                name = result.data.name
                             )
                         }
                     }
