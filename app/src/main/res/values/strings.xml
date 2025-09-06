@@ -39,5 +39,6 @@
     <string name="veterinary">Vet</string>
     <string name="dog_training">Dog Training</string>
     <string name="pet_insurance">Pet insurance</string>
+    <string name="invalid_request">Request is invalid</string>
 
 </resources>

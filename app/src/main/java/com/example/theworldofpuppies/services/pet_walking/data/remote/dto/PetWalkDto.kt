@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.services.pet_walking.data.remote.dto
 
-import com.example.theworldofpuppies.booking.domain.enums.Category
+import com.example.theworldofpuppies.booking.grooming.domain.enums.Category
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
 import kotlinx.serialization.Serializable
 

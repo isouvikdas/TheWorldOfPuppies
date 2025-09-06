@@ -62,7 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
-import com.example.theworldofpuppies.booking.presentation.grooming.DatePickerModal
+import com.example.theworldofpuppies.booking.grooming.presentation.DatePickerModal
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.navigation.Screen
