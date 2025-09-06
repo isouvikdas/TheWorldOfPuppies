@@ -16,10 +16,10 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
-import com.example.theworldofpuppies.booking.presentation.grooming.BookingGroomingScreen
-import com.example.theworldofpuppies.booking.presentation.grooming.GroomingBookingViewModel
-import com.example.theworldofpuppies.booking.presentation.pet_walk.BookingPetWalkScreen
-import com.example.theworldofpuppies.booking.presentation.pet_walk.BookingPetWalkViewModel
+import com.example.theworldofpuppies.booking.grooming.presentation.BookingGroomingScreen
+import com.example.theworldofpuppies.booking.grooming.presentation.GroomingBookingViewModel
+import com.example.theworldofpuppies.booking.pet_walk.presentation.BookingPetWalkScreen
+import com.example.theworldofpuppies.booking.pet_walk.presentation.BookingPetWalkViewModel
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen

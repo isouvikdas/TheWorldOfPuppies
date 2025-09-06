@@ -45,7 +45,8 @@ class PetWalkingViewModel(
                                 description = result.data.description,
                                 basePrice = result.data.basePrice,
                                 discount = result.data.discount,
-                                name = result.data.name
+                                name = result.data.name,
+                                id = result.data.id
                             )
                         }
                     }
