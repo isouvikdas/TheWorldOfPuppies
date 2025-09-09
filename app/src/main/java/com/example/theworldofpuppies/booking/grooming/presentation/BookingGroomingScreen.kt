@@ -68,8 +68,8 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
-import com.example.theworldofpuppies.booking.grooming.domain.enums.Category
-import com.example.theworldofpuppies.booking.grooming.domain.enums.toString
+import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.booking.core.domain.toString
 import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
 import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
@@ -81,8 +81,8 @@ import com.example.theworldofpuppies.core.presentation.util.formatDayOfWeek
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
-import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -554,7 +554,7 @@ fun DatePickerModal(
 @Composable
 fun ServiceSummaryCard(
     modifier: Modifier = Modifier,
-    subService: SubService?,
+    subService: GroomingSubService?,
     context: Context
 ) {
     Column(
@@ -660,7 +660,7 @@ fun ServiceSummaryCard(
 @Composable
 fun BookingGroomingBottomSection(
     modifier: Modifier = Modifier,
-    subService: SubService? = null,
+    subService: GroomingSubService? = null,
     selectedSlot: GroomingSlot? = null,
     selectedAddress: Address? = null,
     groomingBookingViewModel: GroomingBookingViewModel,

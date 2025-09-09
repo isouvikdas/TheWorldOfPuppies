@@ -50,6 +50,7 @@ class PetWalkingViewModel(
                             )
                         }
                     }
+
                     is Result.Error -> {
                         _petWalkingUiState.update {
                             it.copy(
@@ -140,13 +141,25 @@ class PetWalkingViewModel(
 
     fun onBookNowClick(navController: NavController) {
         viewModelScope.launch {
-//            if (petWalkingUiState.value.selectedDays.isNotEmpty() || petWalkingUiState.value.singleDate != null) {
-//
-//                navController.navigate(Screen.BookingPetWalkScreen.route)
-//            } else {
-//                showToast(message = "Please select at least one date")
-//            }
-            navController.navigate(Screen.BookingPetWalkScreen.route)
+            when (petWalkingUiState.value.selectedFrequency) {
+                Frequency.REPEAT_WEEKLY -> {
+                    when {
+                        petWalkingUiState.value.selectedDays.isEmpty() -> showToast(message = "Please select at least one day")
+                        petWalkingUiState.value.dateRange?.startDate == null -> showToast(message = "Please select a start date")
+                        petWalkingUiState.value.dateRange?.endDate == null -> showToast(message = "Please select an end date")
+                        else -> navController.navigate(Screen.BookingPetWalkScreen.route)
+                    }
+                }
+
+                Frequency.ONE_TIME -> {
+                    when {
+                        petWalkingUiState.value.singleDate == null -> showToast(message = "Please select a date")
+                        else -> navController.navigate(Screen.BookingPetWalkScreen.route)
+                    }
+                }
+
+                null -> showToast(message = "Please select a frequency")
+            }
 
         }
 

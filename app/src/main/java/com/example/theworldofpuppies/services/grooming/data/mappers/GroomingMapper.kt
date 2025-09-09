@@ -11,7 +11,7 @@ fun GroomingDto.toGrooming(): Grooming {
         discount = discount,
         category = category,
         subServiceIds = subServiceIds,
-        subServices = petSubServices,
+        subServices = groomingSubServices,
         basePrice = basePrice,
         active = active
     )

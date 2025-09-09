@@ -1,7 +1,7 @@
 package com.example.theworldofpuppies.services.grooming.data.remote.dto
 
 import com.example.theworldofpuppies.services.domain.enums.ServiceCategory
-import com.example.theworldofpuppies.services.grooming.domain.SubService
+import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,7 +12,7 @@ data class GroomingDto(
     val discount: Int,
     val category: ServiceCategory,
     val subServiceIds: List<String>,
-    val petSubServices: List<SubService>,
+    val groomingSubServices: List<GroomingSubService>,
     val basePrice: Double,
     val active: Boolean
 )

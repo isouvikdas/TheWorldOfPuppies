@@ -7,7 +7,7 @@ import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
-import com.example.theworldofpuppies.services.grooming.domain.SubService
+import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -49,7 +49,7 @@ class BookingGroomingRepositoryImpl(
 
     override suspend fun bookGrooming(
         serviceId: String,
-        subService: SubService,
+        subService: GroomingSubService,
         selectedSlot: GroomingSlot,
         selectedDate: LocalDateTime,
         selectedAddress: Address

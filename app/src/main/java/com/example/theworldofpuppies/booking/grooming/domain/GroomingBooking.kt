@@ -1,11 +1,10 @@
 package com.example.theworldofpuppies.booking.grooming.domain
 
 import com.example.theworldofpuppies.address.data.dto.AddressDto
-import com.example.theworldofpuppies.booking.grooming.data.dto.ServiceSnapshot
+import com.example.theworldofpuppies.booking.grooming.data.dto.GroomingSnapshot
 import com.example.theworldofpuppies.booking.grooming.domain.enums.BookingStatus
 import com.example.theworldofpuppies.booking.grooming.domain.enums.CancellationStatus
 import com.example.theworldofpuppies.booking.grooming.domain.enums.PaymentStatus
-import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
 import java.time.LocalDateTime
 
 data class GroomingBooking(
@@ -13,7 +12,7 @@ data class GroomingBooking(
     val publicBookingId: String,
     val providerId: String,
     val petId: String,
-    val serviceSnapshot: ServiceSnapshot,
+    val serviceSnapshot: GroomingSnapshot,
     val address: AddressDto,
     val basePrice: Double,
     val discountedPrice: Double,

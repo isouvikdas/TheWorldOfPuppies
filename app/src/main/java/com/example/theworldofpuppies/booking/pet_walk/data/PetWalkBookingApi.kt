@@ -20,7 +20,7 @@ class PetWalkBookingApi(
             Result<ApiResponse<PetWalkBookingDto>, NetworkError> {
         return safeCall {
             httpClient.post(
-                constructUrl("booking/create")
+                constructUrl("booking/walking/create")
             ) {
                 header("Authorization", token)
                 setBody(request)

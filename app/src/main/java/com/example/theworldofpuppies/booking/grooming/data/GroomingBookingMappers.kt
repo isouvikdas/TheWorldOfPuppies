@@ -29,7 +29,7 @@ fun GroomingBookingDto.toGroomingBooking(): GroomingBooking {
         publicBookingId = this.publicBookingId,
         providerId = this.providerId ?: "",
         petId = this.petId,
-        serviceSnapshot = this.serviceSnapshot,
+        serviceSnapshot = this.groomingSnapshot,
         address = address,
         basePrice = this.basePrice,
         discountedPrice = this.discountedPrice,

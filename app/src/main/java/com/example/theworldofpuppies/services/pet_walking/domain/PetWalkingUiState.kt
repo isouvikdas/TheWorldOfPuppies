@@ -11,7 +11,7 @@ data class PetWalkingUiState(
     val selectedFrequency: Frequency? = Frequency.REPEAT_WEEKLY,
     val selectedDays: List<Days> = emptyList(),
     val dateRange: PetWalkDateRange? = null,
-    val singleDate: LocalDateTime? = null,
+    val singleDate: LocalDateTime? = LocalDateTime.now(),
     val days: List<Days> = Days.entries,
     val id: String? = null,
     val name: String? = null,

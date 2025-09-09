@@ -60,8 +60,8 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
-import com.example.theworldofpuppies.services.grooming.domain.SubService
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.flow.collectLatest
@@ -319,7 +319,7 @@ fun GroomingScreen(
 @Composable
 fun ServiceFeatureItem(
     modifier: Modifier = Modifier,
-    serviceFeature: SubService,
+    serviceFeature: GroomingSubService,
     onClick: () -> Unit = {},
     isSelected: Boolean
 ) {

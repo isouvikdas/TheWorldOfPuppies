@@ -10,7 +10,7 @@ fun PetWalkBookingDto.toPetWalkBooking(): PetWalkBooking {
         publicBookingId = publicBookingId,
         providerId = providerId,
         petId = petId,
-        serviceSnapshot = serviceSnapshot,
+        serviceSnapshot = petWalkSnapshot,
         frequency = frequency,
         address = address,
         basePrice = basePrice,

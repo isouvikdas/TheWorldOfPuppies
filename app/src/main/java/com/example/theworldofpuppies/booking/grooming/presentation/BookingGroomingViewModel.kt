@@ -14,7 +14,7 @@ import com.example.theworldofpuppies.booking.grooming.domain.GroomingTimeUiState
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.services.grooming.domain.SubService
+import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -125,7 +125,7 @@ class GroomingBookingViewModel(
 
     fun placeBooking(
         serviceId: String,
-        subService: SubService?,
+        subService: GroomingSubService?,
         selectedSlot: GroomingSlot?,
         selectedDate: LocalDateTime?,
         selectedAddress: Address?,

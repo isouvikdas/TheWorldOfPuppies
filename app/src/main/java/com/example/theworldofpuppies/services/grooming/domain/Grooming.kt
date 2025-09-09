@@ -9,7 +9,7 @@ data class Grooming(
     val discount: Int,
     val category: ServiceCategory,
     val subServiceIds: List<String>,
-    val subServices: List<SubService>,
+    val subServices: List<GroomingSubService>,
     val basePrice: Double,
     val active: Boolean
 )

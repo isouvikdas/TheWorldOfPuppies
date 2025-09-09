@@ -12,7 +12,7 @@ data class GroomingBookingDto(
     val publicBookingId: String,
     val providerId: String? = null,
     val petId: String,
-    val serviceSnapshot: ServiceSnapshot,
+    val groomingSnapshot: GroomingSnapshot,
     val address: AddressDto,
     val basePrice: Double,
     val discountedPrice: Double,

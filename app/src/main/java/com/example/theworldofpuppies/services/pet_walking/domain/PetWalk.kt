@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.services.pet_walking.domain
 
-import com.example.theworldofpuppies.booking.grooming.domain.enums.Category
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
 
 data class PetWalk(

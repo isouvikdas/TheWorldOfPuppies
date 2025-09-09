@@ -1,10 +1,11 @@
 package com.example.theworldofpuppies.booking.pet_walk.data.dto
 
 import com.example.theworldofpuppies.address.data.dto.AddressDto
-import com.example.theworldofpuppies.booking.grooming.data.dto.ServiceSnapshot
+import com.example.theworldofpuppies.booking.grooming.data.dto.GroomingSnapshot
 import com.example.theworldofpuppies.booking.grooming.domain.enums.BookingStatus
 import com.example.theworldofpuppies.booking.grooming.domain.enums.CancellationStatus
 import com.example.theworldofpuppies.booking.grooming.domain.enums.PaymentStatus
+import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkSnapshot
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
 import kotlinx.serialization.Serializable
@@ -15,7 +16,7 @@ data class PetWalkBookingDto(
     val publicBookingId: String,
     val providerId: String? = null,
     val petId: String,
-    val serviceSnapshot: ServiceSnapshot,
+    val petWalkSnapshot: PetWalkSnapshot,
     val frequency: Frequency,
     val address: AddressDto,
     val basePrice: Double,

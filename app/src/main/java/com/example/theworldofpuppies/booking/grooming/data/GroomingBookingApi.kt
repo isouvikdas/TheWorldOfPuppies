@@ -10,7 +10,7 @@ import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.core.response.ApiResponse
-import com.example.theworldofpuppies.services.grooming.domain.SubService
+import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -23,7 +23,7 @@ class GroomingBookingApi(
 ) {
 
     suspend fun getBookingSlots(forDate: LocalDateTime? = null)
-    : Result<ApiResponse<List<GroomingSlotDto>>, NetworkError> {
+            : Result<ApiResponse<List<GroomingSlotDto>>, NetworkError> {
         return safeCall {
             httpClient.get(
                 constructUrl("booking/service/grooming/booking-slot")
@@ -33,15 +33,15 @@ class GroomingBookingApi(
 
     suspend fun bookGrooming(
         serviceId: String,
-        subService: SubService,
+        subService: GroomingSubService,
         selectedSlot: GroomingSlotDto,
         selectedDate: LocalDateTime,
-        selectedAddress: Address?= null,
+        selectedAddress: Address? = null,
         token: String
     ): Result<ApiResponse<GroomingBookingDto>, NetworkError> {
         return safeCall {
             httpClient.post(
-                urlString = constructUrl("booking/create")
+                urlString = constructUrl("booking/grooming/create")
             ) {
                 header("Authorization", token)
                 setBody(

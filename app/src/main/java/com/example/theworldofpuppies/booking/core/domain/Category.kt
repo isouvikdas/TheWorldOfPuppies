@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.booking.grooming.domain.enums
+package com.example.theworldofpuppies.booking.core.domain
 
 import android.content.Context
 import com.example.theworldofpuppies.R
