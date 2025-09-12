@@ -33,6 +33,7 @@ import com.example.theworldofpuppies.services.grooming.presentation.GroomingView
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.services.vet.presentation.VetScreen
+import com.example.theworldofpuppies.services.vet.presentation.VetViewModel
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.order.presentation.CheckoutScreen
@@ -124,6 +125,9 @@ fun AppNavigation(
     val groomingBookingViewModel = koinViewModel<GroomingBookingViewModel>()
 
     val bookingPetWalkViewModel = koinViewModel<BookingPetWalkViewModel>()
+
+    val vetViewModel = koinViewModel<VetViewModel>()
+    val vetUiState by vetViewModel.vetUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -457,7 +461,9 @@ fun AppNavigation(
                 searchIconVisibilityChanged
             )
             VetScreen(
-                navController = navController
+                navController = navController,
+                vetViewModel = vetViewModel,
+                vetUiState = vetUiState
             )
         }
 

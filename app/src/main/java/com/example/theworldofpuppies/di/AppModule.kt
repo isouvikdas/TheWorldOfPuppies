@@ -36,6 +36,7 @@ import com.example.theworldofpuppies.services.pet_walking.data.remote.PetWalkApi
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkRepository
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.services.vet.data.VetRepositoryImpl
+import com.example.theworldofpuppies.services.vet.data.remote.DemoApi
 import com.example.theworldofpuppies.services.vet.data.remote.VetApi
 import com.example.theworldofpuppies.services.vet.domain.VetRepository
 import com.example.theworldofpuppies.services.vet.presentation.VetViewModel
@@ -91,6 +92,7 @@ val appModule = module {
     singleOf(::PetWalkApi)
     singleOf(::PetWalkBookingApi)
     singleOf(::VetApi)
+    singleOf(::DemoApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)

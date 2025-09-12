@@ -31,12 +31,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,25 +58,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.booking.grooming.presentation.DatePickerModal
 import com.example.theworldofpuppies.booking.grooming.presentation.DaySelectorCard
-import com.example.theworldofpuppies.booking.grooming.presentation.GroomingBookingViewModel
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
-import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
 import com.example.theworldofpuppies.services.vet.domain.VetOption
+import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
+import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import com.example.theworldofpuppies.services.vet.domain.getIconRes
 import com.example.theworldofpuppies.services.vet.domain.toString
 import com.example.theworldofpuppies.ui.theme.dimens
+import java.time.LocalDate
 import java.time.LocalDateTime
-import kotlin.collections.forEach
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VetScreen(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    vetViewModel: VetViewModel,
+    vetUiState: VetUiState
 ) {
 
     val context = LocalContext.current
@@ -83,11 +90,41 @@ fun VetScreen(
         state = rememberTopAppBarState()
     )
 
-    val vetOptions = emptyList<VetOption>()
-    val discount = 25
-    var selectedVetOption by remember { mutableStateOf<VetOption?>(null) }
+    val id = vetUiState.id
 
-    androidx.compose.material3.Scaffold(
+    LaunchedEffect(Unit) {
+        if (id.isNullOrEmpty()) {
+            vetViewModel.getVet(context = context)
+        }
+    }
+
+    var showDateDialog by remember { mutableStateOf(false) }
+
+    val vetOptions = vetUiState.vetOptions
+    val discount = vetUiState.discount ?: 0
+    val selectedVetOption = vetUiState.selectedVetOption
+    val description = vetUiState.description ?: ""
+
+    val selectedDate = vetUiState.selectedDate
+    val timeSlots = vetUiState.slotsPerDate
+    val currentDate = LocalDate.now()
+
+    val isItToday = selectedDate.toLocalDate() == currentDate
+    val finalTimeSlots = if (isItToday) {
+        timeSlots
+            .filter { it.dateTime.toLocalTime().isAfter(LocalTime.now().plusHours(1)) }
+    } else {
+        timeSlots
+    }
+
+    val dateDisplayPattern = when (selectedDate.toLocalDate()) {
+        currentDate -> "'Today', dd MMM yyyy"
+        currentDate.plusDays(1) -> "'Tomorrow', dd MMM yyyy"
+        currentDate.minusDays(1) -> "'Yesterday', dd MMM yyyy"
+        else -> "EEEE, dd MMM yyyy"
+    }
+
+    Scaffold(
         modifier = modifier
             .fillMaxSize()
             .navigationBarsPadding()
@@ -97,6 +134,17 @@ fun VetScreen(
             VetHeader(scrollBehavior = scrollBehavior, navController = navController)
         }
     ) {
+        if (showDateDialog) {
+            DatePickerModal(
+                onDateSelected = { date ->
+                    date?.let { it ->
+                        vetViewModel.onDateSelect(it)
+                    }
+                },
+                onDismiss = { showDateDialog = false },
+                selectedDate = selectedDate,
+            )
+        }
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -107,7 +155,7 @@ fun VetScreen(
                 LazyColumn {
                     item {
                         Text(
-                            "Book a Vet Consultation Near You",
+                            description,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier
@@ -133,17 +181,44 @@ fun VetScreen(
                         VetOptionSection(
                             modifier = Modifier.padding(vertical = 5.dp),
                             vetOptions = vetOptions,
-                            selectedVetOptions = selectedVetOption ?: vetOptions.first(),
+                            selectedVetOptions = selectedVetOption,
                             context = context,
                             onVetOptionSelected = { vetOption ->
-                                selectedVetOption = vetOption
+                                vetViewModel.onVetOptionSelect(vetOption)
                             },
-                            discount = 25
+                            discount = discount
                         )
                     }
 
                     item {
+                        VetDateSelectionSection(
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                    vertical = MaterialTheme.dimens.extraSmall
+                                ),
+                            heading = formatDateTime(
+                                selectedDate,
+                                pattern = dateDisplayPattern
+                            ),
+                            onShowDateDialogChange = { showDateDialog = it },
+                            vetViewModel = vetViewModel,
+                            timeSlots = finalTimeSlots,
+                            selectedDate = selectedDate,
+                            error = vetUiState.errorMessage,
+                            isLoading = vetUiState.isLoading,
+                            selectedSlot = vetUiState.selectedSlot,
+                            onTimeSlotSelection = { slot ->
+                                vetViewModel.onTimeSlotSelection(
+                                    slot
+                                )
+                            }
+                        )
 
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
                     }
                 }
 
@@ -164,9 +239,10 @@ fun VetScreen(
 fun VetDateSelectionSection(
     modifier: Modifier = Modifier,
     heading: String,
-    groomingBookingViewModel: GroomingBookingViewModel,
+    vetViewModel: VetViewModel,
     onShowDateDialogChange: (Boolean) -> Unit = {},
     timeSlots: List<VetTimeSlot>,
+    selectedVetOptions: VetOption? = null,
     selectedDate: LocalDateTime,
     error: String? = null,
     isLoading: Boolean,
@@ -207,7 +283,7 @@ fun VetDateSelectionSection(
         DaySelectorCard(
             selectedDate = selectedDate,
             onDateSelect = {
-                groomingBookingViewModel.onDateSelect(it)
+                vetViewModel.onDateSelect(it)
             }
         )
 
@@ -296,8 +372,11 @@ fun VetDateSelectionSection(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        val errorText = if (selectedVetOptions != null) error
+                            ?: "No slots available for the selected date"
+                        else "Please select a vet option"
                         Text(
-                            error ?: "No slots available for the selected date",
+                            errorText,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.W500,
                             modifier = Modifier.padding(
@@ -319,7 +398,7 @@ fun VetDateSelectionSection(
 fun VetOptionSection(
     modifier: Modifier = Modifier,
     vetOptions: List<VetOption>,
-    selectedVetOptions: VetOption,
+    selectedVetOptions: VetOption? = null,
     context: Context,
     discount: Int,
     onVetOptionSelected: (VetOption) -> Unit

@@ -9,6 +9,7 @@ import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetRepository
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
 import com.example.theworldofpuppies.services.vet.domain.VetUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,13 +26,20 @@ class VetViewModel(
 
     fun onVetOptionSelect(vetOption: VetOption) {
         viewModelScope.launch {
-            val selectedDate = vetUiState.value.selectedDate ?: LocalDateTime.now()
+            _vetUiState.update {
+                it.copy(
+                    isLoading = true,
+                    selectedVetOption = vetOption,
+                    )
+            }
+            delay(1000)
+            val selectedDate = vetUiState.value.selectedDate
             val slotsPerDate = getSlotsPerDate(selectedDate, vetOption)
             _vetUiState.update {
                 it.copy(
-                    selectedVetOption = vetOption,
                     selectedSlot = null,
-                    slotsPerDate = slotsPerDate
+                    slotsPerDate = slotsPerDate,
+                    isLoading = false
                 )
             }
         }
@@ -39,21 +47,34 @@ class VetViewModel(
 
     fun onDateSelect(date: LocalDateTime) {
         viewModelScope.launch {
+            _vetUiState.update {
+                it.copy(
+                    isLoading = true,
+                    selectedDate = date
+                )
+            }
+            delay(1000)
             val selectedVetOption = vetUiState.value.selectedVetOption
             val slotsPerDate = getSlotsPerDate(date, selectedVetOption)
             _vetUiState.update {
                 it.copy(
                     selectedSlot = null,
-                    slotsPerDate = slotsPerDate
+                    slotsPerDate = slotsPerDate,
+                    isLoading = false
                 )
             }
         }
     }
 
+    fun onTimeSlotSelection(timeSlot: VetTimeSlot) {
+        viewModelScope.launch {
+            _vetUiState.update { it.copy(selectedSlot = timeSlot) }
+        }
+    }
+
     fun getVet(context: Context) {
         viewModelScope.launch {
-            _vetUiState.update { it.copy(isLoading = false, errorMessage = null) }
-
+            _vetUiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
                 when (val result = vetRepository.getVet()) {
                     is Result.Success -> {
@@ -66,7 +87,8 @@ class VetViewModel(
                                 description = vet.description,
                                 discount = vet.discount,
                                 category = vet.category,
-                                active = vet.active
+                                active = vet.active,
+                                id = vet.id
                             )
                         }
                     }
@@ -82,7 +104,6 @@ class VetViewModel(
             }
         }
     }
-
 
     private fun getSlotsPerDate(
         selectedDate: LocalDateTime,

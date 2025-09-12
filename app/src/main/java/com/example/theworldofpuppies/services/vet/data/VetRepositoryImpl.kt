@@ -3,12 +3,13 @@ package com.example.theworldofpuppies.services.vet.data
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.services.vet.data.mappers.toVet
+import com.example.theworldofpuppies.services.vet.data.remote.DemoApi
 import com.example.theworldofpuppies.services.vet.data.remote.VetApi
 import com.example.theworldofpuppies.services.vet.domain.Vet
 import com.example.theworldofpuppies.services.vet.domain.VetRepository
 
 class VetRepositoryImpl(
-    private val api: VetApi,
+    private val api: DemoApi,
 ) : VetRepository {
 
     override suspend fun getVet(): Result<Vet, NetworkError> {

@@ -4,7 +4,7 @@ import com.example.theworldofpuppies.booking.core.domain.Category
 import java.time.LocalDateTime
 
 data class VetUiState(
-    val selectedDate: LocalDateTime? = null,
+    val selectedDate: LocalDateTime = LocalDateTime.now(),
     val selectedSlot: VetTimeSlot? = null,
     val timeSlots: List<VetTimeSlot> = emptyList(),
     val slotsPerDate: List<VetTimeSlot> = emptyList(),
@@ -12,6 +12,7 @@ data class VetUiState(
     val errorMessage: String? = null,
     val vetOptions: List<VetOption> = emptyList(),
     val selectedVetOption: VetOption? = null,
+    val id: String? = null,
     val name: String? = null,
     val description: String? = null,
     val discount: Int? = 0,
