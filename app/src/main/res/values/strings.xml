@@ -40,5 +40,9 @@
     <string name="dog_training">Dog Training</string>
     <string name="pet_insurance">Pet insurance</string>
     <string name="invalid_request">Request is invalid</string>
+    <string name="in_call_booking">In-Call Booking</string>
+    <string name="home_visit">Home Visit</string>">
+    <string name="in_call_booking_description">Quick advice from a trusted vet, anytime, anywhere</string>
+    <string name="home_visit_description">Expert care at your doorstep for stress-free checkups</string>">
 
 </resources>

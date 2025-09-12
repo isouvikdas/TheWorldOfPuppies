@@ -256,7 +256,6 @@ fun BookingGroomingScreen(
                         groomingBookingViewModel = groomingBookingViewModel,
                         serviceId = serviceId
                     )
-
                 }
             }
         }
@@ -436,7 +435,7 @@ fun SelectDateSection(
 
 
 @Composable
-private fun DaySelectorCard(
+fun DaySelectorCard(
     modifier: Modifier = Modifier,
     selectedDate: LocalDateTime,
     onDateSelect: (LocalDateTime) -> Unit = {}

@@ -51,6 +51,18 @@ sealed class DrawerItems(
         }
     )
 
+    data object VetScreen : DrawerItems(
+        route = Screen.VetScreen.route,
+        title = "Vet Booking",
+        icon = { modifier ->
+            Icon(
+                painterResource(id = R.drawable.refer_earn_filled),
+                contentDescription = null,
+                modifier = modifier.then(Modifier.size(20.dp))
+            )
+        }
+    )
+
     data object Support : DrawerItems(
         route = "Support",
         title = "Support",
