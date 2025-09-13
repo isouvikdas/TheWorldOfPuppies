@@ -9,7 +9,7 @@ import com.example.theworldofpuppies.services.vet.domain.Vet
 import com.example.theworldofpuppies.services.vet.domain.VetRepository
 
 class VetRepositoryImpl(
-    private val api: DemoApi,
+    private val api: VetApi,
 ) : VetRepository {
 
     override suspend fun getVet(): Result<Vet, NetworkError> {

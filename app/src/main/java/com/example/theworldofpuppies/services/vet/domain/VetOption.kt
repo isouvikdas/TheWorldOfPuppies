@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VetOption(
     val id: String,
-    val category: VetBookingCategory,
+    val vetBookingCategory: VetBookingCategory,
     val description: String,
     val price: Double
 )

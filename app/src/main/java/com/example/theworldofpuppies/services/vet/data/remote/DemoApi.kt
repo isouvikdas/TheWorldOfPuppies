@@ -49,13 +49,13 @@ class DemoApi {
                         listOf(
                             VetOption(
                                 id = "In Call Booking",
-                                category = VetBookingCategory.IN_CALL_BOOKING,
+                                vetBookingCategory = VetBookingCategory.IN_CALL_BOOKING,
                                 description = "Quick advice from a trusted vet, anytime, anywhere",
                                 price = 199.00
                             ),
                             VetOption(
                                 id = "Home Visit",
-                                category = VetBookingCategory.HOME_VISIT,
+                                vetBookingCategory = VetBookingCategory.HOME_VISIT,
                                 description = "Expert care at your doorstep for stress-free checkups",
                                 price = 599.00
                             )

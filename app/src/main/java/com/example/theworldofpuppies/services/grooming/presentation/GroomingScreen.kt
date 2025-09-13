@@ -255,14 +255,9 @@ fun GroomingScreen(
                                                         fontWeight = FontWeight.SemiBold,
                                                         color = MaterialTheme.colorScheme.secondary
                                                     )
-
                                                 }
-
                                             }
-
                                         }
-
-
                                     }
                                 }
 

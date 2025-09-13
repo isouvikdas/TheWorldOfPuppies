@@ -152,7 +152,9 @@ fun VetScreen(
             color = Color.Transparent
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     item {
                         Text(
                             description,
@@ -384,9 +386,7 @@ fun VetDateSelectionSection(
                                 horizontal = MaterialTheme.dimens.small1
                             )
                         )
-
                     }
-
                 }
             }
         }
@@ -438,7 +438,7 @@ fun VetOptionSection(
                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             Icon(
-                                painterResource(vetOption.category.getIconRes()),
+                                painterResource(vetOption.vetBookingCategory.getIconRes()),
                                 contentDescription = null,
                                 modifier = Modifier.size(26.dp)
                             )
@@ -448,7 +448,7 @@ fun VetOptionSection(
                                 verticalArrangement = Arrangement.SpaceAround
                             ) {
                                 Text(
-                                    vetOption.category.toString(context),
+                                    vetOption.vetBookingCategory.toString(context),
                                     style = MaterialTheme.typography.titleSmall,
                                     overflow = TextOverflow.Ellipsis,
                                     fontWeight = FontWeight.SemiBold

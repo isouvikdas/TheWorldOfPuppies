@@ -111,7 +111,7 @@ class VetViewModel(
     ): List<VetTimeSlot> {
         return vetUiState.value.timeSlots
             .filter { slot ->
-                slot.vetBookingCategory == selectedVetOption?.category &&
+                slot.vetBookingCategory == selectedVetOption?.vetBookingCategory &&
                         slot.dateTime.toLocalDate() == selectedDate.toLocalDate()
             }
             .sortedBy { it.dateTime }

@@ -82,7 +82,7 @@ fun ProfileScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small3))
+                Spacer(modifier = Modifier.padding(bottom = MaterialTheme.dimens.small2))
             }
 
             item {
@@ -103,7 +103,7 @@ fun SignOutSection(modifier: Modifier = Modifier) {
         onClick = { },
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.buttonHeight)
+            .height(45.dp)
             .padding(horizontal = MaterialTheme.dimens.small1),
         shape = RoundedCornerShape(26.dp),
         colors = ButtonDefaults.outlinedButtonColors(
@@ -118,48 +118,11 @@ fun SignOutSection(modifier: Modifier = Modifier) {
     ) {
         Text(
             "Sign Out",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
     }
 }
-
-//@Composable
-//fun SignOutSection(onClick: () -> Unit) {
-//    Surface(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .wrapContentHeight()
-//            .padding(horizontal = MaterialTheme.dimens.small1)
-//            .clickable { onClick() },
-//        color = Color.LightGray.copy(0.4f),
-//        shape = RoundedCornerShape(MaterialTheme.dimens.small1)
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(start = MaterialTheme.dimens.small1.times(2))
-//                .padding(vertical = MaterialTheme.dimens.small1),
-//            horizontalArrangement = Arrangement.Start,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Icon(
-//                painter = painterResource(R.drawable.logout_outline),
-//                contentDescription = "logout",
-//                tint = Color.Red,
-//                modifier = Modifier.size(21.dp)
-//            )
-//            Text(
-//                "Sign Out",
-//                style = MaterialTheme.typography.titleMedium,
-//                fontWeight = FontWeight.SemiBold,
-//                color = Color.Red,
-//                modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
-//            )
-//        }
-//    }
-//}
-
 
 @Composable
 fun ProfileSection(
@@ -171,7 +134,7 @@ fun ProfileSection(
             .padding(start = MaterialTheme.dimens.small1)
             .padding(top = MaterialTheme.dimens.small1, bottom = 6.dp),
         text = "Profiles",
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold
     )
     Surface(
@@ -223,12 +186,12 @@ fun ProfileItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(MaterialTheme.dimens.small1),
+            .padding(horizontal = MaterialTheme.dimens.small1, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
             modifier = Modifier
-                .size(MaterialTheme.dimens.small1.times(3)),
+                .size(40.dp),
             shape = CircleShape,
         ) {
             Image(
@@ -239,7 +202,7 @@ fun ProfileItem(
         Column(modifier = Modifier.padding(start = MaterialTheme.dimens.small1)) {
             Text(
                 title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
@@ -255,8 +218,8 @@ fun ProfileItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(MaterialTheme.dimens.small3)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable { onClick() }
                     .background(Color.White.copy(0.7f)),
                 contentAlignment = Alignment.Center
@@ -266,7 +229,7 @@ fun ProfileItem(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
                     modifier = Modifier
-                        .size(13.dp)
+                        .size(11.dp)
                 )
             }
         }
@@ -283,7 +246,7 @@ fun AccountAndMembershipSection(
             .padding(start = MaterialTheme.dimens.small1)
             .padding(top = MaterialTheme.dimens.small1, bottom = 6.dp),
         text = "Account & Membership",
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold
     )
 
@@ -333,12 +296,12 @@ fun AccountAndMembershipItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(MaterialTheme.dimens.small1),
+            .padding(horizontal = MaterialTheme.dimens.small1, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
             modifier = Modifier
-                .size(MaterialTheme.dimens.small1.times(5).div(2)),
+                .size(27.dp),
             shape = CircleShape,
         ) {
             Image(
@@ -348,7 +311,7 @@ fun AccountAndMembershipItem(
         }
         Text(
             title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
         )
@@ -359,8 +322,8 @@ fun AccountAndMembershipItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(MaterialTheme.dimens.small3)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable { onClick() }
                     .background(Color.White.copy(0.7f)),
                 contentAlignment = Alignment.Center
@@ -370,7 +333,7 @@ fun AccountAndMembershipItem(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
                     modifier = Modifier
-                        .size(13.dp)
+                        .size(11.dp)
                 )
             }
         }
@@ -387,7 +350,7 @@ fun CommunicationAndEngagementSection(
             .padding(start = MaterialTheme.dimens.small1)
             .padding(top = MaterialTheme.dimens.small1, bottom = 6.dp),
         text = "Communication & Engagement",
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold
     )
 
@@ -437,12 +400,12 @@ fun CommunicationAndMembershipItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(MaterialTheme.dimens.small1),
+            .padding(horizontal = MaterialTheme.dimens.small1, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
             modifier = Modifier
-                .size(MaterialTheme.dimens.small1.times(5).div(2)),
+                .size(27.dp),
             shape = CircleShape,
         ) {
             Image(
@@ -452,7 +415,7 @@ fun CommunicationAndMembershipItem(
         }
         Text(
             title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
         )
@@ -463,8 +426,8 @@ fun CommunicationAndMembershipItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(MaterialTheme.dimens.small3)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable { onClick() }
                     .background(Color.White.copy(0.7f)),
                 contentAlignment = Alignment.Center
@@ -473,7 +436,7 @@ fun CommunicationAndMembershipItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(13.dp)
+                    modifier = Modifier.size(11.dp)
                 )
             }
         }
@@ -491,7 +454,7 @@ fun OrderAndRewardSection(
             .padding(start = MaterialTheme.dimens.small1)
             .padding(top = MaterialTheme.dimens.small1, bottom = 6.dp),
         text = "Orders & Rewards",
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold
     )
 
@@ -552,12 +515,12 @@ fun OrderAndRewardsItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(MaterialTheme.dimens.small1),
+            .padding(horizontal = MaterialTheme.dimens.small1, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
             modifier = Modifier
-                .size(MaterialTheme.dimens.small1.times(5).div(2)),
+                .size(27.dp),
             shape = CircleShape,
         ) {
             Image(
@@ -567,7 +530,7 @@ fun OrderAndRewardsItem(
         }
         Text(
             title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
         )
@@ -578,8 +541,8 @@ fun OrderAndRewardsItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(MaterialTheme.dimens.small3)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable { onClick() }
                     .background(Color.White.copy(0.7f)),
                 contentAlignment = Alignment.Center
@@ -588,7 +551,7 @@ fun OrderAndRewardsItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(13.dp)
+                    modifier = Modifier.size(11.dp)
                 )
             }
         }
