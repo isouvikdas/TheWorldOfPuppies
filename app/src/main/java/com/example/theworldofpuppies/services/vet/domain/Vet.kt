@@ -10,5 +10,6 @@ data class Vet(
     val description: String,
     val active: Boolean,
     val vetOptions: List<VetOption>,
-    val vetTimeSlots: List<VetTimeSlot>
+    val vetTimeSlots: List<VetTimeSlot>,
+    val healthIssues: List<HealthIssue>
 )

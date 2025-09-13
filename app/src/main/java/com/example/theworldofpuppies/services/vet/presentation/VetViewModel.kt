@@ -3,8 +3,11 @@ package com.example.theworldofpuppies.services.vet.presentation
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
+import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetRepository
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
@@ -23,6 +26,26 @@ class VetViewModel(
 
     private val _vetUiState = MutableStateFlow(VetUiState())
     val vetUiState: StateFlow<VetUiState> = _vetUiState.asStateFlow()
+
+    fun onBookNowClick(navController: NavController) {
+        navController.navigate(Screen.VetIssuesScreen.route)
+    }
+
+    fun onHealthIssueDescriptionChange(value: String) {
+        _vetUiState.update { it.copy(healthIssueDescription = value) }
+    }
+
+    fun onHealthIssueSelect(healthIssue: HealthIssue) {
+        _vetUiState.update {
+            it.copy(
+                selectedHealthIssues = if (it.selectedHealthIssues.contains(healthIssue)) {
+                    it.selectedHealthIssues - healthIssue
+                } else {
+                    it.selectedHealthIssues + healthIssue
+                }
+            )
+        }
+    }
 
     fun onVetOptionSelect(vetOption: VetOption) {
         viewModelScope.launch {
@@ -88,7 +111,8 @@ class VetViewModel(
                                 discount = vet.discount,
                                 category = vet.category,
                                 active = vet.active,
-                                id = vet.id
+                                id = vet.id,
+                                healthIssues = vet.healthIssues
                             )
                         }
                     }

@@ -224,11 +224,12 @@ fun VetScreen(
                     }
                 }
 
-                BookingVetBottomSection(
+                VetBottomSection(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .zIndex(1f),
-                    context = context
+                    vetViewModel = vetViewModel,
+                    navController = navController
                 )
             }
         }
@@ -545,9 +546,10 @@ fun VetHeader(
 }
 
 @Composable
-fun BookingVetBottomSection(
+fun VetBottomSection(
     modifier: Modifier = Modifier,
-    context: Context
+    vetViewModel: VetViewModel,
+    navController: NavController
 ) {
     Surface(
         modifier = modifier
@@ -571,6 +573,7 @@ fun BookingVetBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
+                    vetViewModel.onBookNowClick(navController = navController)
                 },
                 modifier = Modifier
                     .fillMaxWidth()

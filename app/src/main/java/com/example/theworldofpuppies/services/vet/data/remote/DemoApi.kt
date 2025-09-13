@@ -62,7 +62,8 @@ class DemoApi {
                         ),
                     vetTimeSlots = next14daysTimeSlotsSequence(VetBookingCategory.IN_CALL_BOOKING) + next14daysTimeSlotsSequence(VetBookingCategory.HOME_VISIT),
                     active = true,
-                    category = Category.VETERINARY
+                    category = Category.VETERINARY,
+                    healthIssues = emptyList()
                 )
             )
         )
