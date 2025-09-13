@@ -16,7 +16,8 @@ fun VetDto.toVet(): Vet {
         description = description,
         active = active,
         vetOptions = vetOptions,
-        vetTimeSlots = vetTimeSlots.map { it.toVetTimeSlot() }
+        vetTimeSlots = vetTimeSlots.map { it.toVetTimeSlot() },
+        healthIssues = healthIssues
     )
 }
 

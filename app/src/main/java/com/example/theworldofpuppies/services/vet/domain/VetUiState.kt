@@ -17,5 +17,8 @@ data class VetUiState(
     val description: String? = null,
     val discount: Int? = 0,
     val category: Category = Category.VETERINARY,
-    val active: Boolean = false
+    val active: Boolean = false,
+    val healthIssues: List<HealthIssue> = emptyList(),
+    val healthIssueDescription: String = "",
+    val selectedHealthIssues: List<HealthIssue> = emptyList()
 )

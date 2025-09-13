@@ -32,6 +32,7 @@ import com.example.theworldofpuppies.services.grooming.presentation.GroomingScre
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
+import com.example.theworldofpuppies.services.vet.presentation.VetIssuesScreen
 import com.example.theworldofpuppies.services.vet.presentation.VetScreen
 import com.example.theworldofpuppies.services.vet.presentation.VetViewModel
 import com.example.theworldofpuppies.shop.cart.presentation.CartScreen
@@ -64,6 +65,8 @@ sealed class Screen(val route: String) {
     data object GroomingScreen : Screen("GroomingScreen")
     data object PetWalkingScreen : Screen("PetWalkingScreen")
     data object VetScreen: Screen("VetScreen")
+
+    data object VetIssuesScreen: Screen("VetIssuesScreen")
 }
 
 @Composable
@@ -461,6 +464,20 @@ fun AppNavigation(
                 searchIconVisibilityChanged
             )
             VetScreen(
+                navController = navController,
+                vetViewModel = vetViewModel,
+                vetUiState = vetUiState
+            )
+        }
+        composable(route = Screen.VetIssuesScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            VetIssuesScreen(
                 navController = navController,
                 vetViewModel = vetViewModel,
                 vetUiState = vetUiState

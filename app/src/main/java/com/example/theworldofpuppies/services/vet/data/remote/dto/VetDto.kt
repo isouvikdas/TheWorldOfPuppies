@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.services.vet.data.remote.dto
 
 import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import kotlinx.serialization.Serializable
 
@@ -13,5 +14,6 @@ data class VetDto(
     val category: Category,
     val vetOptions: List<VetOption>,
     val vetTimeSlots: List<VetTimeSlotDto>,
+    val healthIssues: List<HealthIssue>,
     val active: Boolean
 )
