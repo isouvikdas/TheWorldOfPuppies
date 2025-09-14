@@ -13,7 +13,9 @@ import com.example.theworldofpuppies.services.vet.domain.VetRepository
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
 import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,8 +29,37 @@ class VetViewModel(
     private val _vetUiState = MutableStateFlow(VetUiState())
     val vetUiState: StateFlow<VetUiState> = _vetUiState.asStateFlow()
 
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent: SharedFlow<String> = _toastEvent
+
+    suspend fun showToast(message: String) {
+        _toastEvent.emit(message)
+    }
+
     fun onBookNowClick(navController: NavController) {
-        navController.navigate(Screen.VetIssuesScreen.route)
+        val selectedVetOption = vetUiState.value.selectedVetOption
+        val selectedSlot = vetUiState.value.selectedSlot
+        viewModelScope.launch {
+            if (selectedSlot == null) {
+                showToast("Please select a time slot")
+                return@launch
+            }
+            if (selectedVetOption == null) {
+                showToast("Please select a vet option")
+                return@launch
+            }
+            navController.navigate(Screen.VetIssuesScreen.route)
+        }
+    }
+
+    fun onSaveIssueSelect(navController: NavController) {
+        viewModelScope.launch {
+            if (vetUiState.value.selectedHealthIssues.isEmpty()) {
+                showToast("Please select at least an issue")
+                return@launch
+            }
+            navController.navigate(Screen.VetBookingScreen.route)
+        }
     }
 
     fun onHealthIssueDescriptionChange(value: String) {
@@ -51,9 +82,9 @@ class VetViewModel(
         viewModelScope.launch {
             _vetUiState.update {
                 it.copy(
-                    isLoading = true,
+                    isDateSectionLoading = true,
                     selectedVetOption = vetOption,
-                    )
+                )
             }
             delay(1000)
             val selectedDate = vetUiState.value.selectedDate
@@ -62,7 +93,7 @@ class VetViewModel(
                 it.copy(
                     selectedSlot = null,
                     slotsPerDate = slotsPerDate,
-                    isLoading = false
+                    isDateSectionLoading = false
                 )
             }
         }
@@ -72,7 +103,7 @@ class VetViewModel(
         viewModelScope.launch {
             _vetUiState.update {
                 it.copy(
-                    isLoading = true,
+                    isDateSectionLoading = true,
                     selectedDate = date
                 )
             }
@@ -83,7 +114,7 @@ class VetViewModel(
                 it.copy(
                     selectedSlot = null,
                     slotsPerDate = slotsPerDate,
-                    isLoading = false
+                    isDateSectionLoading = false
                 )
             }
         }

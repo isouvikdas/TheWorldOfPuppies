@@ -20,6 +20,8 @@ import com.example.theworldofpuppies.booking.grooming.presentation.BookingGroomi
 import com.example.theworldofpuppies.booking.grooming.presentation.GroomingBookingViewModel
 import com.example.theworldofpuppies.booking.pet_walk.presentation.BookingPetWalkScreen
 import com.example.theworldofpuppies.booking.pet_walk.presentation.BookingPetWalkViewModel
+import com.example.theworldofpuppies.booking.vet.presentation.VetBookingScreen
+import com.example.theworldofpuppies.booking.vet.presentation.VetBookingViewModel
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
@@ -65,8 +67,8 @@ sealed class Screen(val route: String) {
     data object GroomingScreen : Screen("GroomingScreen")
     data object PetWalkingScreen : Screen("PetWalkingScreen")
     data object VetScreen: Screen("VetScreen")
-
     data object VetIssuesScreen: Screen("VetIssuesScreen")
+    data object VetBookingScreen: Screen("VetBookingScreen")
 }
 
 @Composable
@@ -131,6 +133,9 @@ fun AppNavigation(
 
     val vetViewModel = koinViewModel<VetViewModel>()
     val vetUiState by vetViewModel.vetUiState.collectAsStateWithLifecycle()
+
+    val vetBookingViewModel = koinViewModel<VetBookingViewModel>()
+    val vetBookingUiState by vetBookingViewModel.vetBookingUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -481,6 +486,22 @@ fun AppNavigation(
                 navController = navController,
                 vetViewModel = vetViewModel,
                 vetUiState = vetUiState
+            )
+        }
+        composable(route = Screen.VetBookingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            VetBookingScreen(
+                navController = navController,
+                vetBookingViewModel = vetBookingViewModel,
+                vetUiState = vetUiState,
+                addressUiState = addressUiState,
+                addressViewModel = addressViewModel
             )
         }
 

@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.services.vet.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +59,7 @@ import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBa
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,9 +70,17 @@ fun VetIssuesScreen(
     vetUiState: VetUiState
 ) {
 
+    val context = LocalContext.current
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
+
+    LaunchedEffect(Unit) {
+        vetViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     val selectedHealthIssues = vetUiState.selectedHealthIssues
 
@@ -346,6 +358,7 @@ fun VetIssuesBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
+                    vetViewModel.onSaveIssueSelect(navController)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
