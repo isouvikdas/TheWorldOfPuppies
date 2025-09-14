@@ -1,6 +1,8 @@
 package com.example.theworldofpuppies.services.vet.presentation
 
 import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +73,7 @@ import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import com.example.theworldofpuppies.services.vet.domain.getIconRes
 import com.example.theworldofpuppies.services.vet.domain.toString
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -91,6 +94,12 @@ fun VetScreen(
     )
 
     val id = vetUiState.id
+
+    LaunchedEffect(Unit) {
+        vetViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (id.isNullOrEmpty()) {
@@ -124,116 +133,151 @@ fun VetScreen(
         else -> "EEEE, dd MMM yyyy"
     }
 
-    Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
-        topBar = {
-            VetHeader(scrollBehavior = scrollBehavior, navController = navController)
-        }
-    ) {
-        if (showDateDialog) {
-            DatePickerModal(
-                onDateSelected = { date ->
-                    date?.let { it ->
-                        vetViewModel.onDateSelect(it)
-                    }
-                },
-                onDismiss = { showDateDialog = false },
-                selectedDate = selectedDate,
-            )
-        }
-        Surface(
-            modifier = Modifier
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Scaffold(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(it),
-            color = Color.Transparent
+                .navigationBarsPadding()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f),
+            topBar = {
+                VetHeader(scrollBehavior = scrollBehavior, navController = navController)
+            }
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+            if (showDateDialog) {
+                DatePickerModal(
+                    onDateSelected = { date ->
+                        date?.let { it ->
+                            vetViewModel.onDateSelect(it)
+                        }
+                    },
+                    onDismiss = { showDateDialog = false },
+                    selectedDate = selectedDate,
+                )
+            } else if (!vetUiState.isLoading && id.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    item {
-                        Text(
-                            description,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(MaterialTheme.dimens.small1),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    item {
-                        Text(
-                            "Choose between instant in-call consultation or a home visit for your pet’s comfort",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.W500,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = MaterialTheme.dimens.small1),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    item {
-                        VetOptionSection(
-                            modifier = Modifier.padding(vertical = 5.dp),
-                            vetOptions = vetOptions,
-                            selectedVetOptions = selectedVetOption,
-                            context = context,
-                            onVetOptionSelected = { vetOption ->
-                                vetViewModel.onVetOptionSelect(vetOption)
-                            },
-                            discount = discount
-                        )
-                    }
-
-                    item {
-                        VetDateSelectionSection(
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = MaterialTheme.dimens.small1,
-                                    vertical = MaterialTheme.dimens.extraSmall
-                                ),
-                            heading = formatDateTime(
-                                selectedDate,
-                                pattern = dateDisplayPattern
-                            ),
-                            onShowDateDialogChange = { showDateDialog = it },
-                            vetViewModel = vetViewModel,
-                            timeSlots = finalTimeSlots,
-                            selectedDate = selectedDate,
-                            error = vetUiState.errorMessage,
-                            isLoading = vetUiState.isLoading,
-                            selectedSlot = vetUiState.selectedSlot,
-                            onTimeSlotSelection = { slot ->
-                                vetViewModel.onTimeSlotSelection(
-                                    slot
+                    Image(
+                        painterResource(R.drawable.dog_sad),
+                        contentDescription = "dog",
+                        modifier = Modifier.size(100.dp)
+                    )
+                    Text(
+                        "Oops! Something went wrong",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            } else {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it),
+                    color = Color.Transparent
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            item {
+                                Text(
+                                    description,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(MaterialTheme.dimens.small1),
+                                    textAlign = TextAlign.Center
                                 )
                             }
+
+                            item {
+                                Text(
+                                    "Choose between instant in-call consultation or a home visit for your pet’s comfort",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.W500,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = MaterialTheme.dimens.small1),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            item {
+                                VetOptionSection(
+                                    modifier = Modifier.padding(vertical = 5.dp),
+                                    vetOptions = vetOptions,
+                                    selectedVetOptions = selectedVetOption,
+                                    context = context,
+                                    onVetOptionSelected = { vetOption ->
+                                        vetViewModel.onVetOptionSelect(vetOption)
+                                    },
+                                    discount = discount
+                                )
+                            }
+
+                            item {
+                                VetDateSelectionSection(
+                                    modifier = Modifier
+                                        .padding(
+                                            horizontal = MaterialTheme.dimens.small1,
+                                            vertical = MaterialTheme.dimens.extraSmall
+                                        ),
+                                    heading = formatDateTime(
+                                        selectedDate,
+                                        pattern = dateDisplayPattern
+                                    ),
+                                    onShowDateDialogChange = { showDateDialog = it },
+                                    vetViewModel = vetViewModel,
+                                    timeSlots = finalTimeSlots,
+                                    selectedDate = selectedDate,
+                                    error = vetUiState.errorMessage,
+                                    isDateSectionLoading = vetUiState.isDateSectionLoading,
+                                    selectedSlot = vetUiState.selectedSlot,
+                                    onTimeSlotSelection = { slot ->
+                                        vetViewModel.onTimeSlotSelection(
+                                            slot
+                                        )
+                                    }
+                                )
+
+                            }
+
+                            item {
+                                Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
+                            }
+                        }
+
+                        VetBottomSection(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .zIndex(1f),
+                            vetViewModel = vetViewModel,
+                            navController = navController
                         )
-
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
                     }
                 }
 
-                VetBottomSection(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .zIndex(1f),
-                    vetViewModel = vetViewModel,
-                    navController = navController
-                )
             }
         }
+
+        if (vetUiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent.copy(0.5f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+        }
+
     }
+
 
 }
 
@@ -248,7 +292,7 @@ fun VetDateSelectionSection(
     selectedVetOptions: VetOption? = null,
     selectedDate: LocalDateTime,
     error: String? = null,
-    isLoading: Boolean,
+    isDateSectionLoading: Boolean,
     selectedSlot: VetTimeSlot?,
     onTimeSlotSelection: (VetTimeSlot) -> Unit = {}
 ) {
@@ -298,7 +342,7 @@ fun VetDateSelectionSection(
             shape = RoundedCornerShape(16.dp)
         ) {
             Surface(color = Color.LightGray.copy(0.4f)) {
-                if (isLoading) {
+                if (isDateSectionLoading) {
                     Column(
                         modifier = Modifier.wrapContentSize(),
                         verticalArrangement = Arrangement.Center,

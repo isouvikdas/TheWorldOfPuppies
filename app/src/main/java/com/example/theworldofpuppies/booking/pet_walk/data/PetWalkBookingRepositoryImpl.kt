@@ -1,10 +1,8 @@
 package com.example.theworldofpuppies.booking.pet_walk.data
 
-import android.util.Log
-import com.example.theworldofpuppies.booking.pet_walk.data.PetWalkBookingApi
+import com.example.theworldofpuppies.booking.pet_walk.data.request.CreatePetWalkBookingRequest
 import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkBooking
 import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkBookingRepository
-import com.example.theworldofpuppies.booking.pet_walk.data.request.CreatePetWalkBookingRequest
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
@@ -17,7 +15,7 @@ import java.time.LocalDateTime
 class PetWalkBookingRepositoryImpl(
     private val api: PetWalkBookingApi,
     private val userRepository: UserRepository
-): PetWalkBookingRepository {
+) : PetWalkBookingRepository {
     override suspend fun createBooking(
         serviceId: String,
         petId: String,
@@ -119,4 +117,5 @@ class PetWalkBookingRepositoryImpl(
         } catch (e: Exception) {
             return Result.Error(NetworkError.UNKNOWN)
         }
-    }}
+    }
+}
