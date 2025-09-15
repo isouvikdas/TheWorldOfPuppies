@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.services.grooming.domain
 
-import com.example.theworldofpuppies.services.domain.enums.ServiceCategory
+import com.example.theworldofpuppies.services.core.domain.ServiceCategory
 
 data class Grooming(
     val id: String,

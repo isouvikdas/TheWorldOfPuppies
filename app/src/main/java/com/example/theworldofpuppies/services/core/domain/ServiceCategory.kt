@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.services.domain.enums
+package com.example.theworldofpuppies.services.core.domain
 
 enum class ServiceCategory {
     GROOMING,

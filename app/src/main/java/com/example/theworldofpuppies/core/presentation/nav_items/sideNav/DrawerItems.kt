@@ -100,7 +100,7 @@ sealed class DrawerItems(
     )
 
     data object Training : DrawerItems(
-        route = "Training",
+        route = Screen.DogTrainingScreen.route,
         title = "Dog Training",
         icon = { modifier->
             Icon(
