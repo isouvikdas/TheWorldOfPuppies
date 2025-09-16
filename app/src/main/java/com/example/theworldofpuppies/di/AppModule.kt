@@ -33,6 +33,7 @@ import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
+import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceViewModel
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.services.dog_training.data.DogTrainingRepositoryImpl
@@ -145,4 +146,6 @@ val appModule = module {
     viewModelOf(::VetBookingViewModel)
     viewModelOf(::DogTrainingViewModel)
     viewModelOf(::DogTrainingBookingViewModel)
+    viewModelOf(::PetInsuranceViewModel)
+
 }
