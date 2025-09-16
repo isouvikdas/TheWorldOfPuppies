@@ -648,7 +648,7 @@ fun PetWalkBottomSection(
             ) {
                 Text(
                     text = "Book Now",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

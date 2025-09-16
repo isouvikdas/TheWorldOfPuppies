@@ -570,19 +570,19 @@ fun ServiceSummaryCard(
         ) {
             Text(
                 "Service",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.W500
             )
             Column(verticalArrangement = Arrangement.Top) {
                 Text(
                     Category.GROOMING.toString(context),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 subService?.name?.let {
                     Text(
                         "($it)",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
@@ -712,7 +712,7 @@ fun BookingGroomingBottomSection(
             ) {
                 Text(
                     text = "Place Booking",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

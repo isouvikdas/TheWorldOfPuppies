@@ -1,6 +1,8 @@
 package com.example.theworldofpuppies.services.dog_training.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +80,12 @@ fun DogTrainingScreen(
     val selectedFeatures = dogTrainingUiState.selectedDogTrainingFeatures
 
     LaunchedEffect(Unit) {
+        dogTrainingViewModel.toastEvent.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
         if (id.isEmpty()) {
             dogTrainingViewModel.getDogTraining(context)
         }
@@ -97,87 +105,106 @@ fun DogTrainingScreen(
                 )
             }
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-            ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+            if (!dogTrainingUiState.isLoading && id.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    item {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            Text(
-                                "Choose the Right Training for Your Dog",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(MaterialTheme.dimens.small1),
-                                textAlign = TextAlign.Center
-                            )
-                            Text(
-                                "Certified Trainers to Build Obedience, Confidence & Bonding",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.W500,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = MaterialTheme.dimens.small1),
-                                textAlign = TextAlign.Center
-                            )
-
-                        }
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.padding(16.dp))
-                    }
-
-                    item {
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            items(trainingOptions) { option ->
-                                val isSelected = selectedTrainingOption == option
-                                DogTrainingOptionCard(
-                                    modifier = Modifier
-                                        .padding(
-                                            start = if (trainingOptions.first() == option) MaterialTheme.dimens.small1
-                                            else 0.dp,
-                                            end = if (trainingOptions.last() == option) MaterialTheme.dimens.small1
-                                            else 0.dp
-                                        ),
-                                    name = option.name,
-                                    description = option.description,
-                                    onSelect = {
-                                        dogTrainingViewModel.onTrainingOptionSelect(option)
-                                    },
-                                    isSelected = isSelected
-                                )
-                            }
-                        }
-                    }
-
-                    item {
-                        DogTrainingFeatureSection(
-                            trainingFeatures = trainingFeatures,
-                            selectedFeatures = selectedFeatures,
-                            onSelect = { feature ->
-                                dogTrainingViewModel.onTrainingFeatureSelect(feature)
-                            }
-                        )
-                    }
+                    Image(
+                        painterResource(R.drawable.dog_sad),
+                        contentDescription = "dog",
+                        modifier = Modifier.size(100.dp)
+                    )
+                    Text(
+                        dogTrainingUiState.error ?: "Oops! Something went wrong",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
-
-                DogTrainingBottomSection(
+            } else {
+                Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .zIndex(1f),
-                    dogTrainingViewModel = dogTrainingViewModel,
-                    navController = navController
-                )
+                        .fillMaxSize()
+                        .padding(it)
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        item {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                Text(
+                                    "Choose the Right Training for Your Dog",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(MaterialTheme.dimens.small1),
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    "Certified Trainers to Build Obedience, Confidence & Bonding",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.W500,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = MaterialTheme.dimens.small1),
+                                    textAlign = TextAlign.Center
+                                )
+
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.padding(16.dp))
+                        }
+
+                        item {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                items(trainingOptions) { option ->
+                                    val isSelected = selectedTrainingOption == option
+                                    DogTrainingOptionCard(
+                                        modifier = Modifier
+                                            .padding(
+                                                start = if (trainingOptions.first() == option) MaterialTheme.dimens.small1
+                                                else 0.dp,
+                                                end = if (trainingOptions.last() == option) MaterialTheme.dimens.small1
+                                                else 0.dp
+                                            ),
+                                        name = option.name,
+                                        description = option.description,
+                                        onSelect = {
+                                            dogTrainingViewModel.onTrainingOptionSelect(option)
+                                        },
+                                        isSelected = isSelected
+                                    )
+                                }
+                            }
+                        }
+
+                        item {
+                            DogTrainingFeatureSection(
+                                trainingFeatures = trainingFeatures,
+                                selectedFeatures = selectedFeatures,
+                                onSelect = { feature ->
+                                    dogTrainingViewModel.onTrainingFeatureSelect(feature)
+                                }
+                            )
+                        }
+                    }
+
+                    DogTrainingBottomSection(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .zIndex(1f),
+                        dogTrainingViewModel = dogTrainingViewModel,
+                        navController = navController
+                    )
+
+                }
 
             }
         }
@@ -379,7 +406,7 @@ fun DogTrainingBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
-//                    vetViewModel.onSaveIssueSelect(navController)
+                    dogTrainingViewModel.onBookNowClick(navController)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -395,7 +422,7 @@ fun DogTrainingBottomSection(
             ) {
                 Text(
                     text = "Book Now",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

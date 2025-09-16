@@ -277,7 +277,7 @@ fun BookingPetWalkBottomSection(
             ) {
                 Text(
                     text = "Place Booking",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -297,13 +297,13 @@ fun PetWalkNameSection(modifier: Modifier = Modifier, name: String? = null) {
     ) {
         Text(
             "Service",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.W500
         )
         name?.let {
             Text(
                 it,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -316,9 +316,9 @@ fun PriceRowSection(
     priceTitle: String,
     price1: Double? = null,
     price2: Double? = null,
-    priceTitleStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    priceTitleStyle: TextStyle = MaterialTheme.typography.titleSmall,
     priceTitleWeight: FontWeight = FontWeight.W500,
-    priceStyle: TextStyle = MaterialTheme.typography.titleLarge,
+    priceStyle: TextStyle = MaterialTheme.typography.titleMedium,
     priceWeight: FontWeight = FontWeight.SemiBold
 ) {
     Row(
@@ -333,7 +333,8 @@ fun PriceRowSection(
         Text(
             priceTitle,
             style = priceTitleStyle,
-            fontWeight = priceTitleWeight
+            fontWeight = priceTitleWeight,
+            modifier = Modifier.fillMaxWidth(0.5f)
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,

@@ -4,6 +4,6 @@ enum class ServiceCategory {
     GROOMING,
     PET_ADOPT,
     WALKING,
-    BOARDING,
-    VETERINARY
+    VETERINARY,
+    DOG_TRAINING
 }

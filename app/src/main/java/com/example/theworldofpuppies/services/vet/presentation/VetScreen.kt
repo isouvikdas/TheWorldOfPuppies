@@ -166,7 +166,7 @@ fun VetScreen(
                         modifier = Modifier.size(100.dp)
                     )
                     Text(
-                        "Oops! Something went wrong",
+                        vetUiState.errorMessage ?: "Oops! Something went wrong",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -633,7 +633,7 @@ fun VetBottomSection(
             ) {
                 Text(
                     text = "Book Now",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

@@ -16,6 +16,8 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
+import com.example.theworldofpuppies.booking.dog_training.presentation.DogTrainingBookingScreen
+import com.example.theworldofpuppies.booking.dog_training.presentation.DogTrainingBookingViewModel
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingGroomingScreen
 import com.example.theworldofpuppies.booking.grooming.presentation.GroomingBookingViewModel
 import com.example.theworldofpuppies.booking.pet_walk.presentation.BookingPetWalkScreen
@@ -72,6 +74,7 @@ sealed class Screen(val route: String) {
     data object VetIssuesScreen: Screen("VetIssuesScreen")
     data object VetBookingScreen: Screen("VetBookingScreen")
     data object DogTrainingScreen: Screen("DogTrainingScreen")
+    data object DogTrainingBookingScreen: Screen("DogTrainingBookingScreen")
 }
 
 @Composable
@@ -141,6 +144,9 @@ fun AppNavigation(
 
     val dogTrainingViewModel = koinViewModel<DogTrainingViewModel>()
     val dogTrainingUiState by dogTrainingViewModel.dogTrainingUiState.collectAsStateWithLifecycle()
+
+    val dogTrainingBookingViewModel = koinViewModel<DogTrainingBookingViewModel>()
+    val dogTrainingBookingUiState by dogTrainingBookingViewModel.dogTrainingBookingUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -522,6 +528,24 @@ fun AppNavigation(
                 navController = navController,
                 dogTrainingViewModel = dogTrainingViewModel,
                 dogTrainingUiState = dogTrainingUiState
+            )
+        }
+
+        composable(route = Screen.DogTrainingBookingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            DogTrainingBookingScreen(
+                navController = navController,
+                dogTrainingBookingViewModel = dogTrainingBookingViewModel,
+                dogTrainingUiState = dogTrainingUiState,
+                dogTrainingBookingUiState = dogTrainingBookingUiState,
+                addressUiState = addressUiState,
+                addressViewModel = addressViewModel
             )
         }
 

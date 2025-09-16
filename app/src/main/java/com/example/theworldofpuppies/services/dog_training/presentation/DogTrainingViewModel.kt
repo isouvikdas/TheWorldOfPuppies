@@ -3,8 +3,10 @@ package com.example.theworldofpuppies.services.dog_training.presentation
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingOption
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingRepository
@@ -28,6 +30,17 @@ class DogTrainingViewModel(
 
     suspend fun showToast(message: String) {
         _toastEvent.emit(message)
+    }
+
+    fun onBookNowClick(navController: NavController) {
+        viewModelScope.launch {
+            val selectedFeatures = dogTrainingUiState.value.selectedDogTrainingFeatures
+            if (selectedFeatures.isEmpty()) {
+                showToast("Please select at least one feature")
+            } else {
+                navController.navigate(Screen.DogTrainingBookingScreen.route)
+            }
+        }
     }
 
     fun onTrainingFeatureSelect(feature: DogTrainingFeature) {
@@ -78,6 +91,7 @@ class DogTrainingViewModel(
                             )
                         }
                     }
+
                     is Result.Error -> {
                         _dogTrainingUiState.update { it.copy(error = result.error.toString(context)) }
                     }

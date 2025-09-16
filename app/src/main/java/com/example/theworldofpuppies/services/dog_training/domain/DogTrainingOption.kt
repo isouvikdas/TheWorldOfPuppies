@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DogTrainingOption(
-    val name: String,
-    val description: String,
-    val dogTrainingFeatures: List<DogTrainingFeature>
+    val name: String = "",
+    val description: String = "",
+    val dogTrainingFeatures: List<DogTrainingFeature> = emptyList()
 )
