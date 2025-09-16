@@ -16,6 +16,8 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
+import com.example.theworldofpuppies.booking.dog_training.presentation.DogTrainingBookingScreen
+import com.example.theworldofpuppies.booking.dog_training.presentation.DogTrainingBookingViewModel
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingGroomingScreen
 import com.example.theworldofpuppies.booking.grooming.presentation.GroomingBookingViewModel
 import com.example.theworldofpuppies.booking.pet_walk.presentation.BookingPetWalkScreen
@@ -30,6 +32,8 @@ import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingScreen
+import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
@@ -69,6 +73,8 @@ sealed class Screen(val route: String) {
     data object VetScreen: Screen("VetScreen")
     data object VetIssuesScreen: Screen("VetIssuesScreen")
     data object VetBookingScreen: Screen("VetBookingScreen")
+    data object DogTrainingScreen: Screen("DogTrainingScreen")
+    data object DogTrainingBookingScreen: Screen("DogTrainingBookingScreen")
 }
 
 @Composable
@@ -135,7 +141,12 @@ fun AppNavigation(
     val vetUiState by vetViewModel.vetUiState.collectAsStateWithLifecycle()
 
     val vetBookingViewModel = koinViewModel<VetBookingViewModel>()
-    val vetBookingUiState by vetBookingViewModel.vetBookingUiState.collectAsStateWithLifecycle()
+
+    val dogTrainingViewModel = koinViewModel<DogTrainingViewModel>()
+    val dogTrainingUiState by dogTrainingViewModel.dogTrainingUiState.collectAsStateWithLifecycle()
+
+    val dogTrainingBookingViewModel = koinViewModel<DogTrainingBookingViewModel>()
+    val dogTrainingBookingUiState by dogTrainingBookingViewModel.dogTrainingBookingUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -500,6 +511,39 @@ fun AppNavigation(
                 navController = navController,
                 vetBookingViewModel = vetBookingViewModel,
                 vetUiState = vetUiState,
+                addressUiState = addressUiState,
+                addressViewModel = addressViewModel
+            )
+        }
+
+        composable(route = Screen.DogTrainingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            DogTrainingScreen(
+                navController = navController,
+                dogTrainingViewModel = dogTrainingViewModel,
+                dogTrainingUiState = dogTrainingUiState
+            )
+        }
+
+        composable(route = Screen.DogTrainingBookingScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            DogTrainingBookingScreen(
+                navController = navController,
+                dogTrainingBookingViewModel = dogTrainingBookingViewModel,
+                dogTrainingUiState = dogTrainingUiState,
+                dogTrainingBookingUiState = dogTrainingBookingUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel
             )

@@ -71,7 +71,7 @@ import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.getIconRes
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.toString
-import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDateTime
@@ -648,7 +648,7 @@ fun PetWalkBottomSection(
             ) {
                 Text(
                     text = "Book Now",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

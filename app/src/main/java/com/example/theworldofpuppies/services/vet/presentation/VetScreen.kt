@@ -66,7 +66,7 @@ import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
 import com.example.theworldofpuppies.services.vet.domain.VetUiState
@@ -166,7 +166,7 @@ fun VetScreen(
                         modifier = Modifier.size(100.dp)
                     )
                     Text(
-                        "Oops! Something went wrong",
+                        vetUiState.errorMessage ?: "Oops! Something went wrong",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -633,7 +633,7 @@ fun VetBottomSection(
             ) {
                 Text(
                     text = "Book Now",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

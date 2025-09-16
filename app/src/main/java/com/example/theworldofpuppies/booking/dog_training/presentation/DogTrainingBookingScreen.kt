@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.booking.vet.presentation
+package com.example.theworldofpuppies.booking.dog_training.presentation
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,31 +33,39 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
+import com.example.theworldofpuppies.booking.dog_training.domain.DogTrainingBookingUIState
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.PriceRowSection
+import com.example.theworldofpuppies.booking.vet.presentation.VetBookingBottomSection
+import com.example.theworldofpuppies.booking.vet.presentation.VetBookingNameSection
+import com.example.theworldofpuppies.booking.vet.presentation.VetBookingViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
+import com.example.theworldofpuppies.core.presentation.util.calculateDiscountedPrice
+import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
+import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingOption
+import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingUiState
+import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
-import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import com.example.theworldofpuppies.services.vet.domain.toString
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VetBookingScreen(
+fun DogTrainingBookingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    vetUiState: VetUiState,
+    dogTrainingBookingViewModel: DogTrainingBookingViewModel,
+    dogTrainingBookingUiState: DogTrainingBookingUIState,
+    dogTrainingUiState: DogTrainingUiState,
     addressUiState: AddressUiState,
-    addressViewModel: AddressViewModel,
-    vetBookingViewModel: VetBookingViewModel
+    addressViewModel: AddressViewModel
 ) {
 
     val context = LocalContext.current
@@ -67,36 +74,30 @@ fun VetBookingScreen(
         state = rememberTopAppBarState()
     )
 
+    val id = dogTrainingUiState.id
+    val name = dogTrainingUiState.name
+    val discount = dogTrainingUiState.discount
+    val dogTrainingOption = dogTrainingUiState.selectedDogTrainingOption
+    val dogTrainingFeatures = dogTrainingUiState.selectedDogTrainingFeatures
+
     val selectedAddress = addressUiState.addresses.find { it.isSelected }
 
-    val id = vetUiState.id
-    val vetOption = vetUiState.selectedVetOption
-    val price = vetOption?.price
-    val discount = vetUiState.discount
-    val name = vetUiState.name
-    val selectedVetOption = vetUiState.selectedVetOption
-    val selectedVetTimeSlot = vetUiState.selectedSlot
-    val selectedHealthIssues = vetUiState.selectedHealthIssues
-    val healthIssueDescription = vetUiState.healthIssueDescription
-
-    val vetBookingUiState by vetBookingViewModel.vetBookingUiState.collectAsStateWithLifecycle()
-
-    if (vetBookingUiState.showSuccessDialog && vetBookingUiState.vetBooking != null) {
+    if (dogTrainingBookingUiState.showSuccessDialog && dogTrainingBookingUiState.dogTrainingBooking != null) {
         BookingSuccessDialog(
-            bookingId = vetBookingUiState.vetBooking?.publicBookingId ?: "",
+            bookingId = dogTrainingBookingUiState.dogTrainingBooking.publicBookingId,
             onBookingView = {
-                vetBookingViewModel.dismissDialog(
+                dogTrainingBookingViewModel.dismissDialog(
                     navController = navController,
                     route = BottomNavigationItems.Home.route
                 )
-                vetBookingViewModel.resetUiState()
+                dogTrainingBookingViewModel.resetUiState()
             },
             onDismiss = {
-                vetBookingViewModel.dismissDialog(
+                dogTrainingBookingViewModel.dismissDialog(
                     navController = navController,
                     route = BottomNavigationItems.Home.route
                 )
-                vetBookingViewModel.resetUiState()
+                dogTrainingBookingViewModel.resetUiState()
             }
         )
     }
@@ -131,7 +132,7 @@ fun VetBookingScreen(
                             selectedAddress = selectedAddress,
                             addressViewModel = addressViewModel,
                             onAddressChangeClick = {
-                                vetBookingViewModel.onAddressChangeClick(
+                                dogTrainingBookingViewModel.onAddressChangeClick(
                                     navController
                                 )
                             },
@@ -142,22 +143,20 @@ fun VetBookingScreen(
                     }
                 }
 
-                VetBookingBottomSection(
+                DogTrainingBookingBottomSection(
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    basePrice = price ?: 0.0,
-                    discount = discount ?: 0,
+                    discount = discount,
                     name = name,
-                    context = context,
-                    selectedVetOption = selectedVetOption,
-                    selectedVetTimeSlot = selectedVetTimeSlot,
-                    healthIssues = selectedHealthIssues,
-                    healthIssueDescription = healthIssueDescription,
+                    selectedFeatures = dogTrainingFeatures,
+                    selectedDogTrainingOption = dogTrainingOption,
                     serviceId = id,
-                    vetBookingViewModel = vetBookingViewModel
+                    dogTrainingBookingViewModel = dogTrainingBookingViewModel,
+                    context = context,
                 )
+
             }
         }
-        if (vetBookingUiState.isLoading) {
+        if (dogTrainingBookingUiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -174,21 +173,18 @@ fun VetBookingScreen(
 }
 
 @Composable
-fun VetBookingBottomSection(
+fun DogTrainingBookingBottomSection(
     modifier: Modifier = Modifier,
-    basePrice: Double = 0.0,
     discount: Int = 0,
     name: String?,
-    selectedVetOption: VetOption?,
-    selectedVetTimeSlot: VetTimeSlot?,
-    healthIssues: List<HealthIssue>,
-    healthIssueDescription: String,
+    selectedFeatures: List<DogTrainingFeature>,
+    selectedDogTrainingOption: DogTrainingOption? = null,
     serviceId: String?,
-    vetBookingViewModel: VetBookingViewModel,
+    dogTrainingBookingViewModel: DogTrainingBookingViewModel,
     context: Context
 ) {
 
-    val discountedPrice = basePrice.times(100 - discount).div(100)
+    val totalPrice = selectedFeatures.sumOf { calculateDiscountedPrice(discount, it.price) }
 
     Surface(
         modifier = modifier
@@ -211,37 +207,35 @@ fun VetBookingBottomSection(
         ) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
 
-            VetBookingNameSection(
+            DogTrainingBookingNameSection(
                 name = name,
-                vetOptionName = selectedVetOption?.vetBookingCategory?.toString(context)
+                dogTrainingOption = selectedDogTrainingOption?.name
             )
             Spacer(modifier = Modifier.height(6.dp))
-            PriceRowSection(
-                priceTitle = "Sessions (1)",
-                price1 = basePrice,
-                price2 = discountedPrice
-            )
-            Spacer(modifier = Modifier.height(6.dp))
+            selectedFeatures.forEach { feature->
+                PriceRowSection(
+                    priceTitle = feature.name,
+                    price1 = feature.price,
+                    price2 = calculateDiscountedPrice(discount = discount, price = feature.price)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
             PriceRowSection(
                 priceTitle = "",
-                price2 = discountedPrice
+                price2 = totalPrice
             )
             Spacer(modifier = Modifier.height(6.dp))
 
             Button(
                 onClick = {
-                    selectedVetOption.let {
-                        vetBookingViewModel.createBooking(
-                            serviceId = serviceId,
-                            petId = "",
-                            healthIssues = healthIssues,
-                            healthIssueDescription = healthIssueDescription,
-                            vetTimeSlot = selectedVetTimeSlot,
-                            vetOptionId = selectedVetOption?.id,
-                            context = context,
-                        )
-
-                    }
+                    dogTrainingBookingViewModel.createBooking(
+                        serviceId = serviceId,
+                        petId = "",
+                        notes = "",
+                        dogTrainingOption = selectedDogTrainingOption,
+                        dogTrainingFeatures = selectedFeatures,
+                        context = context
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -267,10 +261,10 @@ fun VetBookingBottomSection(
 }
 
 @Composable
-fun VetBookingNameSection(
+fun DogTrainingBookingNameSection(
     modifier: Modifier = Modifier,
     name: String? = null,
-    vetOptionName: String? = null
+    dogTrainingOption: String? = null
 ) {
     Row(
         modifier = modifier
@@ -281,22 +275,19 @@ fun VetBookingNameSection(
     ) {
         Text(
             "Service",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.W500
         )
-        if (!name.isNullOrEmpty() && !vetOptionName.isNullOrEmpty()) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        if (!name.isNullOrEmpty() && !dogTrainingOption.isNullOrEmpty()) {
+            Column(verticalArrangement = Arrangement.Center) {
                 Text(
                     name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    "($vetOptionName)",
-                    style = MaterialTheme.typography.titleSmall,
+                    "($dogTrainingOption)",
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold
                 )
 
@@ -304,3 +295,5 @@ fun VetBookingNameSection(
         }
     }
 }
+
+

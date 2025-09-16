@@ -83,7 +83,7 @@ import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
-import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
 import java.time.LocalDateTime
@@ -570,19 +570,19 @@ fun ServiceSummaryCard(
         ) {
             Text(
                 "Service",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.W500
             )
             Column(verticalArrangement = Arrangement.Top) {
                 Text(
                     Category.GROOMING.toString(context),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 subService?.name?.let {
                     Text(
                         "($it)",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
@@ -712,7 +712,7 @@ fun BookingGroomingBottomSection(
             ) {
                 Text(
                     text = "Place Booking",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

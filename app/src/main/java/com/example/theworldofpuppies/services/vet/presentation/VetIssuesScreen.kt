@@ -36,10 +36,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,7 +51,7 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.services.utils.presentation.ServiceTopAppBar
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import com.example.theworldofpuppies.ui.theme.dimens

@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.services.grooming.data.remote.dto
 
-import com.example.theworldofpuppies.services.domain.enums.ServiceCategory
+import com.example.theworldofpuppies.services.core.domain.ServiceCategory
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import kotlinx.serialization.Serializable
 
