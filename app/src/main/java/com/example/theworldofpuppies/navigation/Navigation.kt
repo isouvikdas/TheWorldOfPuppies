@@ -28,6 +28,8 @@ import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
+import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceScreen
+import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceViewModel
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
@@ -75,6 +77,8 @@ sealed class Screen(val route: String) {
     data object VetBookingScreen: Screen("VetBookingScreen")
     data object DogTrainingScreen: Screen("DogTrainingScreen")
     data object DogTrainingBookingScreen: Screen("DogTrainingBookingScreen")
+
+    data object PetInsuranceScreen: Screen("PetInsuranceScreen")
 }
 
 @Composable
@@ -147,6 +151,10 @@ fun AppNavigation(
 
     val dogTrainingBookingViewModel = koinViewModel<DogTrainingBookingViewModel>()
     val dogTrainingBookingUiState by dogTrainingBookingViewModel.dogTrainingBookingUiState.collectAsStateWithLifecycle()
+
+    val petInsuranceViewModel = koinViewModel<PetInsuranceViewModel>()
+    val petInsuranceUiState by petInsuranceViewModel.petInsuranceUiState.collectAsStateWithLifecycle()
+    val petInsuranceBookingUiState by petInsuranceViewModel.petInsuranceBookingUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -546,6 +554,21 @@ fun AppNavigation(
                 dogTrainingBookingUiState = dogTrainingBookingUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel
+            )
+        }
+        composable(route = Screen.PetInsuranceScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            PetInsuranceScreen(
+                navController = navController,
+                petInsuranceViewModel = petInsuranceViewModel,
+                petInsuranceUiState = petInsuranceUiState,
+                petInsuranceBookingUiState = petInsuranceBookingUiState
             )
         }
 

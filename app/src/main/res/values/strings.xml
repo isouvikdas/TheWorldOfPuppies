@@ -43,6 +43,9 @@
     <string name="in_call_booking">In-Call Booking</string>
     <string name="home_visit">Home Visit</string>">
     <string name="in_call_booking_description">Quick advice from a trusted vet, anytime, anywhere</string>
-    <string name="home_visit_description">Expert care at your doorstep for stress-free checkups</string>">
+    <string name="home_visit_description">Expert care at your doorstep for stress-free checkups</string>
+    <string name="dog">Dog</string>
+    <string name="cat">Cat</string>
+    <string name="other">Other</string>">
 
 </resources>

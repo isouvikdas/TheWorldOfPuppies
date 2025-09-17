@@ -71,6 +71,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -503,13 +504,13 @@ fun PetBreedField(
         ) {
             Text(
                 text = heading,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             if (isOptional) {
                 Text(
                     text = "(Optional)",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -520,10 +521,12 @@ fun PetBreedField(
             supportingText = {
                 errorMessage?.let {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.W500
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.W500,
+                        textAlign = TextAlign.End
                     )
                 }
             },
@@ -539,22 +542,22 @@ fun PetBreedField(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
                 errorBorderColor = Color.Transparent,
-                focusedContainerColor = Color.LightGray.copy(0.4f),
-                unfocusedContainerColor = Color.LightGray.copy(0.4f),
-                errorContainerColor = Color.LightGray.copy(0.4f)
+                focusedContainerColor = Color.LightGray.copy(0.3f),
+                unfocusedContainerColor = Color.LightGray.copy(0.3f),
+                errorContainerColor = Color.LightGray.copy(0.3f)
             ),
             maxLines = maxLines,
-            textStyle = MaterialTheme.typography.titleMedium,
+            textStyle = MaterialTheme.typography.titleSmall,
             placeholder = {
                 if (placeHolder.isNotEmpty())
                     Text(
                         text = placeHolder,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         color = Color.Gray
                     )
                 else Text(
                     text = "Enter $heading",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = Color.Gray
                 )
             },
@@ -599,13 +602,13 @@ fun ProfileScreenField(
         ) {
             Text(
                 text = heading,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             if (isOptional) {
                 Text(
                     text = "(Optional)",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -616,10 +619,12 @@ fun ProfileScreenField(
             supportingText = {
                 errorMessage?.let {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.W500
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.W500,
+                        textAlign = TextAlign.End
                     )
                 }
             },
@@ -635,26 +640,26 @@ fun ProfileScreenField(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
                 errorBorderColor = Color.Transparent,
-                focusedContainerColor = Color.LightGray.copy(0.4f),
-                unfocusedContainerColor = Color.LightGray.copy(0.4f),
-                errorContainerColor = Color.LightGray.copy(0.4f)
+                focusedContainerColor = Color.LightGray.copy(0.3f),
+                unfocusedContainerColor = Color.LightGray.copy(0.3f),
+                errorContainerColor = Color.LightGray.copy(0.3f)
             ),
             maxLines = maxLines,
-            textStyle = MaterialTheme.typography.titleMedium,
+            textStyle = MaterialTheme.typography.titleSmall,
             placeholder = {
                 if (readOnly) Text(
                     text = defaultValue,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleSmall
                 )
                 else if (placeHolder.isNotEmpty())
                     Text(
                         text = placeHolder,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         color = Color.Gray
                     )
                 else Text(
                     text = "Enter $heading",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = Color.Gray
                 )
             }

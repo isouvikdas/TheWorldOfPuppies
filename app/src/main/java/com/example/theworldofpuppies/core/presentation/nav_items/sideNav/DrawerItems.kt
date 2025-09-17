@@ -88,7 +88,7 @@ sealed class DrawerItems(
     )
 
     data object Insurance : DrawerItems(
-        route = "Pet insurance",
+        route = Screen.PetInsuranceScreen.route,
         title = "Pet Insurance",
         icon = { modifier->
             Icon(

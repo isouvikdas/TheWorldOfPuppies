@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
@@ -426,13 +427,13 @@ fun AddressField(
         ) {
             Text(
                 text = heading,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             if (isOptional) {
                 Text(
                     text = "(Optional)",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -443,10 +444,12 @@ fun AddressField(
             supportingText = {
                 if (errorMessage != null) {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.W500
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.W500,
+                        textAlign = TextAlign.End
                     )
                 }
             },
@@ -467,15 +470,15 @@ fun AddressField(
                 errorContainerColor = Color.LightGray.copy(0.4f)
             ),
             maxLines = maxLines,
-            textStyle = MaterialTheme.typography.titleMedium,
+            textStyle = MaterialTheme.typography.titleSmall,
             placeholder = {
                 if (readOnly) Text(
                     text = defaultValue,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleSmall
                 )
                 else Text(
                     text = "Enter $heading",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = Color.Gray
                 )
             }
