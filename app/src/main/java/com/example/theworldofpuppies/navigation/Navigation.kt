@@ -154,6 +154,7 @@ fun AppNavigation(
 
     val petInsuranceViewModel = koinViewModel<PetInsuranceViewModel>()
     val petInsuranceUiState by petInsuranceViewModel.petInsuranceUiState.collectAsStateWithLifecycle()
+    val petInsuranceBookingUiState by petInsuranceViewModel.petInsuranceBookingUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -566,7 +567,8 @@ fun AppNavigation(
             PetInsuranceScreen(
                 navController = navController,
                 petInsuranceViewModel = petInsuranceViewModel,
-                petInsuranceUiState = petInsuranceUiState
+                petInsuranceUiState = petInsuranceUiState,
+                petInsuranceBookingUiState = petInsuranceBookingUiState
             )
         }
 

@@ -71,6 +71,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -520,10 +521,12 @@ fun PetBreedField(
             supportingText = {
                 errorMessage?.let {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.W500
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.W500,
+                        textAlign = TextAlign.End
                     )
                 }
             },
@@ -616,10 +619,12 @@ fun ProfileScreenField(
             supportingText = {
                 errorMessage?.let {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.W500
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.W500,
+                        textAlign = TextAlign.End
                     )
                 }
             },

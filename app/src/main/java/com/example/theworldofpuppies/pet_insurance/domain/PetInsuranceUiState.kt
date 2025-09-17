@@ -4,6 +4,10 @@ import com.example.theworldofpuppies.pet_insurance.domain.enums.PetType
 import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
 
 data class PetInsuranceUiState(
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val petInsurance: PetInsurance? = null,
+
     val petType: PetType = PetType.DOG,
     val name: String? = null,
     val email: String? = null,

@@ -1,14 +1,19 @@
 package com.example.theworldofpuppies.pet_insurance.presentation
 
+import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +38,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,8 +60,12 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
+import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
+import com.example.theworldofpuppies.core.presentation.util.rememberImeState
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.pet_insurance.domain.PetInsuranceBookingUiState
 import com.example.theworldofpuppies.pet_insurance.domain.PetInsuranceUiState
 import com.example.theworldofpuppies.pet_insurance.domain.enums.toString
 import com.example.theworldofpuppies.profile.pet.presentation.BreedSearchingScreen
@@ -68,19 +80,28 @@ fun PetInsuranceScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     petInsuranceViewModel: PetInsuranceViewModel,
-    petInsuranceUiState: PetInsuranceUiState
+    petInsuranceUiState: PetInsuranceUiState,
+    petInsuranceBookingUiState: PetInsuranceBookingUiState
 ) {
     val context = LocalContext.current
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
+    val imeInsets = WindowInsets.ime
+    val imeVisible = imeInsets.getBottom(LocalDensity.current) > 0
 
     val features = listOf(
         "Plans starting at Rs 2 per day",
         "Use any vet, anywhere",
         "More than a million pets protected"
     )
+
+    LaunchedEffect(Unit) {
+        if (petInsuranceUiState.petInsurance == null) {
+            petInsuranceViewModel.getPetInsurance(context)
+        }
+    }
 
     val name = petInsuranceUiState.name ?: ""
     val breed = petInsuranceUiState.breed
@@ -89,7 +110,7 @@ fun PetInsuranceScreen(
     val petType = petInsuranceUiState.petType
     val contactNumber = petInsuranceUiState.contactNumber ?: ""
 
-    val description = "The Best Pet Insurance for a Lifetime of Care"
+    val description = petInsuranceUiState.petInsurance?.description.orEmpty()
     val showModalBottomSheet = petInsuranceUiState.showModalBottomSheet
 
     //errors
@@ -98,6 +119,26 @@ fun PetInsuranceScreen(
     val ageError = petInsuranceUiState.ageError
     val contactNumberError = petInsuranceUiState.contactNumberError
     val emailError = petInsuranceUiState.emailError
+
+    if (petInsuranceBookingUiState.showSuccessDialog && petInsuranceBookingUiState.petInsuranceBooking != null) {
+        BookingSuccessDialog(
+            bookingId = petInsuranceBookingUiState.petInsuranceBooking.publicBookingId,
+            onBookingView = {
+                petInsuranceViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Home.route
+                )
+                petInsuranceViewModel.resetUiState()
+            },
+            onDismiss = {
+                petInsuranceViewModel.dismissDialog(
+                    navController = navController,
+                    route = BottomNavigationItems.Home.route
+                )
+                petInsuranceViewModel.resetUiState()
+            }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -115,139 +156,169 @@ fun PetInsuranceScreen(
                 showModalBottomSheet = showModalBottomSheet
             )
 
+            if (!petInsuranceUiState.isLoading && !petInsuranceUiState.errorMessage.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painterResource(R.drawable.dog_sad),
+                        contentDescription = "dog",
+                        modifier = Modifier.size(100.dp)
+                    )
+                    Text(
+                        petInsuranceUiState.errorMessage,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item {
+                            Text(
+                                description,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = MaterialTheme.dimens.small1)
+                                    .padding(top = 6.dp, bottom = 10.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        item {
+                            features.forEach { feature ->
+                                PetInsuranceFeatureItem(
+                                    feature = feature
+                                )
+                            }
+                        }
+
+                        item {
+                            Text(
+                                "Fill in your details below to receive policy plan quotations",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.W500,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = MaterialTheme.dimens.small1)
+                                    .padding(vertical = 10.dp),
+                                textAlign = TextAlign.Start
+                            )
+                        }
+
+                        item {
+                            ProfileScreenField(
+                                modifier = Modifier.padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                ),
+                                heading = "Pet Type?",
+                                value = petType.toString(context),
+                                onValueChange = { petInsuranceViewModel.onNameChange(it) },
+                                errorMessage = nameError,
+                                readOnly = true
+                            )
+                        }
+
+                        item {
+                            PetBreedField(
+                                modifier = Modifier.padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                ),
+                                heading = "Pet Breed?",
+                                value = breed?.breedName.orEmpty(),
+                                readOnly = true,
+                                onToggleClick = { petInsuranceViewModel.toggleModalBottomSheet() },
+                                errorMessage = breedError
+                            )
+                        }
+
+                        item {
+                            ProfileScreenField(
+                                modifier = Modifier.padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                ),
+                                heading = "Your Name",
+                                value = name,
+                                onValueChange = { petInsuranceViewModel.onNameChange(it) },
+                                errorMessage = nameError
+                            )
+                        }
+
+                        item {
+                            ProfileScreenField(
+                                modifier = Modifier.padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                ),
+                                heading = "Your Email",
+                                value = email,
+                                onValueChange = { petInsuranceViewModel.onEmailChange(it) },
+                                errorMessage = emailError
+                            )
+                        }
+
+                        item {
+                            ProfileScreenField(
+                                modifier = Modifier.padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                ),
+                                heading = "Your Contact Number",
+                                value = contactNumber,
+                                onValueChange = { petInsuranceViewModel.onContactNumberChange(it) },
+                                errorMessage = contactNumberError,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
+                            )
+                        }
+
+                        item {
+                            ProfileScreenField(
+                                modifier = Modifier.padding(
+                                    horizontal = MaterialTheme.dimens.small1,
+                                ),
+                                heading = "Your Pet's age in months",
+                                value = age,
+                                onValueChange = { petInsuranceViewModel.onAgeChange(it) },
+                                errorMessage = ageError,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(if (imeVisible) 340.dp else 180.dp))
+                        }
+
+                    }
+                    PetInsuranceBottomSection(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .zIndex(1f),
+                        petInsuranceViewModel = petInsuranceViewModel,
+                        context = context
+                    )
+                }
+            }
+        }
+        if (petInsuranceUiState.isLoading || petInsuranceBookingUiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
+                    .background(Color.Transparent.copy(0.5f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
             ) {
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    item {
-                        Text(
-                            description,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = MaterialTheme.dimens.small1)
-                                .padding(top = 6.dp, bottom = 10.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    item {
-                        features.forEach { feature ->
-                            PetInsuranceFeatureItem(
-                                feature = feature
-                            )
-                        }
-                    }
-
-                    item {
-                        Text(
-                            "Fill in your details below to receive policy plan quotations",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.W500,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = MaterialTheme.dimens.small1)
-                                .padding(top = 10.dp),
-                            textAlign = TextAlign.Start
-                        )
-                    }
-
-                    item {
-                        ProfileScreenField(
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.dimens.small1,
-                            ),
-                            heading = "Pet Type?",
-                            value = petType.toString(context),
-                            onValueChange = { petInsuranceViewModel.onNameChange(it) },
-                            errorMessage = nameError,
-                            readOnly = true
-                        )
-                    }
-
-                    item {
-                        PetBreedField(
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.dimens.small1,
-                            ),
-                            heading = "Pet Breed?",
-                            value = breed?.breedName.orEmpty(),
-                            readOnly = true,
-                            onToggleClick = { petInsuranceViewModel.toggleModalBottomSheet() },
-                            errorMessage = breedError
-                        )
-                    }
-
-                    item {
-                        ProfileScreenField(
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.dimens.small1,
-                            ),
-                            heading = "Your Name",
-                            value = name,
-                            onValueChange = { petInsuranceViewModel.onNameChange(it) },
-                            errorMessage = nameError
-                        )
-                    }
-
-                    item {
-                        ProfileScreenField(
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.dimens.small1,
-                            ),
-                            heading = "Your Email",
-                            value = email,
-                            onValueChange = { petInsuranceViewModel.onEmailChange(it) },
-                            errorMessage = emailError
-                        )
-                    }
-
-                    item {
-                        ProfileScreenField(
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.dimens.small1,
-                            ),
-                            heading = "Your Contact Number",
-                            value = contactNumber,
-                            onValueChange = { petInsuranceViewModel.onContactNumberChange(it) },
-                            errorMessage = contactNumberError
-                        )
-                    }
-
-                    item {
-                        ProfileScreenField(
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.dimens.small1,
-                            ),
-                            heading = "Your Pet's age in months",
-                            value = age,
-                            onValueChange = { petInsuranceViewModel.onAgeChange(it) },
-                            errorMessage = ageError,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(180.dp))
-                    }
-
-                }
-                PetInsuranceBottomSection(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .zIndex(1f),
-                    petInsuranceViewModel = petInsuranceViewModel,
-                    navController = navController
-                )
-
+                CircularProgressIndicator()
             }
+
         }
     }
 }
@@ -279,7 +350,7 @@ fun PetInsuranceFeatureItem(modifier: Modifier = Modifier, feature: String) {
 fun PetInsuranceBottomSection(
     modifier: Modifier = Modifier,
     petInsuranceViewModel: PetInsuranceViewModel,
-    navController: NavController
+    context: Context
 ) {
     Surface(
         modifier = modifier
@@ -303,7 +374,7 @@ fun PetInsuranceBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
-                    petInsuranceViewModel.onBookNowClick(navController = navController)
+                    petInsuranceViewModel.onButtonClick(context = context)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
