@@ -28,40 +28,6 @@ sealed class DrawerItems(
             )
         }
     )
-    data object Grooming : DrawerItems(
-        route = Screen.GroomingScreen.route,
-        title = "Grooming",
-        icon = { modifier ->
-            Icon(
-                painterResource(id = R.drawable.refer_earn_filled),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(20.dp))
-            )
-        }
-    )
-    data object PetWalk : DrawerItems(
-        route = Screen.PetWalkingScreen.route,
-        title = "Pet Walking",
-        icon = { modifier ->
-            Icon(
-                painterResource(id = R.drawable.refer_earn_filled),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(20.dp))
-            )
-        }
-    )
-
-    data object VetScreen : DrawerItems(
-        route = Screen.VetScreen.route,
-        title = "Vet Booking",
-        icon = { modifier ->
-            Icon(
-                painterResource(id = R.drawable.refer_earn_filled),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(20.dp))
-            )
-        }
-    )
 
     data object Support : DrawerItems(
         route = "Support",

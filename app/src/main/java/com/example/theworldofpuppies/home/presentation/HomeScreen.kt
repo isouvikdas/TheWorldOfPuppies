@@ -1,5 +1,7 @@
 package com.example.theworldofpuppies.home.presentation
 
+import android.content.Context
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,21 +42,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
-import com.example.theworldofpuppies.core.domain.Plan
-import com.example.theworldofpuppies.core.domain.Service
+import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.booking.core.domain.getImageRes
+import com.example.theworldofpuppies.booking.core.domain.getScreenRoute
+import com.example.theworldofpuppies.booking.core.domain.toString
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
 
+    val context = LocalContext.current
     val imageList = List(6) { painterResource(id = R.drawable.pet_banner) }
 
     Surface(
@@ -69,7 +76,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             ScrollableBanner(imageList = imageList)
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ServiceSection(serviceList = serviceList)
+            ServiceSection(serviceList = Category.entries, context = context, navController = navController)
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             PetExpertSection()
         }
@@ -114,7 +121,7 @@ fun PetExpertSection(modifier: Modifier = Modifier) {
             contentPadding = PaddingValues(MaterialTheme.dimens.small1),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
         ) {
-            items(serviceList.take(4)) {
+            items(4) {
                 PetExpertItem()
             }
 
@@ -256,33 +263,24 @@ fun PetExpertItem(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
+fun ServiceSection(
+    modifier: Modifier = Modifier,
+    serviceList: List<Category>,
+    context: Context,
+    navController: NavController
+) {
     Column(
         modifier = modifier
             .height(MaterialTheme.dimens.large3)
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(horizontal = MaterialTheme.dimens.small1),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Services",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = stringResource(R.string.see_all),
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.Gray,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.bounceClick { }
-            )
-        }
+        Text(
+            modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1),
+            text = "Services",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -292,7 +290,7 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                     .fillMaxWidth()
                     .fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(serviceList) { service ->
                     val isVisible = remember { mutableStateOf(false) }
@@ -301,7 +299,7 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                start = MaterialTheme.dimens.small1,
+                                start = if (service == serviceList.first())MaterialTheme.dimens.small1 else 0.dp,
                                 end = if (service == serviceList.last()) MaterialTheme.dimens.small1 else 0.dp
                             ),
                         verticalArrangement = Arrangement.Center,
@@ -309,20 +307,31 @@ fun ServiceSection(modifier: Modifier = Modifier, serviceList: List<Service>) {
                     ) {
                         Surface(
                             modifier = Modifier
-                                .size(MaterialTheme.dimens.medium2)
+                                .size(70.dp)
                                 .clip(CircleShape),
-                            color = Color.Gray.copy(0.3f)
-
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
                         ) {
-                            // Put your Image/Icon here
+                            Image(
+                                modifier = Modifier
+                                    .padding(1.dp)
+                                    .size(70.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        navController.navigate(service.getScreenRoute())
+                                    }
+                                ,
+                                painter = painterResource(service.getImageRes()),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
 
                         Text(
-                            text = service.name,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.W500
+                            text = service.toString(context),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -369,170 +378,3 @@ fun ScrollableBanner(
         }
     }
 }
-
-
-@Preview
-@Composable
-private fun HomeScreenPreview() {
-    AppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
-            HomeScreen()
-        }
-    }
-}
-
-val serviceList = listOf(
-    Service(
-        localId = 1,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 2,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 3,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 4,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 5,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 6,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 7,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 8,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 9,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    ),
-    Service(
-        localId = 10,
-        id = "",
-        name = "Grooming",
-        category = "Dog",
-        plans = List(5) {
-            Plan(
-                name = "Spa Bath",
-                price = 800.0,
-                description = "Both with Shampoo and Conditioner"
-            )
-        },
-        imageId = "",
-        imageUri = ""
-    )
-
-
-)
-

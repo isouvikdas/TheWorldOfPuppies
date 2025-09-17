@@ -229,7 +229,7 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            HomeScreen()
+            HomeScreen(navController = navController)
         }
 
         composable(route = BottomNavigationItems.Booking.route) {
