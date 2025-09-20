@@ -59,7 +59,7 @@ fun TopAppBar(
                     )
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.W500,
                     )
                 }

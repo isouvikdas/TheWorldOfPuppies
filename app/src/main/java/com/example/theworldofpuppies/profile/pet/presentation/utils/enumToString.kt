@@ -10,6 +10,8 @@ fun Aggression.toString(context: Context): String {
         Aggression.LOW -> R.string.low
         Aggression.MEDIUM -> R.string.medium
         Aggression.HIGH -> R.string.high
+        Aggression.EXTREME -> R.string.extreme
+        Aggression.NULL -> R.string.Null
     }
     return context.getString(resId)
 }
@@ -18,6 +20,7 @@ fun Gender.toString(context: Context): String {
     val resId = when (this) {
         Gender.FEMALE -> R.string.female
         Gender.MALE -> R.string.male
+        Gender.NULL -> R.string.Null
     }
     return context.getString(resId)
 }

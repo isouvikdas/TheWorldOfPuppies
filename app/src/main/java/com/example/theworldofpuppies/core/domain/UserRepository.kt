@@ -13,6 +13,7 @@ class UserRepository(
         private const val USER_ID_KEY = "user_id"
         private const val EMAIL_KEY = "email"
         private const val PHONE_NUMBER_KEY = "phone_number"
+        private const val PET_IDS = "pet_ids"
     }
 
     fun clearOnInconsistentData() {
@@ -22,6 +23,7 @@ class UserRepository(
         val expirationTime = sharedPreferences.getLong(EXPIRATION_TIME_KEY, 0L)
         val userId = sharedPreferences.getString(USER_ID_KEY, "")
         val email = sharedPreferences.getString(EMAIL_KEY, "")
+        val petIds = sharedPreferences.getString(PET_IDS, "")
 
         val currentTime = System.currentTimeMillis()
 
@@ -44,9 +46,11 @@ class UserRepository(
         if (!userId.isNullOrEmpty()) {
             editor.remove(USER_ID_KEY)
         }
+        if (!petIds.isNullOrEmpty()) {
+            editor.remove(PET_IDS)
+        }
         editor.apply()
     }
-
 
     fun saveUserData(
         token: String? = null,
@@ -54,7 +58,8 @@ class UserRepository(
         userId: String? = null,
         phoneNumber: String? = null,
         username: String? = null,
-        email: String? = null
+        email: String? = null,
+        petIds: List<String>? = null
     ) {
         sharedPreferences.edit().apply {
             token?.let {
@@ -77,11 +82,14 @@ class UserRepository(
             username?.let {
                 putString(USERNAME_KEY, it)
                 Log.i("toggle", "savedUsername: $username")
-
             }
             email?.let {
                 putString(EMAIL_KEY, it)
                 Log.i("toggle", "savedEmail: $email")
+            }
+            petIds?.filter { it.isNotBlank() }?.let {
+                putString(PET_IDS, it.joinToString(","))
+                Log.i("toggle", "savedPetIds: $it")
             }
 
             apply()
@@ -106,11 +114,28 @@ class UserRepository(
         }
     }
 
+    fun savePetId(petId: String? = null) {
+        sharedPreferences.edit().apply {
+            petId?.takeIf { it.isNotBlank() }?.let {
+                val currentPetIds = getPetIds().toMutableList()
+                if (!currentPetIds.contains(it)) { // avoid duplicates
+                    currentPetIds.add(it)
+                }
+                putString(PET_IDS, currentPetIds.joinToString(","))
+                Log.i("toggle", "Updated PetIds: $currentPetIds")
+            }
+            apply()
+        }
+    }
+
     fun getUserId(): String? = sharedPreferences.getString(USER_ID_KEY, "")
     fun getUserName(): String? = sharedPreferences.getString(USERNAME_KEY, "")
     fun getUserEmail(): String? = sharedPreferences.getString(EMAIL_KEY, "")
     fun getUserPhoneNumber(): String? = sharedPreferences.getString(PHONE_NUMBER_KEY, "")
-
+    fun getPetIds(): List<String> {
+        val petIdsString = sharedPreferences.getString(PET_IDS, "")
+        return petIdsString?.split(",") ?: emptyList()
+    }
 
     fun getToken(): String? = sharedPreferences.getString(TOKEN_KEY, "")
     private fun getExpirationTime(): Long = sharedPreferences.getLong(EXPIRATION_TIME_KEY, 0)
@@ -130,6 +155,7 @@ class UserRepository(
                 .remove(USER_ID_KEY)
                 .remove(USERNAME_KEY)
                 .remove(PHONE_NUMBER_KEY)
+                .remove(PET_IDS)
                 .commit()
             Result.success(isSuccess)
         } catch (e: Exception) {

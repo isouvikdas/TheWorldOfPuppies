@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.auth.data
 
-import com.example.theworldofpuppies.core.response.ApiResponse
 import com.example.theworldofpuppies.auth.data.request.LoginRequest
 import com.example.theworldofpuppies.auth.data.request.OtpRequest
 import com.example.theworldofpuppies.auth.data.request.RegistrationRequest
@@ -10,6 +9,7 @@ import com.example.theworldofpuppies.core.data.networking.constructUrl
 import com.example.theworldofpuppies.core.data.networking.safeCall
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
+import com.example.theworldofpuppies.core.response.ApiResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

@@ -1,4 +1,5 @@
 <resources>
+    <string name="Null">Null</string>
     <string name="app_name">TheWorldOfPuppies</string>
     <string name="error_request_timeout">The request timed out.</string>
     <string name="error_too_many_requests">Oops, it seems like your quota is exceeded.</string>
@@ -22,6 +23,7 @@
     <string name="low">Low</string>
     <string name="medium">Medium</string>
     <string name="high">High</string>
+    <string name="extreme">Extreme</string>
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="one_time">One Time</string>

@@ -104,6 +104,7 @@ class LoginViewModel(
                             val number = userResponse.phoneNumber
                             val username = userResponse.username
                             val email = userResponse.email
+                            val petIds = userResponse.petIds
                             Log.i("toggle", "token: $token")
                             Log.i("toggle", "expirationTime: $expirationTime")
                             Log.i("toggle", "userId: $userId")
@@ -116,7 +117,8 @@ class LoginViewModel(
                                 userId = userResponse.userId,
                                 phoneNumber = phoneNumber,
                                 username = userResponse.username,
-                                email = userResponse.email
+                                email = userResponse.email,
+                                petIds = petIds
                             )
                         }
                         authEventManager.sendEvent(Event.LoggedIn)

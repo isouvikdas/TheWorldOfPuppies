@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -37,13 +38,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    petProfileViewModel: PetProfileViewModel
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -58,7 +61,11 @@ fun ProfileScreen(
             item {
                 ProfileSection(
                     onUserProfileClick = {},
-                    onPetProfileClick = { profileViewModel.onPetProfileClick(navController) }
+                    onPetProfileClick = {
+                        profileViewModel.onPetProfileClick(
+                            navController
+                        )
+                    }
                 )
             }
             item {
@@ -99,28 +106,35 @@ fun ProfileScreen(
 
 @Composable
 fun SignOutSection(modifier: Modifier = Modifier) {
-    OutlinedButton(
-        onClick = { },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(45.dp)
-            .padding(horizontal = MaterialTheme.dimens.small1),
-        shape = RoundedCornerShape(26.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.errorContainer,
-            containerColor = Color.Transparent
-        ),
-        border = BorderStroke(
-            width = 1.3.dp,
-            color = MaterialTheme.colorScheme.errorContainer
-        )
-
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Text(
-            "Sign Out",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
-        )
+        OutlinedButton(
+            onClick = { },
+            modifier = Modifier
+                .width(MaterialTheme.dimens.large3.times(2))
+                .height(45.dp)
+                .padding(horizontal = MaterialTheme.dimens.small1),
+            shape = RoundedCornerShape(26.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.errorContainer,
+                containerColor = Color.Transparent
+            ),
+            border = BorderStroke(
+                width = 1.3.dp,
+                color = MaterialTheme.colorScheme.errorContainer
+            )
+
+        ) {
+            Text(
+                "Sign Out",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
     }
 }
 
@@ -165,7 +179,7 @@ fun ProfileSection(
             )
             ProfileItem(
                 image = R.drawable.pet_profile,
-                title = "Sheru",
+                title = "Pet",
                 description = "Personal Info",
                 onClick = {
                     onPetProfileClick()
