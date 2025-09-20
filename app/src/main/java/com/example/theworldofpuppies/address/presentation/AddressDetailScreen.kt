@@ -305,7 +305,7 @@ fun AddressForm(
                         label = {
                             Text(
                                 addressType.name,
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleSmall
                             )
                         },
                         selected = isSelected,
@@ -314,12 +314,10 @@ fun AddressForm(
                             .padding(end = MaterialTheme.dimens.small1.div(2))
                             .animateItem(),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                0.8f
-                            ),
+                            selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             selectedLabelColor = Color.White
                         ),
-                        border = BorderStroke(0.5.dp, color = Color.Gray),
+                        border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.tertiaryContainer),
                         leadingIcon = {
                             Icon(
                                 painterResource(addressType.getIconRes()),

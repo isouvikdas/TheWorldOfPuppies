@@ -30,6 +30,7 @@ import com.example.theworldofpuppies.home.presentation.HomeScreen
 import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceScreen
 import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceViewModel
+import com.example.theworldofpuppies.profile.pet.presentation.PetListScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
@@ -68,17 +69,17 @@ sealed class Screen(val route: String) {
     data object AddressDetailScreen : Screen("AddressDetailScreen")
     data object OrderHistoryScreen : Screen("OrderHistoryScreen")
     data object PetProfileScreen : Screen("PetProfileScreen")
+    data object PetListScreen : Screen("PetListScreen")
     data object BookingGroomingScreen : Screen("BookingGroomingScreen")
     data object BookingPetWalkScreen : Screen("BookingPetWalkScreen")
     data object GroomingScreen : Screen("GroomingScreen")
     data object PetWalkingScreen : Screen("PetWalkingScreen")
-    data object VetScreen: Screen("VetScreen")
-    data object VetIssuesScreen: Screen("VetIssuesScreen")
-    data object VetBookingScreen: Screen("VetBookingScreen")
-    data object DogTrainingScreen: Screen("DogTrainingScreen")
-    data object DogTrainingBookingScreen: Screen("DogTrainingBookingScreen")
-
-    data object PetInsuranceScreen: Screen("PetInsuranceScreen")
+    data object VetScreen : Screen("VetScreen")
+    data object VetIssuesScreen : Screen("VetIssuesScreen")
+    data object VetBookingScreen : Screen("VetBookingScreen")
+    data object DogTrainingScreen : Screen("DogTrainingScreen")
+    data object DogTrainingBookingScreen : Screen("DogTrainingBookingScreen")
+    data object PetInsuranceScreen : Screen("PetInsuranceScreen")
 }
 
 @Composable
@@ -135,7 +136,8 @@ fun AppNavigation(
     val petWalkingUiState by petWalkingViewModel.petWalkingUiState.collectAsStateWithLifecycle()
 
     val petProfileViewModel = koinViewModel<PetProfileViewModel>()
-    val petProfileUiState by petProfileViewModel.petUiState.collectAsStateWithLifecycle()
+    val petProfileUiState by petProfileViewModel.editState.collectAsStateWithLifecycle()
+    val petListUiState by petProfileViewModel.petListUiState.collectAsStateWithLifecycle()
 
     val groomingBookingViewModel = koinViewModel<GroomingBookingViewModel>()
 
@@ -229,7 +231,11 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            HomeScreen()
+            HomeScreen(
+                navController = navController,
+                petListUiState = petListUiState,
+                petProfileViewModel = petProfileViewModel
+            )
         }
 
         composable(route = BottomNavigationItems.Booking.route) {
@@ -279,7 +285,7 @@ fun AppNavigation(
             onGesturesChanged(true)
             ProfileScreen(
                 navController = navController,
-                profileViewModel = profileViewModel
+                profileViewModel = profileViewModel,
             )
         }
 
@@ -413,7 +419,7 @@ fun AppNavigation(
             )
             PetProfileScreen(
                 navController = navController,
-                petUiState = petProfileUiState,
+                editState = petProfileUiState,
                 petProfileViewModel = petProfileViewModel
 
             )
@@ -569,6 +575,20 @@ fun AppNavigation(
                 petInsuranceViewModel = petInsuranceViewModel,
                 petInsuranceUiState = petInsuranceUiState,
                 petInsuranceBookingUiState = petInsuranceBookingUiState
+            )
+        }
+        composable(route = Screen.PetListScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            PetListScreen(
+                navController = navController,
+                petListUiState = petListUiState,
+                petProfileViewModel = petProfileViewModel
             )
         }
 

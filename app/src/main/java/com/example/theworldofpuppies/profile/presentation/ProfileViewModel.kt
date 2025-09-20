@@ -12,7 +12,7 @@ class ProfileViewModel() : ViewModel() {
 
     fun onPetProfileClick(navController: NavController) {
         viewModelScope.launch {
-            navController.navigate(Screen.PetProfileScreen.route)
+            navController.navigate(Screen.PetListScreen.route)
         }
     }
 

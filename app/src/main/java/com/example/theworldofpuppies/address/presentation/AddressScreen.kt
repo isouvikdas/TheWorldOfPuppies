@@ -104,7 +104,7 @@ fun AddressScreen(
                     item {
                         Text(
                             "Select Delivery Address",
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1)
                         )
@@ -129,7 +129,7 @@ fun AddressScreen(
                         ) {
                             Text(
                                 text = "Add New Address",
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -214,12 +214,12 @@ fun AddressCard(
                     Icon(
                         painterResource(address.addressType.getIconRes()),
                         contentDescription = "address",
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = address.addressType.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.W500,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(5.dp)
                     )
                     Row(
@@ -231,7 +231,8 @@ fun AddressCard(
                             Icon(
                                 Icons.Default.CheckCircle,
                                 contentDescription = "checked",
-                                tint = MaterialTheme.colorScheme.tertiaryContainer
+                                tint = MaterialTheme.colorScheme.tertiaryContainer,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                         Icon(
@@ -245,6 +246,7 @@ fun AddressCard(
                                     )
                                 }
                                 .padding(start = 10.dp)
+                                .size(22.dp)
                         )
                         Icon(
                             Icons.Default.DeleteOutline,
@@ -256,18 +258,19 @@ fun AddressCard(
                                     )
                                 }
                                 .padding(start = 10.dp)
+                                .size(22.dp)
                         )
 
                     }
                 }
                 Text(
                     text = address.contactName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.W500
                 )
                 Text(
                     text = formatPhoneNumber(address.contactNumber),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.W500
                 )
 
@@ -279,7 +282,7 @@ fun AddressCard(
 
                 Text(
                     text = addressDescription,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.W500,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 10.dp),

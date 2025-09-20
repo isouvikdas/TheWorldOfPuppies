@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -93,7 +94,7 @@ fun SearchScreen(
                 ),
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(vertical = MaterialTheme.dimens.extraSmall),
+                    .padding(vertical = 6.dp),
                 title = {
                     LazyRow(
                         modifier = Modifier
@@ -149,14 +150,16 @@ fun SearchScreen(
                             )
                         }
                         OutlinedTextField(
-                            modifier = Modifier.width(MaterialTheme.dimens.medium2.times(4)),
+                            modifier = Modifier.width(MaterialTheme.dimens.medium2.times(4)).height(60.dp),
                             value = searchQuery,
                             onValueChange = { text -> productViewModel.onSearchTextChange(text) },
                             singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium,
                             placeholder = {
                                 Text(
                                     "Search products",
-                                    color = Color.Black.copy(0.9f)
+                                    color = Color.Black.copy(0.9f),
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             },
                             leadingIcon = {

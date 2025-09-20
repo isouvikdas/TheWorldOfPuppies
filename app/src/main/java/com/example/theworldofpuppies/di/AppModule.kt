@@ -37,6 +37,9 @@ import com.example.theworldofpuppies.pet_insurance.data.PetInsuranceRepositoryIm
 import com.example.theworldofpuppies.pet_insurance.data.remote.PetInsuranceBookingApi
 import com.example.theworldofpuppies.pet_insurance.domain.PetInsuranceRepository
 import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceViewModel
+import com.example.theworldofpuppies.profile.pet.data.PetRepositoryImpl
+import com.example.theworldofpuppies.profile.pet.data.remote.PetApi
+import com.example.theworldofpuppies.profile.pet.domain.PetRepository
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.services.dog_training.data.DogTrainingRepositoryImpl
@@ -113,6 +116,7 @@ val appModule = module {
     singleOf(::DogTrainingApi)
     singleOf(::PetInsuranceBookingApi)
     singleOf(::DogTrainingBookingApi)
+    singleOf(::PetApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -133,6 +137,7 @@ val appModule = module {
     singleOf(::DogTrainingRepositoryImpl).bind<DogTrainingRepository>()
     singleOf(::DogTrainingBookingRepositoryImpl).bind<DogTrainingBookingRepository>()
     singleOf(::PetInsuranceRepositoryImpl).bind<PetInsuranceRepository>()
+    singleOf(::PetRepositoryImpl).bind<PetRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)

@@ -108,26 +108,3 @@ fun BottomAppbar(
         }
     }
 }
-
-@Preview
-@Composable
-private fun BottomAppBarPreview() {
-    AppTheme {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray.copy(0.2f)),
-            bottomBar = {
-                BottomAppbar(
-                    navController = rememberNavController()
-                )
-            }
-        ) { innerPadding ->
-            HomeScreen(
-                modifier = Modifier
-                    .padding(innerPadding)
-            )
-        }
-
-    }
-}
