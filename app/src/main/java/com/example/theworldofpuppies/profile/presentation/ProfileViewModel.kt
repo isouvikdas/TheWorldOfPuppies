@@ -10,10 +10,9 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel() : ViewModel() {
 
-    fun onPetProfileClick(navController: NavController, fillPet: () -> Unit = {}) {
+    fun onPetProfileClick(navController: NavController) {
         viewModelScope.launch {
             navController.navigate(Screen.PetListScreen.route)
-            fillPet()
         }
     }
 

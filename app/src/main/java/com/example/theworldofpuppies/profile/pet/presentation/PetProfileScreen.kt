@@ -2,6 +2,7 @@ package com.example.theworldofpuppies.profile.pet.presentation
 
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -85,13 +86,13 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.profile.pet.domain.PetEditUiState
 import com.example.theworldofpuppies.profile.pet.domain.enums.Aggression
 import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
 import com.example.theworldofpuppies.profile.pet.domain.enums.Gender
 import com.example.theworldofpuppies.profile.pet.presentation.utils.toString
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,23 +102,21 @@ fun PetProfileScreen(
     navController: NavController,
     petProfileViewModel: PetProfileViewModel,
     editState: PetEditUiState,
-    selectedPet: Pet? = null
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
-        if (selectedPet != null) {
-            petProfileViewModel.fillExistingPetData(selectedPet)
-        } else {
-            petProfileViewModel.resetPetUiState()
+        petProfileViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
 
     val isLoading by petProfileViewModel.isLoading.collectAsStateWithLifecycle()
 
-    val context = LocalContext.current
 
     val petPictureUri = editState.petPictureUri
     val name = editState.name
@@ -308,7 +307,11 @@ fun PetProfileScreen(
                                                 ProfileFilterItem<Aggression>(
                                                     type = a.toString(context),
                                                     isSelected = isSelected,
-                                                    onClick = { petProfileViewModel.onAggressionChange(a) }
+                                                    onClick = {
+                                                        petProfileViewModel.onAggressionChange(
+                                                            a
+                                                        )
+                                                    }
                                                 )
                                             }
                                         }
@@ -355,7 +358,8 @@ fun PetProfileScreen(
                         PetProfileBottomSection(
                             modifier = Modifier.align(Alignment.BottomCenter),
                             petProfileViewModel = petProfileViewModel,
-                            context = context
+                            context = context,
+                            navController = navController
                         )
                     }
                 }
@@ -736,7 +740,8 @@ fun PetProfileHeader(
 fun PetProfileBottomSection(
     modifier: Modifier = Modifier,
     petProfileViewModel: PetProfileViewModel,
-    context: Context
+    context: Context,
+    navController: NavController
 ) {
     Surface(
         modifier = modifier
@@ -760,7 +765,7 @@ fun PetProfileBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             Button(
                 onClick = {
-                    petProfileViewModel.saveProfile(context)
+                    petProfileViewModel.saveProfile(context, navController)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -815,7 +820,10 @@ fun BreedSheet(modifier: Modifier = Modifier, petProfileViewModel: PetProfileVie
                 searchQuery = searchQuery,
                 onSearchTextChange = { petProfileViewModel.onSearchTextChange(it) },
                 breedList = breedList,
-                onBreedSelect = { petProfileViewModel.selectBreed(it) }
+                onBreedSelect = {
+                    petProfileViewModel.selectBreed(it)
+                    petProfileViewModel.toggleModalBottomSheet()
+                }
             )
         }
     }

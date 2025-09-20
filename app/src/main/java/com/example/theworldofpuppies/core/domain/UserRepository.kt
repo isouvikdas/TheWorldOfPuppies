@@ -127,6 +127,20 @@ class UserRepository(
             apply()
         }
     }
+    fun removePetId(petId: String? = null) {
+        sharedPreferences.edit().apply {
+            petId?.takeIf { it.isNotBlank() }?.let {
+                val currentPetIds = getPetIds().toMutableList()
+                if (currentPetIds.contains(it)) {
+                    currentPetIds.remove(it) // ✅ remove instead of add
+                }
+                putString(PET_IDS, currentPetIds.joinToString(","))
+                Log.i("toggle", "Updated PetIds after removal: $currentPetIds")
+            }
+            apply()
+        }
+    }
+
 
     fun getUserId(): String? = sharedPreferences.getString(USER_ID_KEY, "")
     fun getUserName(): String? = sharedPreferences.getString(USERNAME_KEY, "")

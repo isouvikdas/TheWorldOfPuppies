@@ -7,11 +7,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.SearchUiState
 import com.example.theworldofpuppies.core.presentation.util.Event
+import com.example.theworldofpuppies.core.presentation.util.getBytes
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.profile.pet.domain.PetEditUiState
@@ -20,8 +22,10 @@ import com.example.theworldofpuppies.profile.pet.domain.PetRepository
 import com.example.theworldofpuppies.profile.pet.domain.enums.Aggression
 import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
 import com.example.theworldofpuppies.profile.pet.domain.enums.Gender
+import com.example.theworldofpuppies.shop.cart.presentation.CartUiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,18 +37,22 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class PetProfileViewModel(
     private val petRepository: PetRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authEventManager: AuthEventManager
 ) : ViewModel() {
 
     private val _petListUiState = MutableStateFlow(PetListUiState())
     val petListUiState = _petListUiState.asStateFlow()
 
-    private val _toastMessage = MutableStateFlow<String?>(null)
-    val toastMessage = _toastMessage.asSharedFlow()
+    private val _selectedPet = MutableStateFlow<Pet?>(null)
+
+    private val _isEditing = MutableStateFlow(false)
+
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent = _toastEvent.asSharedFlow()
 
     // Original fetched data
     private val _isLoading = MutableStateFlow(false)
@@ -71,11 +79,24 @@ class PetProfileViewModel(
         if (!userRepository.getUserId().isNullOrEmpty()) {
             getPets()
         }
+        observeAuthEvents()
+    }
+
+    fun changeEditingState(isEditing: Boolean, pet: Pet? = null) {
+        _isEditing.value = isEditing
+        if (isEditing) {
+            _selectedPet.value = pet
+        } else {
+            resetPetUiState()
+            _selectedPet.value = null
+        }
+
     }
 
     fun fillExistingPetData(pet: Pet) {
         viewModelScope.launch {
             resetPetUiState()
+            changeEditingState(true, pet)
             onPetPictureChange(pet.downloadUrl.toUri())
             onNameChange(pet.name)
             onAgeChange(pet.age)
@@ -117,7 +138,6 @@ class PetProfileViewModel(
 
     fun selectBreed(breed: DogBreed) {
         _editState.update { it.copy(breed = breed) }
-        toggleModalBottomSheet()
     }
 
     // ---------- search ----------
@@ -130,7 +150,7 @@ class PetProfileViewModel(
     }
 
     suspend fun showToastMessage(message: String) {
-        _toastMessage.emit(message)
+        _toastEvent.emit(message)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -248,6 +268,7 @@ class PetProfileViewModel(
                     is Result.Success -> {
                         _petListUiState.update { it.copy(pets = result.data) }
                     }
+
                     is Result.Error -> {
                         showToastMessage(result.error.toString())
                     }
@@ -260,8 +281,34 @@ class PetProfileViewModel(
         }
     }
 
+    fun saveProfile(context: Context, navController: NavController) {
+        viewModelScope.launch {
+            if (_isEditing.value && _selectedPet.value != null) {
+                val selectedPet = _selectedPet.value!!
+                val editState = editState.value
+                if (selectedPet.name == editState.name
+                    && selectedPet.breed == editState.breed
+                    && selectedPet.age == editState.age
+                    && selectedPet.gender == editState.gender
+                    && selectedPet.aggression == editState.aggression
+                    && selectedPet.isVaccinated == editState.isVaccinated
+                    && selectedPet.weight == editState.weight
+                    && selectedPet.downloadUrl == editState.petPictureUri.toString()
+                ) {
+                    showToastMessage("No changes to save")
+                    return@launch
+                } else {
+                    updatePetProfile(context, navController)
+                }
+            } else {
+                addNewProfile(context, navController)
+            }
+
+        }
+    }
+
     // ---------- save profile ----------
-    fun saveProfile(context: Context) {
+    fun addNewProfile(context: Context, navController: NavController) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
@@ -285,6 +332,7 @@ class PetProfileViewModel(
                                 )
                             }
                             userRepository.savePetId(result.data.id)
+                            navController.popBackStack()
                         }
 
                         is Result.Error -> {
@@ -300,4 +348,84 @@ class PetProfileViewModel(
         }
     }
 
+    fun updatePetProfile(context: Context, navController: NavController) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                if (!validateFields()) {
+                    return@launch
+                } else {
+                    val imageUri = if (editState.value.petPictureUri.toString() ==  _selectedPet.value?.downloadUrl) {
+                        null
+                    } else {
+                        editState.value.petPictureUri
+                    }
+                    when (val result = petRepository.updatePet(
+                        id = _selectedPet.value!!.id,
+                        imageUri = imageUri,
+                        name = editState.value.name,
+                        breed = editState.value.breed,
+                        age = editState.value.age,
+                        gender = editState.value.gender,
+                        aggression = editState.value.aggression,
+                        isVaccinated = editState.value.isVaccinated,
+                        weight = editState.value.weight
+                    )) {
+                        is Result.Success -> {
+                            _petListUiState.update {
+                                val pets = it.pets.toMutableList()
+                                pets.remove(_selectedPet.value)
+                                pets.add(result.data)
+                                it.copy(
+                                    pets = pets
+                                )
+                            }
+                            navController.popBackStack()
+                        }
+
+                        is Result.Error -> {
+                            showToastMessage(result.error.toString(context))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.i("pet", e.message.toString())
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun deletePet(petId: String, context: Context) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                when (val result = petRepository.deletePet(petId)) {
+                    is Result.Success -> {
+                        val pets = petListUiState.value.pets.filter { it.id != petId }
+                        _petListUiState.update { it.copy(pets = pets) }
+                        userRepository.removePetId(petId)
+                    }
+                    is Result.Error -> {
+                        showToastMessage(result.error.toString(context))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.i("pet", e.message.toString())
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+
+    private fun observeAuthEvents() {
+        viewModelScope.launch {
+            authEventManager.events.collect { event ->
+                if (event is Event.LoggedIn) {
+                    getPets()
+                }
+            }
+        }
+    }
 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,6 +43,8 @@ fun PetListScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
+
+    val context = LocalContext.current
 
     val pets = petListUiState.pets
 
@@ -63,16 +66,9 @@ fun PetListScreen(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
             ) {
                 item {
-                    Text(
-                        "Select Pet",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1)
-                    )
-                }
-                item {
                     Button(
                         onClick = {
+                            petProfileViewModel.changeEditingState(false)
                             navController.navigate(Screen.PetProfileScreen.route)
                         },
                         modifier = Modifier
@@ -105,6 +101,9 @@ fun PetListScreen(
                         selectPet = { pet ->
                             petProfileViewModel.fillExistingPetData(pet)
                             navController.navigate(Screen.PetProfileScreen.route)
+                        },
+                        onDeleteClick = { pet ->
+                            petProfileViewModel.deletePet(pet.id, context)
                         }
                     )
                 }

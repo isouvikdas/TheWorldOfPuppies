@@ -19,5 +19,19 @@ interface PetRepository {
         weight: String
     ): Result<Pet, NetworkError>
 
+    suspend fun updatePet(
+        imageUri: Uri ? = null,
+        id: String,
+        name: String,
+        breed: DogBreed,
+        age: String,
+        gender: Gender,
+        aggression: Aggression,
+        isVaccinated: Boolean,
+        weight: String
+    ): Result<Pet, NetworkError>
+
     suspend fun getPets(petIds: List<String>): Result<List<Pet>, NetworkError>
+
+    suspend fun deletePet(petId: String): Result<Boolean, NetworkError>
 }
