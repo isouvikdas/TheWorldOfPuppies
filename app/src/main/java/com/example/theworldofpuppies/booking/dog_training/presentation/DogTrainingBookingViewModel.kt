@@ -32,7 +32,7 @@ class DogTrainingBookingViewModel(
 
     fun createBooking(
         serviceId: String?,
-        petId: String = "",
+        petId: String,
         notes: String = "",
         dogTrainingOption: DogTrainingOption?,
         dogTrainingFeatures: List<DogTrainingFeature>,

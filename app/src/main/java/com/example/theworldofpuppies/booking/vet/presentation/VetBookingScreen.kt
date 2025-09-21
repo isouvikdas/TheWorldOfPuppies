@@ -42,6 +42,7 @@ import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDia
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.PriceRowSection
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
+import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
@@ -58,7 +59,8 @@ fun VetBookingScreen(
     vetUiState: VetUiState,
     addressUiState: AddressUiState,
     addressViewModel: AddressViewModel,
-    vetBookingViewModel: VetBookingViewModel
+    vetBookingViewModel: VetBookingViewModel,
+    selectedPetForBooking: Pet?
 ) {
 
     val context = LocalContext.current
@@ -153,7 +155,8 @@ fun VetBookingScreen(
                     healthIssues = selectedHealthIssues,
                     healthIssueDescription = healthIssueDescription,
                     serviceId = id,
-                    vetBookingViewModel = vetBookingViewModel
+                    vetBookingViewModel = vetBookingViewModel,
+                    petId = selectedPetForBooking?.id ?: ""
                 )
             }
         }
@@ -185,7 +188,8 @@ fun VetBookingBottomSection(
     healthIssueDescription: String,
     serviceId: String?,
     vetBookingViewModel: VetBookingViewModel,
-    context: Context
+    context: Context,
+    petId: String
 ) {
 
     val discountedPrice = basePrice.times(100 - discount).div(100)
@@ -233,7 +237,7 @@ fun VetBookingBottomSection(
                     selectedVetOption.let {
                         vetBookingViewModel.createBooking(
                             serviceId = serviceId,
-                            petId = "",
+                            petId = petId,
                             healthIssues = healthIssues,
                             healthIssueDescription = healthIssueDescription,
                             vetTimeSlot = selectedVetTimeSlot,

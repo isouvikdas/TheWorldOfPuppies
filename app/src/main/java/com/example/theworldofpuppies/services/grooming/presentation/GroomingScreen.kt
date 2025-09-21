@@ -59,9 +59,9 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
-import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.flow.collectLatest
 
@@ -74,7 +74,8 @@ fun GroomingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     groomingViewModel: GroomingViewModel,
-    groomingUiState: GroomingUiState
+    groomingUiState: GroomingUiState,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
     val grooming = groomingUiState.grooming
     val discount = grooming?.discount
@@ -279,13 +280,11 @@ fun GroomingScreen(
                                 }
                             }
                         }
-
-
-
                         GroomingBottomSection(
                             modifier = Modifier.align(Alignment.BottomCenter),
-                            onBookNowClick = {
-                                groomingViewModel.onBookNowClick(navController)
+                            onProceedClick = {
+                                groomingViewModel.onProceedClick(navController)
+                                changePetSelectionView(true)
                             })
                     }
 
@@ -445,7 +444,7 @@ fun ServiceFeatureItem(
 }
 
 @Composable
-fun GroomingBottomSection(modifier: Modifier = Modifier, onBookNowClick: () -> Unit) {
+fun GroomingBottomSection(modifier: Modifier = Modifier, onProceedClick: () -> Unit) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -468,7 +467,7 @@ fun GroomingBottomSection(modifier: Modifier = Modifier, onBookNowClick: () -> U
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             Button(
                 onClick = {
-                    onBookNowClick()
+                    onProceedClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -483,7 +482,7 @@ fun GroomingBottomSection(modifier: Modifier = Modifier, onBookNowClick: () -> U
                 ),
             ) {
                 Text(
-                    text = "Book Now",
+                    text = "Proceed",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )

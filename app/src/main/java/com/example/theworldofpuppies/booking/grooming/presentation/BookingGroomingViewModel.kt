@@ -124,6 +124,7 @@ class GroomingBookingViewModel(
     }
 
     fun placeBooking(
+        petId: String,
         serviceId: String,
         subService: GroomingSubService?,
         selectedSlot: GroomingSlot?,

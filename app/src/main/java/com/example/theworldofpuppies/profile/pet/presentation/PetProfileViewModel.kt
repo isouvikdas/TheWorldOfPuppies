@@ -9,12 +9,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.SearchUiState
 import com.example.theworldofpuppies.core.presentation.util.Event
-import com.example.theworldofpuppies.core.presentation.util.getBytes
 import com.example.theworldofpuppies.core.presentation.util.toString
+import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.profile.pet.domain.PetEditUiState
 import com.example.theworldofpuppies.profile.pet.domain.PetListUiState
@@ -22,7 +23,6 @@ import com.example.theworldofpuppies.profile.pet.domain.PetRepository
 import com.example.theworldofpuppies.profile.pet.domain.enums.Aggression
 import com.example.theworldofpuppies.profile.pet.domain.enums.DogBreed
 import com.example.theworldofpuppies.profile.pet.domain.enums.Gender
-import com.example.theworldofpuppies.shop.cart.presentation.CartUiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -73,6 +73,13 @@ class PetProfileViewModel(
 
     private val _breedList = MutableStateFlow(DogBreed.entries)
 
+    private val _isPetSelectionView = MutableStateFlow(false)
+    val isPetSelectionView = _isPetSelectionView.asStateFlow()
+
+    private val selectedServiceCategory = MutableStateFlow<Category?>(null)
+
+    private val _selectedPetForService = MutableStateFlow<Pet?>(null)
+    val selectedPetForService = _selectedPetForService.asStateFlow()
     // ---------- field change handlers ----------
 
     init {
@@ -80,6 +87,45 @@ class PetProfileViewModel(
             getPets()
         }
         observeAuthEvents()
+    }
+
+    fun onBookNowClick(navController: NavController) {
+        viewModelScope.launch {
+            if (selectedPetForService.value == null) {
+                showToastMessage("Please select a pet first")
+                return@launch
+            }
+            when (selectedServiceCategory.value) {
+                Category.DOG_TRAINING -> {
+                    navController.navigate(Screen.DogTrainingBookingScreen.route)
+                }
+
+                Category.WALKING -> {
+                    navController.navigate(Screen.BookingPetWalkScreen.route)
+                }
+
+                Category.VETERINARY -> {
+                    navController.navigate(Screen.VetIssuesScreen.route)
+                }
+
+                Category.GROOMING -> {
+                    navController.navigate(Screen.BookingGroomingScreen.route)
+                }
+
+                else -> {
+
+                }
+            }
+        }
+    }
+
+    fun changePetSelectionView(isPetSelectionView: Boolean, selectedService: Category? = null) {
+        _isPetSelectionView.value = isPetSelectionView
+        selectedServiceCategory.value = selectedService
+    }
+
+    fun onPetSelection(pet: Pet) {
+        _selectedPetForService.value = pet
     }
 
     fun changeEditingState(isEditing: Boolean, pet: Pet? = null) {
@@ -355,11 +401,12 @@ class PetProfileViewModel(
                 if (!validateFields()) {
                     return@launch
                 } else {
-                    val imageUri = if (editState.value.petPictureUri.toString() ==  _selectedPet.value?.downloadUrl) {
-                        null
-                    } else {
-                        editState.value.petPictureUri
-                    }
+                    val imageUri =
+                        if (editState.value.petPictureUri.toString() == _selectedPet.value?.downloadUrl) {
+                            null
+                        } else {
+                            editState.value.petPictureUri
+                        }
                     when (val result = petRepository.updatePet(
                         id = _selectedPet.value!!.id,
                         imageUri = imageUri,
@@ -406,6 +453,7 @@ class PetProfileViewModel(
                         _petListUiState.update { it.copy(pets = pets) }
                         userRepository.removePetId(petId)
                     }
+
                     is Result.Error -> {
                         showToastMessage(result.error.toString(context))
                     }

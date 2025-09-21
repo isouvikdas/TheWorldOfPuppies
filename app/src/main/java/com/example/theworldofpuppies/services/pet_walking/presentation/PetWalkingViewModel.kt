@@ -139,7 +139,7 @@ class PetWalkingViewModel(
         }
     }
 
-    fun onBookNowClick(navController: NavController) {
+    fun onProceedClick(navController: NavController) {
         viewModelScope.launch {
             when (petWalkingUiState.value.selectedFrequency) {
                 Frequency.REPEAT_WEEKLY -> {
@@ -147,14 +147,14 @@ class PetWalkingViewModel(
                         petWalkingUiState.value.selectedDays.isEmpty() -> showToast(message = "Please select at least one day")
                         petWalkingUiState.value.dateRange?.startDate == null -> showToast(message = "Please select a start date")
                         petWalkingUiState.value.dateRange?.endDate == null -> showToast(message = "Please select an end date")
-                        else -> navController.navigate(Screen.BookingPetWalkScreen.route)
+                        else -> navController.navigate(Screen.PetListScreen.route)
                     }
                 }
 
                 Frequency.ONE_TIME -> {
                     when {
                         petWalkingUiState.value.singleDate == null -> showToast(message = "Please select a date")
-                        else -> navController.navigate(Screen.BookingPetWalkScreen.route)
+                        else -> navController.navigate(Screen.PetListScreen.route)
                     }
                 }
 

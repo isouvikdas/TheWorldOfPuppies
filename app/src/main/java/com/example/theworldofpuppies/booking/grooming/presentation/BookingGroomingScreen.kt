@@ -81,6 +81,7 @@ import com.example.theworldofpuppies.core.presentation.util.formatDayOfWeek
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
@@ -96,7 +97,8 @@ fun BookingGroomingScreen(
     addressViewModel: AddressViewModel,
     addressUiState: AddressUiState,
     groomingBookingViewModel: GroomingBookingViewModel,
-    groomingUiState: GroomingUiState
+    groomingUiState: GroomingUiState,
+    selectedPetForBooking: Pet?
 ) {
     val context = LocalContext.current
 
@@ -254,7 +256,8 @@ fun BookingGroomingScreen(
                         selectedSlot = selectedSlot,
                         context = context,
                         groomingBookingViewModel = groomingBookingViewModel,
-                        serviceId = serviceId
+                        serviceId = serviceId,
+                        petId = selectedPetForBooking?.id ?: ""
                     )
                 }
             }
@@ -664,7 +667,8 @@ fun BookingGroomingBottomSection(
     selectedAddress: Address? = null,
     groomingBookingViewModel: GroomingBookingViewModel,
     context: Context,
-    serviceId: String
+    serviceId: String,
+    petId: String
 ) {
     Surface(
         modifier = modifier
@@ -695,7 +699,8 @@ fun BookingGroomingBottomSection(
                         selectedDate = selectedSlot?.startTime?.toLocalDate()?.atStartOfDay(),
                         selectedAddress = selectedAddress,
                         context = context,
-                        serviceId = serviceId
+                        serviceId = serviceId,
+                        petId = petId
                     )
                 },
                 modifier = Modifier

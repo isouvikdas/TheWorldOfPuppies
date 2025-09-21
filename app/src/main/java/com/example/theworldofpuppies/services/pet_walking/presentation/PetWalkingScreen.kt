@@ -55,7 +55,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,12 +65,12 @@ import com.example.theworldofpuppies.booking.grooming.presentation.DatePickerMod
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkingUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.getIconRes
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.toString
-import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDateTime
@@ -82,7 +81,8 @@ fun PetWalkingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     petWalkingViewModel: PetWalkingViewModel,
-    petWalkingUiState: PetWalkingUiState
+    petWalkingUiState: PetWalkingUiState,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -221,9 +221,10 @@ fun PetWalkingScreen(
                     }
                     PetWalkBottomSection(
                         modifier = Modifier.align(Alignment.BottomCenter),
-                        onBookNowClick = {
-                            petWalkingViewModel.onBookNowClick(navController)
-                        }
+                        onProceedClick = {
+                            petWalkingViewModel.onProceedClick(navController)
+                        },
+                        changePetSelectionView = { changePetSelectionView(true) }
                     )
                 }
             }
@@ -608,7 +609,8 @@ fun PetWalkingHeader(
 @Composable
 fun PetWalkBottomSection(
     modifier: Modifier = Modifier,
-    onBookNowClick: () -> Unit
+    onProceedClick: () -> Unit,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -632,7 +634,8 @@ fun PetWalkBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             Button(
                 onClick = {
-                    onBookNowClick()
+                    onProceedClick()
+                    changePetSelectionView(true)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -647,30 +650,12 @@ fun PetWalkBottomSection(
                 ),
             ) {
                 Text(
-                    text = "Book Now",
+                    text = "Proceed",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PetWalkBottomSectionPrev() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            PetWalkBottomSection(
-                onBookNowClick = {}
-            )
         }
     }
 }

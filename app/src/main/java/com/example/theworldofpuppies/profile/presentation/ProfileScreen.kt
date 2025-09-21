@@ -45,7 +45,8 @@ import com.example.theworldofpuppies.ui.theme.dimens
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    petProfileViewModel: PetProfileViewModel
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -61,7 +62,10 @@ fun ProfileScreen(
                 ProfileSection(
                     onUserProfileClick = {},
                     onPetProfileClick = {
+                        petProfileViewModel.resetPetUiState()
+                        petProfileViewModel.changePetSelectionView(false)
                         profileViewModel.onPetProfileClick(navController)
+
                     }
                 )
             }

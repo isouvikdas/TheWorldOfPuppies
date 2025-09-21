@@ -38,10 +38,10 @@ class GroomingViewModel(
         _toastEvent.emit(message)
     }
 
-    fun onBookNowClick(navController: NavController) {
+    fun onProceedClick(navController: NavController) {
         viewModelScope.launch {
             if (groomingUiState.value.selectedSubServiceId.isNotEmpty()) {
-                navController.navigate(Screen.BookingGroomingScreen.route)
+                navController.navigate(Screen.PetListScreen.route)
             } else {
                 showToast("Please select a service")
                 return@launch
