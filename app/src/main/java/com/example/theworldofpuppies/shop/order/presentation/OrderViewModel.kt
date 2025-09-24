@@ -376,7 +376,7 @@ class OrderViewModel(
         viewModelScope.launch {
             orderEventManager.events.collect { event ->
                 if (event is OrderEvent.OrderConfirmed) {
-                    getOrderById(event.orderId)
+                    getOrders()
                 }
             }
         }

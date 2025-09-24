@@ -22,6 +22,7 @@ fun DogTrainingBookingDto.toDogTrainingBooking(): DogTrainingBooking {
         paymentStatus = paymentStatus,
         creationDate = creationDate.toLocalDateTime(),
         serviceStartDate = serviceStartDate?.toLocalDateTime(),
-        serviceEndDate = serviceEndDate?.toLocalDateTime()
+        serviceEndDate = serviceEndDate?.toLocalDateTime(),
+        isRated = isRated
     )
 }

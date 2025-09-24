@@ -15,5 +15,6 @@ data class OrderItemDto(
     val returnStatus: ReturnStatus,
     val orderStatus: OrderStatus,
     val price: Double,
-    val totalPrice: Double
+    val totalPrice: Double,
+    val isRated: Boolean = false
 )

@@ -24,7 +24,8 @@ fun VetBookingDto.toVetBooking(): VetBooking {
         cancellationStatus = cancellationStatus,
         paymentStatus = paymentStatus,
         creationDate = creationDate,
-        serviceDate = serviceDate?.toLocalDateTime()
+        serviceDate = serviceDate?.toLocalDateTime(),
+        isRated = isRated
     )
 }
 

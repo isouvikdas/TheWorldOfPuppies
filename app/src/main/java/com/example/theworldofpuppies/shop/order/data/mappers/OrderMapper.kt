@@ -38,7 +38,8 @@ fun OrderItemDto.toOrderItem(): OrderItem {
         returnStatus = returnStatus,
         orderStatus = orderStatus,
         price = price,
-        totalPrice = totalPrice
+        totalPrice = totalPrice,
+        isRated = isRated
     )
 }
 

@@ -22,5 +22,6 @@ data class DogTrainingBooking(
     var paymentStatus: PaymentStatus,
     var creationDate: LocalDateTime? = null,
     var serviceStartDate: LocalDateTime? = null,
-    var serviceEndDate: LocalDateTime? = null
+    var serviceEndDate: LocalDateTime? = null,
+    val isRated: Boolean
 )

@@ -1,9 +1,8 @@
 package com.example.theworldofpuppies.shop.order.presentation.order_history
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +32,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,11 +52,11 @@ import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.RatingCard
 import com.example.theworldofpuppies.shop.order.domain.Order
 import com.example.theworldofpuppies.shop.order.domain.OrderHistoryUiState
 import com.example.theworldofpuppies.ui.theme.dimens
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderHistoryScreen(
@@ -93,13 +95,14 @@ fun OrderHistoryScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Image(
-                            painterResource(R.drawable.dog_emoji_angry),
+                            painterResource(R.drawable.dog_sad),
                             contentDescription = "dog",
-                            modifier = Modifier.size(100.dp)
+                            modifier = Modifier.size(60.dp)
                         )
                         Text(
                             "Oops! You haven't placed any orders yet",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.W500
                         )
                     }
                 } else {
@@ -114,7 +117,11 @@ fun OrderHistoryScreen(
                         }
 
                         items(sortedOrders, { it.createdDate }) { order ->
-                            OrderItem(order = order)
+                            OrderItem(
+                                order = order,
+                                modifier = Modifier
+                                    .clickable { navController.navigate(Screen.ReviewScreen.route) }
+                            )
                         }
                     }
 
@@ -140,7 +147,6 @@ fun OrderHistoryScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun OrderItem(modifier: Modifier = Modifier, order: Order) {
     Surface(
@@ -240,17 +246,25 @@ fun OrderItem(modifier: Modifier = Modifier, order: Order) {
 
 @Composable
 fun OrderRowSection(modifier: Modifier = Modifier, order: Order) {
+    var rating by remember { mutableFloatStateOf(0f) }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.fillMaxWidth(0.85f)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             order.orderItems.forEach { orderItem ->
                 OrderItemRow(
                     itemName = orderItem.productName,
-                    itemPrice = orderItem.totalPrice,
+                    itemPrice = orderItem.price,
                     itemCount = orderItem.quantity
+                )
+                RatingCard(
+                    maxStars = 5,
+                    rating = rating,
+                    onRatingChanged = {
+                        rating = it
+                    }
                 )
                 HorizontalDivider(
                     thickness = 0.2.dp,
@@ -258,6 +272,16 @@ fun OrderRowSection(modifier: Modifier = Modifier, order: Order) {
                     color = Color.Gray
                 )
             }
+
+            OrderItemRow(
+                itemName = "Shipping Fee",
+                itemPrice = order.shippingFee,
+            )
+            HorizontalDivider(
+                thickness = 0.2.dp,
+                modifier = Modifier.padding(horizontal = 2.dp),
+                color = Color.Gray
+            )
             val address = order.address
             val addressDescription = if (address.houseNumber.isBlank()) {
                 "${address.landmark}, ${address.street}, ${address.city}, ${address.state}, ${address.pinCode}"
@@ -270,18 +294,6 @@ fun OrderRowSection(modifier: Modifier = Modifier, order: Order) {
             )
         }
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.End
-        ) {
-            Icon(
-                Icons.AutoMirrored.Default.ArrowForwardIos,
-                contentDescription = "Order details buttons",
-                modifier = Modifier.size(13.dp)
-            )
-        }
-
     }
 
 }
@@ -291,13 +303,14 @@ fun OrderItemRow(
     modifier: Modifier = Modifier,
     itemName: String,
     itemPrice: Double,
-    itemCount: Int
+    itemCount: Int? = null
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(0.45f),
@@ -307,28 +320,43 @@ fun OrderItemRow(
             overflow = TextOverflow.Ellipsis,
             maxLines = 1
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                modifier = Modifier.padding(start = 20.dp),
-                text = "$itemCount pcs",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                color = Color.Gray
-            )
+        if (itemCount == null) {
             Text(
                 modifier = Modifier.padding(start = 5.dp),
-                text = formatCurrency(itemCount * itemPrice),
+                text = formatCurrency(itemPrice),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
                 fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
+
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier.padding(start = 20.dp),
+                    text = "$itemCount pcs",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    color = Color.Gray
+                )
+
+                Text(
+                    modifier = Modifier.padding(start = 5.dp),
+                    text = formatCurrency(itemCount * itemPrice),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.SemiBold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+            }
+
         }
     }
 

@@ -36,6 +36,7 @@ import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.review.presentation.ReviewScreen
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingScreen
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
@@ -81,6 +82,7 @@ sealed class Screen(val route: String) {
     data object DogTrainingScreen : Screen("DogTrainingScreen")
     data object DogTrainingBookingScreen : Screen("DogTrainingBookingScreen")
     data object PetInsuranceScreen : Screen("PetInsuranceScreen")
+    data object ReviewScreen : Screen("ReviewScreen")
 }
 
 @Composable
@@ -612,6 +614,17 @@ fun AppNavigation(
                 petListUiState = petListUiState,
                 petProfileViewModel = petProfileViewModel,
             )
+        }
+
+        composable(route = Screen.ReviewScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            ReviewScreen(navController = navController)
         }
 
     }

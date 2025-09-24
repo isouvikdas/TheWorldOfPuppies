@@ -27,4 +27,5 @@ data class VetBooking(
     val paymentStatus: PaymentStatus,
     val creationDate: Long,
     val serviceDate: LocalDateTime? = null,
+    val isRated: Boolean
 )
