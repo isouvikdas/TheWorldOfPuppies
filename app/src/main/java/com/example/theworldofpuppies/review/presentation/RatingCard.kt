@@ -29,8 +29,8 @@ import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 fun RatingCard(
     modifier: Modifier = Modifier,
     maxStars: Int = 5,
-    rating: Float,
-    onRatingChanged: (Float) -> Unit,
+    stars: Float,
+    onStarsChange: (Float) -> Unit,
     starSize: Dp = 30.dp,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Start
 ) {
@@ -43,7 +43,7 @@ fun RatingCard(
         horizontalArrangement = horizontalArrangement
     ) {
         for (i in 1..maxStars) {
-            val isSelected = i <= rating
+            val isSelected = i <= stars
             val icon = if (isSelected) Icons.Filled.Star else Icons.Default.StarOutline
             val iconTintColor = if (isSelected) Color(0xFFFFC700) else Color.Gray
             Icon(
@@ -53,7 +53,7 @@ fun RatingCard(
                 modifier = Modifier
                     .bounceClick(
                         onClick = {
-                            onRatingChanged(i.toFloat())
+                            onStarsChange(i.toFloat())
                         }
                     )
                     .size(starSize)
@@ -64,23 +64,4 @@ fun RatingCard(
             }
         }
     }
-}
-
-@Preview
-@Composable
-private fun RatingCardPreview() {
-    Surface(modifier = Modifier.size(300.dp)) {
-        var rating by remember { mutableFloatStateOf(0f) } //default rating will be 1
-
-        RatingCard(
-            maxStars = 5,
-            rating = rating,
-            onRatingChanged = {
-                rating = it
-            }
-        )
-
-    }
-
-
 }

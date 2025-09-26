@@ -46,6 +46,7 @@ import com.example.theworldofpuppies.review.data.ReviewApi
 import com.example.theworldofpuppies.review.data.request.ReviewRepositoryImpl
 import com.example.theworldofpuppies.review.domain.ReviewRepository
 import com.example.theworldofpuppies.review.presentation.ReviewViewModel
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.dog_training.data.DogTrainingRepositoryImpl
 import com.example.theworldofpuppies.services.dog_training.data.remote.DogTrainingApi
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingRepository
@@ -124,6 +125,7 @@ val appModule = module {
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
+    singleOf(::ReviewEventManager)
     singleOf(::ProductRepositoryImpl).bind<ProductRepository>()
     singleOf(::AuthApiImpl).bind<AuthApi>()
     singleOf(::CategoryRepositoryImpl).bind<CategoryRepository>()

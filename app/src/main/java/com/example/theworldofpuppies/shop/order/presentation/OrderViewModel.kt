@@ -14,6 +14,8 @@ import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentRequest
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentVerificationRequest
 import com.example.theworldofpuppies.shop.order.domain.OrderHistoryUiState
@@ -39,7 +41,8 @@ class OrderViewModel(
     private val paymentRepository: PaymentRepository,
     private val userRepository: UserRepository,
     private val orderEventManager: OrderEventManager,
-    private val authEventManager: AuthEventManager
+    private val authEventManager: AuthEventManager,
+    private val reviewEventManager: ReviewEventManager
 ) : ViewModel() {
 
     private val _orderUiState = MutableStateFlow(OrderUiState())
@@ -64,6 +67,7 @@ class OrderViewModel(
         }
         observeAuthEvents()
         observeOrderEvents()
+        observeReviewEvent()
     }
 
     suspend fun showToast(message: String) {
@@ -125,7 +129,7 @@ class OrderViewModel(
                 when (val result = orderRepository.getOrders()) {
                     is Result.Success -> {
                         _orderHistoryUiState.update {
-                            it.copy(orderHistory = result.data.toMutableList())
+                            it.copy(orderHistory = result.data)
                         }
                     }
 
@@ -376,6 +380,15 @@ class OrderViewModel(
         viewModelScope.launch {
             orderEventManager.events.collect { event ->
                 if (event is OrderEvent.OrderConfirmed) {
+                    getOrders()
+                }
+            }
+        }
+    }
+    private fun observeReviewEvent() {
+        viewModelScope.launch {
+            reviewEventManager.events.collect { event ->
+                if (event is ReviewEvent.ReviewConfirmed) {
                     getOrders()
                 }
             }

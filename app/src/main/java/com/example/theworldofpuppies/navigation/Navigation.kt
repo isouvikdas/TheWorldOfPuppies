@@ -37,6 +37,7 @@ import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewMode
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
 import com.example.theworldofpuppies.review.presentation.ReviewScreen
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingScreen
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
@@ -161,6 +162,9 @@ fun AppNavigation(
     val petInsuranceViewModel = koinViewModel<PetInsuranceViewModel>()
     val petInsuranceUiState by petInsuranceViewModel.petInsuranceUiState.collectAsStateWithLifecycle()
     val petInsuranceBookingUiState by petInsuranceViewModel.petInsuranceBookingUiState.collectAsStateWithLifecycle()
+
+    val reviewViewModel = koinViewModel<ReviewViewModel>()
+    val reviewUiState by reviewViewModel.reviewUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -410,7 +414,9 @@ fun AppNavigation(
             )
             OrderHistoryScreen(
                 navController = navController,
-                orderHistoryUiState = orderHistoryUiState
+                orderHistoryUiState = orderHistoryUiState,
+                reviewViewModel = reviewViewModel,
+                reviewUiState = reviewUiState
             )
         }
 
@@ -624,7 +630,11 @@ fun AppNavigation(
                 onGesturesChanged,
                 searchIconVisibilityChanged
             )
-            ReviewScreen(navController = navController)
+            ReviewScreen(
+                navController = navController,
+                reviewViewModel = reviewViewModel,
+                reviewUiState = reviewUiState
+            )
         }
 
     }

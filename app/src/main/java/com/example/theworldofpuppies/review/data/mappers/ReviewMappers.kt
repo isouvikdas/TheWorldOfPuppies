@@ -10,6 +10,7 @@ fun ReviewDto.toReview(): Review {
         productId = productId,
         targetType = targetType,
         stars = stars,
-        description = description
+        description = description,
+        subType = subType
     )
 }

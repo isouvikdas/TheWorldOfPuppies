@@ -1,5 +1,7 @@
 package com.example.theworldofpuppies.review.presentation
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,15 +31,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,21 +47,33 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewScreen(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    reviewViewModel: ReviewViewModel,
+    reviewUiState: ReviewUiState,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
 
-    var rating by remember { mutableFloatStateOf(0f) }
+    val context = LocalContext.current
 
-    var text by remember { mutableStateOf("") }
+    val stars = reviewUiState.stars
+
+    val text = reviewUiState.description
+
+    LaunchedEffect(Unit) {
+        reviewViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -81,9 +93,9 @@ fun ReviewScreen(
                         .padding(it)
                 ) {
                     RatingSection(
-                        rating = rating,
-                        onRatingChanged = {
-                            rating = it
+                        stars = stars,
+                        onStarsChange = { stars ->
+                            reviewViewModel.onStarsChange(stars)
                         }
                     )
 
@@ -91,13 +103,29 @@ fun ReviewScreen(
 
                     ReviewDescriptionFieldSection(
                         value = text,
-                        onValueChange = { text = it }
+                        onValueChange = { text -> reviewViewModel.onDescriptionChange(text) }
                     )
                 }
 
                 ReviewScreenBottomSection(
                     navController = navController,
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    reviewViewModel = reviewViewModel,
+                    context = context
+                )
+            }
+        }
+
+        if (reviewUiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent.copy(0.5f))
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
@@ -169,7 +197,7 @@ fun ReviewDescriptionFieldSection(
 }
 
 @Composable
-fun RatingSection(modifier: Modifier = Modifier, rating: Float, onRatingChanged: (Float) -> Unit) {
+fun RatingSection(modifier: Modifier = Modifier, stars: Float, onStarsChange: (Float) -> Unit) {
     Column(modifier = modifier) {
         Text(
             "How would you wish to rate this order?",
@@ -187,9 +215,9 @@ fun RatingSection(modifier: Modifier = Modifier, rating: Float, onRatingChanged:
             modifier = Modifier
                 .padding(horizontal = MaterialTheme.dimens.small1),
             maxStars = 5,
-            rating = rating,
-            onRatingChanged = {
-                onRatingChanged(it)
+            stars = stars,
+            onStarsChange = {
+                onStarsChange(it)
             },
             starSize = 35.dp,
             horizontalArrangement = Arrangement.Start
@@ -226,7 +254,9 @@ fun ReviewScreenHeader(
 @Composable
 fun ReviewScreenBottomSection(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    reviewViewModel: ReviewViewModel,
+    context: Context
 ) {
     Surface(
         modifier = modifier
@@ -250,6 +280,10 @@ fun ReviewScreenBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
+                    reviewViewModel.addReview(
+                        navController = navController,
+                        context = context
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()

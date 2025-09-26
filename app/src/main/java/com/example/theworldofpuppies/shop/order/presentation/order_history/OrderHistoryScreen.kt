@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.shop.order.presentation.order_history
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,19 +33,18 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
@@ -52,23 +52,36 @@ import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.review.presentation.RatingCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.shop.order.domain.Order
 import com.example.theworldofpuppies.shop.order.domain.OrderHistoryUiState
 import com.example.theworldofpuppies.ui.theme.dimens
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderHistoryScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    orderHistoryUiState: OrderHistoryUiState
+    orderHistoryUiState: OrderHistoryUiState,
+    reviewViewModel: ReviewViewModel,
+    reviewUiState: ReviewUiState
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
     )
 
     val orders = orderHistoryUiState.orderHistory
+
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        reviewViewModel.toastEvent.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -119,8 +132,9 @@ fun OrderHistoryScreen(
                         items(sortedOrders, { it.createdDate }) { order ->
                             OrderItem(
                                 order = order,
-                                modifier = Modifier
-                                    .clickable { navController.navigate(Screen.ReviewScreen.route) }
+                                reviewViewModel = reviewViewModel,
+                                reviewUiState = reviewUiState,
+                                navController = navController
                             )
                         }
                     }
@@ -148,7 +162,13 @@ fun OrderHistoryScreen(
 }
 
 @Composable
-fun OrderItem(modifier: Modifier = Modifier, order: Order) {
+fun OrderItem(
+    modifier: Modifier = Modifier,
+    order: Order,
+    reviewViewModel: ReviewViewModel,
+    reviewUiState: ReviewUiState,
+    navController: NavController
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -235,7 +255,12 @@ fun OrderItem(modifier: Modifier = Modifier, order: Order) {
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                OrderRowSection(order = order)
+                OrderRowSection(
+                    order = order,
+                    reviewViewModel = reviewViewModel,
+                    reviewUiState = reviewUiState,
+                    navController = navController
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -245,8 +270,13 @@ fun OrderItem(modifier: Modifier = Modifier, order: Order) {
 }
 
 @Composable
-fun OrderRowSection(modifier: Modifier = Modifier, order: Order) {
-    var rating by remember { mutableFloatStateOf(0f) }
+fun OrderRowSection(
+    modifier: Modifier = Modifier,
+    order: Order,
+    reviewViewModel: ReviewViewModel,
+    reviewUiState: ReviewUiState,
+    navController: NavController
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -259,13 +289,19 @@ fun OrderRowSection(modifier: Modifier = Modifier, order: Order) {
                     itemPrice = orderItem.price,
                     itemCount = orderItem.quantity
                 )
-                RatingCard(
-                    maxStars = 5,
-                    rating = rating,
-                    onRatingChanged = {
-                        rating = it
-                    }
-                )
+                if (!orderItem.isRated) {
+                    RatingCard(
+                        maxStars = 5,
+                        stars = reviewUiState.stars,
+                        onStarsChange = { stars ->
+                            reviewViewModel.resetReviewState()
+                            reviewViewModel.onStarsChange(stars)
+                            reviewViewModel.setOrderType(targetId = orderItem.id)
+                            navController.navigate(Screen.ReviewScreen.route)
+
+                        }
+                    )
+                }
                 HorizontalDivider(
                     thickness = 0.2.dp,
                     modifier = Modifier.padding(horizontal = 2.dp),
