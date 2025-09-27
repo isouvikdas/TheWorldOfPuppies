@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.nav_items.ProductSearchView
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -55,7 +56,8 @@ import com.example.theworldofpuppies.ui.theme.dimens
 fun SearchScreen(
     modifier: Modifier = Modifier,
     productViewModel: ProductViewModel,
-    navController: NavController
+    navController: NavController,
+    cartViewModel: CartViewModel
 ) {
     val searchUiState by productViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchQuery = searchUiState.query
@@ -219,7 +221,8 @@ fun SearchScreen(
                     navController = navController,
                     productList = productList,
                     searchQuery = searchQuery,
-                    isSearching = searchUiState.isSearching
+                    isSearching = searchUiState.isSearching,
+                    cartViewModel = cartViewModel
                 )
 
             }

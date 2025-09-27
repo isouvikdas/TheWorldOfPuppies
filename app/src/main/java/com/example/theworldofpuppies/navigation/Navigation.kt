@@ -272,7 +272,8 @@ fun AppNavigation(
                 getCategories = { productViewModel.fetchCategories() },
                 getProducts = { productViewModel.fetchNextPage() },
                 getFeaturedProducts = { productViewModel.fetchFeaturedProducts() },
-                navController = navController
+                navController = navController,
+                cartViewModel = cartViewModel
             )
         }
 
@@ -306,7 +307,8 @@ fun AppNavigation(
             searchIconVisibilityChanged(false)
             SearchScreen(
                 productViewModel = productViewModel,
-                navController = navController
+                navController = navController,
+                cartViewModel = cartViewModel
             )
         }
 
@@ -327,7 +329,8 @@ fun AppNavigation(
                 onLoadMore = { productViewModel.fetchNextPage() },
                 productTypeLabel = productType,
                 categoryListState = categoryListState,
-                productViewModel = productViewModel
+                productViewModel = productViewModel,
+                cartViewModel = cartViewModel
             )
         }
         composable(route = Screen.ProductDetailScreen.route) {

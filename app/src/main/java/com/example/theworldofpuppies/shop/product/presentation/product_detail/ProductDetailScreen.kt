@@ -50,6 +50,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -153,7 +154,10 @@ fun ProductDetailScreen(
                             originalPrice = price,
                             discountedPrice = discountedPrice
                         )
+                    }
 
+                    item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
                     }
                 }
 
@@ -308,28 +312,48 @@ fun ProductDetailSection(
         ) {
             Text(
                 text = productName.toString(),
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth(0.65f),
                 fontWeight = FontWeight.W600
             )
             /*Discount Card*/
             if (discount.toString().isNotEmpty() && discount > 0) {
-                Surface(
-                    modifier = Modifier.wrapContentSize(),
-                    shape = RoundedCornerShape(MaterialTheme.dimens.extraSmall.times(3).div(2)),
-                    color = MaterialTheme.colorScheme.tertiary,
-                    shadowElevation = 1.dp
+                Box(
+                    modifier = Modifier.size(55.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "$discount% Off",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
-                        fontWeight = FontWeight.W500,
-                        color = MaterialTheme.colorScheme.secondary
+                    Icon(
+                        painter = painterResource(R.drawable.discount_badge),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                MaterialTheme.dimens.extraSmall.times(
+                                    3
+                                ) / 2
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "$discount%",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Text(
+                            text = "OFF",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
+
 
             }
         }
@@ -339,27 +363,28 @@ fun ProductDetailSection(
             modifier = Modifier
                 .wrapContentHeight()
                 .wrapContentWidth()
-                .padding(vertical = MaterialTheme.dimens.small1 / 3),
+                .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 text = "MRP :",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.W400,
             )
             /*without discounted price*/
             Text(
                 text = formatCurrency(originalPrice),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 textDecoration = TextDecoration.LineThrough,
+                fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Gray
             )
             /*discounted price*/
             Text(
                 text = formatCurrency(discountedPrice),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold,
             )
         }
@@ -387,7 +412,7 @@ fun ProductDetailSection(
                         Icons.Default.Star,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(MaterialTheme.dimens.small1.times(3) / 2)
+                        modifier = Modifier.size(24.dp)
                     )
                     Text(
                         text = "(4.2)",
@@ -493,11 +518,11 @@ fun ProductBottomSection(
                 ) {
                     Text(
                         text = "Total :",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = formatCurrency(totalPrice.value),
+                        text = formatCurrency(totalPrice.doubleValue),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )
