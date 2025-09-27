@@ -73,7 +73,7 @@ fun CartScreen(
     cartViewModel: CartViewModel? = null,
     navController: NavController
 ) {
-    val cartItems = remember(cartUiState.cartItems) { cartUiState.cartItems as List<CartItem> }
+    val cartItems = cartUiState.cartItems
     val lazyListSTate = rememberLazyListState()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(

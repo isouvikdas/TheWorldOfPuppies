@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.shop.product.presentation.product_detail
 
-import android.util.Base64
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,9 +55,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
@@ -65,6 +65,7 @@ import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
+import com.example.theworldofpuppies.shop.product.domain.Image
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -89,8 +90,12 @@ fun ProductDetailScreen(
     )
 
     val product = productDetailState.product
+    val images = product?.images ?: emptyList()
+    val finalImageList = images.toMutableList().apply {
+        if (product?.firstImage != null)
+            add(product.firstImage)
+    }
     val discount = remember(product?.discount) { product?.discount ?: 0 }
-    val images = remember(productDetailState.images) { productDetailState.images }
     val description = product?.description.orEmpty()
     val price = remember(product?.price) { product?.price ?: 0.0 }
     val discountedPrice = remember(product?.discountedPrice) { product?.discountedPrice ?: 0.0 }
@@ -102,10 +107,6 @@ fun ProductDetailScreen(
         cartViewModel?.toastEvent?.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    LaunchedEffect(product?.id) {
-        product?.let { productViewModel?.fetchImagesIfNeeded(product) }
     }
 
     Scaffold(
@@ -135,7 +136,7 @@ fun ProductDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(MaterialTheme.dimens.large3.times(2)),
-                            images = images
+                            images = finalImageList
                         )
                     }
                     item {
@@ -197,7 +198,7 @@ fun ProductHeader(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ProductImageSection(
-    images: List<String>?,
+    images: List<Image>?,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(
@@ -313,20 +314,23 @@ fun ProductDetailSection(
                 fontWeight = FontWeight.W600
             )
             /*Discount Card*/
-            Surface(
-                modifier = Modifier.wrapContentSize(),
-                shape = RoundedCornerShape(MaterialTheme.dimens.extraSmall.times(3).div(2)),
-                color = MaterialTheme.colorScheme.tertiary,
-                shadowElevation = 1.dp
-            ) {
-                Text(
-                    text = "$discount% Off",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
-                    fontWeight = FontWeight.W500,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+            if (discount.toString().isNotEmpty() && discount > 0) {
+                Surface(
+                    modifier = Modifier.wrapContentSize(),
+                    shape = RoundedCornerShape(MaterialTheme.dimens.extraSmall.times(3).div(2)),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    shadowElevation = 1.dp
+                ) {
+                    Text(
+                        text = "$discount% Off",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
+                        fontWeight = FontWeight.W500,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
             }
         }
 
@@ -412,17 +416,22 @@ fun ProductDetailSection(
 }
 
 @Composable
-fun ProductImage(base64Image: String) {
-    val byteArray = Base64.decode(base64Image, Base64.DEFAULT)
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(byteArray)
-            .error(R.drawable.login)
-            .build(),
-        contentDescription = null,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Fit
-    )
+fun ProductImage(image: Image?) {
+    if (image?.fetchUrl?.toUri() != Uri.EMPTY) {
+        AsyncImage(
+            model = image?.fetchUrl?.toUri(),
+            contentDescription = "product image",
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Fit,
+            error = painterResource(R.drawable.login)
+        )
+    } else {
+        Image(
+            painterResource(R.drawable.login),
+            contentDescription = "Pet profile pic",
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable

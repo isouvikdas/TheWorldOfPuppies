@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.shop.product.presentation
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -321,16 +323,21 @@ fun ProductItem(
                 ),
                 color = Color.LightGray.copy(0.4f)
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(product.firstImageUri)
-                        .crossfade(true)
-                        .error(R.drawable.login)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
+                if (product.firstImage?.fetchUrl?.toUri() != Uri.EMPTY) {
+                    AsyncImage(
+                        model = product.firstImage?.fetchUrl?.toUri(),
+                        contentDescription = "Pet Profile Pic",
+                        modifier = Modifier.fillMaxWidth(),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(R.drawable.login)
+                    )
+                } else {
+                    Image(
+                        painterResource(R.drawable.login),
+                        contentDescription = "Pet profile pic",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
             }
             Column(

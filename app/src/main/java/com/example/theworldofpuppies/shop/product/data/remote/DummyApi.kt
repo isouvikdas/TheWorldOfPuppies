@@ -11,7 +11,6 @@ import io.ktor.client.HttpClient
 class DummyApi(
     private val httpClient: HttpClient
 ) {
-
     private val allProducts = listOf(
         ProductDto(
             id = "6744a4029644e506b119b4bc",
@@ -22,7 +21,6 @@ class DummyApi(
             inventory = 140,
             description = "A durable and adjustable collar for dogs",
             categoryName = "Accessories",
-            imageIds = emptyList(),
             isFeatured = true
         ),
         ProductDto(
@@ -34,7 +32,6 @@ class DummyApi(
             inventory = 95,
             description = "A mat to keep cat litter contained",
             categoryName = "Accessories",
-            imageIds = emptyList(),
             isFeatured = true
         ),
         ProductDto(
@@ -46,7 +43,6 @@ class DummyApi(
             inventory = 180,
             description = "A portable water bottle for dogs",
             categoryName = "Accessories",
-            imageIds = emptyList(),
             isFeatured = true
         ),
         ProductDto(
@@ -58,7 +54,6 @@ class DummyApi(
             inventory = 65,
             description = "A secure harness for rabbits",
             categoryName = "Accessories",
-            imageIds = emptyList(),
             isFeatured = true
         )
     )

@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.West
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,7 +55,6 @@ fun VerifyLoginSheet(
     loginViewModel: LoginViewModel? = null,
 ) {
 
-    val scope = rememberCoroutineScope()
     var skipPartially by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartially)
 
@@ -73,9 +72,6 @@ fun VerifyLoginSheet(
                     .fillMaxSize(),
                 loginUiState = loginUiState,
                 loginViewModel = loginViewModel,
-                scope = scope,
-                bottomSheetState = bottomSheetState,
-                showModalBottomSheet = showModalBottomSheet,
             )
 
         }
@@ -88,9 +84,6 @@ fun VerifyLoginScreen(
     modifier: Modifier = Modifier,
     loginUiState: LoginUiState,
     loginViewModel: LoginViewModel? = null,
-    scope: CoroutineScope,
-    bottomSheetState: SheetState,
-    showModalBottomSheet: MutableState<Boolean>,
 ) {
     val otp = rememberSaveable { mutableStateOf(loginUiState.otp) }
 
@@ -112,26 +105,9 @@ fun VerifyLoginScreen(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                IconButton(onClick = {
-                    scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                        if (!bottomSheetState.isVisible) {
-                            showModalBottomSheet.value = false
-                        }
-                    }
-                    loginViewModel?.toggleOtpSentState()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(22.dp)
-                            .bounceClick{}
-                    )
-                }
 
                 Text(
                     text = "OTP Verification",
@@ -141,23 +117,6 @@ fun VerifyLoginScreen(
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                 )
-
-                IconButton(onClick = {
-                    scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                        if (!bottomSheetState.isVisible) {
-                            showModalBottomSheet.value = false
-                        }
-                    }
-                    loginViewModel?.toggleOtpSentState()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(25.dp)
-                            .bounceClick{}
-                    )
-                }
 
             }
 
@@ -214,7 +173,7 @@ fun VerifyLoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
-                    .bounceClick{},
+                    .bounceClick {},
                 enabled = otp.value.length == 6 && !loginUiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

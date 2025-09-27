@@ -6,6 +6,7 @@ agp = "8.5.2"
 animatedNavigationBar = "1.0.0"
 coilCompose = "2.2.2"
 countrycodepickercompose = "0.1"
+gson = "2.13.2"
 kotlin = "2.0.20"
 koin = "3.5.6"
 ktor = "2.3.12"
@@ -42,6 +43,7 @@ androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "ro
 animated-navigation-bar = { module = "com.exyte:animated-navigation-bar", version.ref = "animatedNavigationBar" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 countrycodepickercompose = { module = "com.github.ahmmedrejowan:CountryCodePickerCompose", version.ref = "countrycodepickercompose" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

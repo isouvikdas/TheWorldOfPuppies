@@ -14,8 +14,8 @@ fun ProductDto.toProductEntity(): ProductEntity {
         description = description,
         categoryName = categoryName,
         inventory = inventory,
-        firstImageId = firstImageId,
-        imageIds = imageIds,
+        images = images.map { it.toImage() },
+        firstImage = firstImage?.toImage(),
         isFeatured = isFeatured,
         isRecommended = isRecommended,
         rating = rating
@@ -33,9 +33,8 @@ fun ProductEntity.toProduct(): Product {
         description = description,
         categoryName = categoryName,
         inventory = inventory,
-        firstImageId = firstImageId,
-        imageIds = imageIds,
-        firstImageUri = this.firstImageUri,
+        images = images,
+        firstImage = firstImage,
         isFeatured = isFeatured,
         isRecommended = isRecommended,
         rating = rating

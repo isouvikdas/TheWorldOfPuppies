@@ -223,29 +223,10 @@ class CartRepositoryImpl(
             if (!apiResponse.success) {
                 throw IOException(apiResponse.message)
             }
-            val products =
-                fetchFirstImage(apiResponse.data?.map { it.toProductEntity() } ?: emptyList())
-            return products
+            return apiResponse.data?.map { it.toProductEntity() } ?: emptyList()
         }.onError { error ->
             throw IOException("Failed loading products: $error")
         }
         return emptyList()
-    }
-
-    private suspend fun fetchFirstImage(products: List<ProductEntity>): List<ProductEntity> {
-        val updatedProducts = withContext(Dispatchers.IO) {
-            products.map { product ->
-                async {
-                    try {
-                        val firstImageUri = productRepository.cacheFirstImage(product, context)
-                        product.copy(firstImageUri = firstImageUri)
-                    } catch (e: Exception) {
-                        Timber.e(e, "Error caching image for the product: ${product.id}")
-                        product
-                    }
-                }
-            }.awaitAll()
-        }
-        return updatedProducts
     }
 }

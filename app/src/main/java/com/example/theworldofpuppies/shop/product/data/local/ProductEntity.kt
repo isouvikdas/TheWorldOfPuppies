@@ -2,6 +2,7 @@ package com.example.theworldofpuppies.shop.product.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.theworldofpuppies.shop.product.domain.Image
 
 @Entity("Products")
 data class ProductEntity(
@@ -15,9 +16,8 @@ data class ProductEntity(
     val discount: Int,
     val inventory: Int,
     val categoryName: String,
-    val imageIds: List<String> = ArrayList(),
-    val firstImageId: String? = null,
-    var firstImageUri: String? = null,
+    val images: List<Image> = emptyList(),
+    val firstImage: Image? = null,
     val isFeatured: Boolean? = false,
     val isRecommended: Boolean = false,
     val rating: Double = 0.0
