@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.shop.product.data.remote.dto
 
-import com.example.theworldofpuppies.shop.product.domain.Image
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,5 +16,7 @@ data class ProductDto(
     val firstImage: ImageDto? = null,
     val isFeatured: Boolean? = false,
     val isRecommended: Boolean = false,
-    val rating: Double = 0.0
+    val isRated: Boolean = false,
+    val averageStars : Double = 0.0,
+    val totalReviews: Int
 )

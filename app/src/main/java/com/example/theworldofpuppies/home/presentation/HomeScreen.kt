@@ -115,51 +115,77 @@ fun PetProfileSection(
         )
 
         Spacer(modifier = Modifier.fillMaxHeight(.04f))
-
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(MaterialTheme.dimens.small1),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
-        ) {
-            items(pets) { pet ->
-                PetProfileCard(
-                    isPetListView = false,
-                    isPetSelectionView = false,
-                    isHomeScreenView = true,
-                    pet = pet,
-                    selectPet = {
-                        petProfileViewModel.fillExistingPetData(pet)
+        if (pets.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        petProfileViewModel.resetPetUiState()
                         navController.navigate(Screen.PetProfileScreen.route)
-                    }
-                )
-            }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .width(if (pets.isEmpty()) 300.dp else 100.dp)
-                        .height(100.dp),
-                    contentAlignment = Alignment.Center
+                    },
+                    shape = CircleShape,
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.tertiary
                 ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null
+                    )
+                }
 
-                    FloatingActionButton(
-                        onClick = {
-                            petProfileViewModel.resetPetUiState()
+
+            }
+        } else {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentPadding = PaddingValues(MaterialTheme.dimens.small1),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+            ) {
+                items(pets) { pet ->
+                    PetProfileCard(
+                        isPetListView = false,
+                        isPetSelectionView = false,
+                        isHomeScreenView = true,
+                        pet = pet,
+                        selectPet = {
+                            petProfileViewModel.fillExistingPetData(pet)
                             navController.navigate(Screen.PetProfileScreen.route)
-                        },
-                        shape = CircleShape,
-                        elevation = FloatingActionButtonDefaults.elevation(0.dp),
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.tertiary
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = null
-                        )
-                    }
+                        }
+                    )
+                }
 
+                item {
+                    Box(
+                        modifier = Modifier
+                            .width(if (pets.isEmpty()) 300.dp else 100.dp)
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        FloatingActionButton(
+                            onClick = {
+                                petProfileViewModel.resetPetUiState()
+                                navController.navigate(Screen.PetProfileScreen.route)
+                            },
+                            shape = CircleShape,
+                            elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null
+                            )
+                        }
+
+
+                    }
 
                 }
 

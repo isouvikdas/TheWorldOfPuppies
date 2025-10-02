@@ -21,41 +21,45 @@ class DummyApi(
             inventory = 140,
             description = "A durable and adjustable collar for dogs",
             categoryName = "Accessories",
-            isFeatured = true
+            isFeatured = true,
+            isRecommended = true,
+            isRated = true,
+            averageStars = 4.5,
+            totalReviews = 120
         ),
-        ProductDto(
-            id = "6744a4029644e506b119b4bd",
-            name = "Cat Litter Mat",
-            price = 19.99,
-            discount = 25,
-            discountedPrice = 0.0,
-            inventory = 95,
-            description = "A mat to keep cat litter contained",
-            categoryName = "Accessories",
-            isFeatured = true
-        ),
-        ProductDto(
-            id = "6744a4029644e506b119b4be",
-            name = "Dog Water Bottle",
-            price = 12.5,
-            discount = 25,
-            discountedPrice = 0.0,
-            inventory = 180,
-            description = "A portable water bottle for dogs",
-            categoryName = "Accessories",
-            isFeatured = true
-        ),
-        ProductDto(
-            id = "6744a4029644e506b119b4bf",
-            name = "Rabbit Harness",
-            price = 17.99,
-            discount = 25,
-            discountedPrice = 0.0,
-            inventory = 65,
-            description = "A secure harness for rabbits",
-            categoryName = "Accessories",
-            isFeatured = true
-        )
+//        ProductDto(
+//            id = "6744a4029644e506b119b4bd",
+//            name = "Cat Litter Mat",
+//            price = 19.99,
+//            discount = 25,
+//            discountedPrice = 0.0,
+//            inventory = 95,
+//            description = "A mat to keep cat litter contained",
+//            categoryName = "Accessories",
+//            isFeatured = true
+//        ),
+//        ProductDto(
+//            id = "6744a4029644e506b119b4be",
+//            name = "Dog Water Bottle",
+//            price = 12.5,
+//            discount = 25,
+//            discountedPrice = 0.0,
+//            inventory = 180,
+//            description = "A portable water bottle for dogs",
+//            categoryName = "Accessories",
+//            isFeatured = true
+//        ),
+//        ProductDto(
+//            id = "6744a4029644e506b119b4bf",
+//            name = "Rabbit Harness",
+//            price = 17.99,
+//            discount = 25,
+//            discountedPrice = 0.0,
+//            inventory = 65,
+//            description = "A secure harness for rabbits",
+//            categoryName = "Accessories",
+//            isFeatured = true
+//        )
     )
 
     fun getAllProducts(cursor: String? = null):

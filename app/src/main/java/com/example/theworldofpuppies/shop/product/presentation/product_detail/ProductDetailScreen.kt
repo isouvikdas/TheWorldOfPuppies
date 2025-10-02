@@ -152,7 +152,11 @@ fun ProductDetailScreen(
                             productName = productName,
                             description = description,
                             originalPrice = price,
-                            discountedPrice = discountedPrice
+                            discountedPrice = discountedPrice,
+                            isRated = product?.isRated ?: false,
+                            averageStars = product?.averageStars ?: 0.0,
+                            totalReviews = product?.totalReviews ?: 0
+
                         )
                     }
 
@@ -298,7 +302,10 @@ fun ProductDetailSection(
     description: String?,
     discount: Int,
     originalPrice: Double,
-    discountedPrice: Double
+    discountedPrice: Double,
+    isRated: Boolean = false,
+    averageStars: Double = 0.0,
+    totalReviews: Int = 0
 ) {
     Column(
         modifier = modifier,
@@ -408,16 +415,28 @@ fun ProductDetailSection(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    Icon(
-                        Icons.Default.Star,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = "(4.2)",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    if (isRated && averageStars > 0.0 && totalReviews > 0) {
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = "Rating",
+                            tint = Color(0xFFFFC700)
+                        )
+                        Text(
+                            text = "$averageStars",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier,
+                            fontWeight = FontWeight.W500
+                        )
+                        Text (
+                            " ~ (${totalReviews})",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.W500,
+                            color = Color.Gray,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
 
                 }
             }

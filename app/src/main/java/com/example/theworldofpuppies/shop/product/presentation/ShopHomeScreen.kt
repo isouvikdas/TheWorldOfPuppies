@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -312,7 +313,7 @@ fun ProductItem(
 ) {
     Surface(
         modifier = modifier
-            .width(MaterialTheme.dimens.extraLarge2)
+            .width(180.dp)
             .height(240.dp)
             .clickable { onProductSelect() },
         shape = RoundedCornerShape(16.dp),
@@ -419,24 +420,35 @@ fun ProductItem(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.width(115.dp)
                     ) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = "Rating",
-                            tint = Color(0xFFFFC700)
-                        )
-                        Text(
-                            text = "(4.2)",
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier,
-                            fontWeight = FontWeight.W500
-                        )
+                        if (product.isRated && product.averageStars > 0.0 && product.totalReviews > 0) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = "Rating",
+                                tint = Color(0xFFFFC700)
+                            )
+                            Text(
+                                text = "${product.averageStars}",
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier,
+                                fontWeight = FontWeight.W500
+                            )
+                            Text (
+                                " ~ (${product.totalReviews})",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500,
+                                color = Color.Gray,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                     FloatingActionButton(
                         onClick = { cartViewModel.addToCart(product.id, 1, true) },
                         modifier = Modifier
-                            .size(40.dp),
+                            .size(35.dp),
                         shape = CircleShape,
                         containerColor = MaterialTheme.colorScheme.primary,
                         elevation = FloatingActionButtonDefaults.elevation(

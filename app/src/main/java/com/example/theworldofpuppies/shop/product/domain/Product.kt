@@ -16,7 +16,9 @@ data class Product(
     val isDetailsFetched: Boolean = false,
     val isImagesFetched: Boolean = false,
     val isRecommended: Boolean = false,
-    val rating: Double = 0.0
+    val isRated: Boolean = false,
+    val averageStars : Double = 0.0,
+    val totalReviews: Int
 ) {
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombinations = listOf(

@@ -166,7 +166,7 @@ class ProductViewModel(
         when (sortOption) {
             SortProduct.HIGH_TO_LOW -> filtered.sortedByDescending { it.price }
             SortProduct.LOW_TO_HIGH -> filtered.sortedBy { it.price }
-            SortProduct.HIGHEST_RATED -> filtered.sortedByDescending { it.rating }
+            SortProduct.HIGHEST_RATED -> filtered.sortedByDescending { it.averageStars }
             SortProduct.LATEST -> filtered.sortedBy { it.isFeatured }
             else -> filtered
         }
