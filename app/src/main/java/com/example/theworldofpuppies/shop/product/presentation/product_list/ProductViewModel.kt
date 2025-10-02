@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.shop.product.presentation.product_list
 
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -168,7 +166,7 @@ class ProductViewModel(
         when (sortOption) {
             SortProduct.HIGH_TO_LOW -> filtered.sortedByDescending { it.price }
             SortProduct.LOW_TO_HIGH -> filtered.sortedBy { it.price }
-            SortProduct.HIGHEST_RATED -> filtered.sortedByDescending { it.rating }
+            SortProduct.HIGHEST_RATED -> filtered.sortedByDescending { it.averageStars }
             SortProduct.LATEST -> filtered.sortedBy { it.isFeatured }
             else -> filtered
         }
@@ -186,51 +184,6 @@ class ProductViewModel(
             }.await()
         }
     }
-
-    private val alreadyRequestedIds = mutableSetOf<String>()
-
-    fun fetchImagesIfNeeded(product: Product) {
-        product.imageIds.forEach { imageId ->
-            if (!_productDetailState.value.fetchedImageIds.contains(imageId) && !alreadyRequestedIds.contains(
-                    imageId
-                )
-            ) {
-                alreadyRequestedIds.add(imageId)
-                getProductImages(imageId)
-            }
-        }
-    }
-
-
-    fun getProductImages(imageId: String) {
-        viewModelScope.launch {
-            _productDetailState.update { it.copy(isImageLoading = true) }
-            val byteArrayImage = productRepository.getProductImages(imageId)
-            if (byteArrayImage != null) {
-                if (byteArrayImage.isNotEmpty()) {
-                    val base64Image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT)
-                    val product = productDetailState.value.product?.copy(isImagesFetched = true)
-                    _productDetailState.update {
-                        it.copy(
-                            errorMessage = null,
-                            images = it.images + base64Image,
-                            fetchedImageIds = it.fetchedImageIds + imageId,
-                            isImageLoading = false,
-                            product = product
-                        )
-                    }
-                } else {
-                    _productDetailState.update {
-                        it.copy(
-                            errorMessage = "Fetching images failed",
-                            isImageLoading = false
-                        )
-                    }
-                }
-            }
-        }
-    }
-
 
     fun getProductDetails(productId: String) {
         viewModelScope.launch {

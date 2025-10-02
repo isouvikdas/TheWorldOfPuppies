@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -64,6 +65,7 @@ fun PetProfileCard(
     isSelected: Boolean = false,
     pet: Pet?,
     onDeleteClick: (Pet) -> Unit = {},
+    selectPetForService: (Pet) -> Unit = {}
 ) {
     val horizontalPadding = MaterialTheme.dimens.small1
     var showDeleteDialog = remember { mutableStateOf(false) }
@@ -89,7 +91,11 @@ fun PetProfileCard(
         Surface(
             modifier = Modifier.clickable {
                 pet?.let {
-                    selectPet(pet)
+                    if (isPetSelectionView){
+                        selectPetForService(pet)
+                    } else {
+                        selectPet(pet)
+                    }
                 }
             },
             color = MaterialTheme.colorScheme.secondary.copy(0.3f),
@@ -180,21 +186,6 @@ fun PetProfileCard(
 
                     }
 
-                    isPetSelectionView && !isPetListView && !isHomeScreenView -> {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Icon(
-                                if (isSelected) Icons.Default.CheckCircle
-                                else Icons.Outlined.Circle,
-                                contentDescription = "selected",
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .align(Alignment.Center),
-                                tint = MaterialTheme.colorScheme.tertiaryContainer
-                            )
-                        }
-
-                    }
-
                     isHomeScreenView && !isPetListView && !isPetSelectionView -> {
                         Box(
                             modifier = Modifier.fillMaxWidth()
@@ -224,6 +215,38 @@ fun PetProfileCard(
                         }
 
                     }
+
+                    else -> {
+                        Row(
+                            modifier = Modifier.fillMaxSize()
+                                .padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Icon(
+                                if (isSelected) Icons.Default.CheckCircle
+                                else Icons.Outlined.Circle,
+                                contentDescription = "selected",
+                                modifier = Modifier
+                                    .size(22.dp),
+                                tint = MaterialTheme.colorScheme.tertiaryContainer
+                            )
+
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "selected",
+                                modifier = Modifier
+                                    .size(22.dp)
+                                    .bounceClick {
+                                        pet?.let {
+                                            selectPet(pet)
+                                        }
+                                    },
+                                tint = MaterialTheme.colorScheme.tertiaryContainer
+                            )
+                        }
+
+                    }
+
                 }
             }
         }

@@ -24,6 +24,7 @@ fun PetWalkBookingDto.toPetWalkBooking(): PetWalkBooking {
         serviceDate = serviceDate?.toLocalDateTime(),
         startDate = serviceDate?.toLocalDateTime(),
         endDate = serviceDate?.toLocalDateTime(),
-        days = selectedDays
+        days = selectedDays,
+        isRated = isRated
     )
 }

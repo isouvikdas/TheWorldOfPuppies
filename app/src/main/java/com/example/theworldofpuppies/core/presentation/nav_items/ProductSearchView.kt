@@ -29,6 +29,7 @@ import com.example.theworldofpuppies.shop.product.presentation.ProductItem
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 
 @Composable
 fun ProductSearchView(
@@ -38,7 +39,8 @@ fun ProductSearchView(
     navController: NavController,
     productList: List<Product>,
     searchQuery: String,
-    isSearching: Boolean
+    isSearching: Boolean,
+    cartViewModel: CartViewModel
 ) {
     val lazyGridState = rememberLazyGridState()
 
@@ -63,7 +65,8 @@ fun ProductSearchView(
                         onProductSelect = {
                             productViewModel.setProduct(product)
                             navController.navigate(Screen.ProductDetailScreen.route)
-                        }
+                        },
+                        cartViewModel = cartViewModel
                     )
                 }
             }

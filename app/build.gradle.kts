@@ -131,4 +131,6 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.13-rc")
 
+    implementation(libs.gson)
+
 }

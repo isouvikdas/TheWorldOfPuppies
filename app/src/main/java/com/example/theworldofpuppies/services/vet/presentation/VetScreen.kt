@@ -84,7 +84,8 @@ fun VetScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     vetViewModel: VetViewModel,
-    vetUiState: VetUiState
+    vetUiState: VetUiState,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -255,7 +256,8 @@ fun VetScreen(
                                 .align(Alignment.BottomCenter)
                                 .zIndex(1f),
                             vetViewModel = vetViewModel,
-                            navController = navController
+                            navController = navController,
+                            changePetSelectionView = { changePetSelectionView(true) }
                         )
                     }
                 }
@@ -593,7 +595,8 @@ fun VetHeader(
 fun VetBottomSection(
     modifier: Modifier = Modifier,
     vetViewModel: VetViewModel,
-    navController: NavController
+    navController: NavController,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -617,7 +620,8 @@ fun VetBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
-                    vetViewModel.onBookNowClick(navController = navController)
+                    vetViewModel.onProceedClick(navController = navController)
+                    changePetSelectionView(true)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -632,7 +636,7 @@ fun VetBottomSection(
                 )
             ) {
                 Text(
-                    text = "Book Now",
+                    text = "Proceed",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )

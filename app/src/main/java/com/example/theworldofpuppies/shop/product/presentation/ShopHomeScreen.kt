@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.shop.product.presentation
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,10 +25,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,13 +52,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.domain.Category
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.domain.util.ListType
@@ -76,7 +83,8 @@ fun ShopHomeScreen(
     getCategories: () -> Unit,
     getProducts: () -> Unit,
     getFeaturedProducts: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    cartViewModel: CartViewModel
 ) {
     val lazyListState = rememberLazyListState()
     val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
@@ -128,7 +136,7 @@ fun ShopHomeScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 item {
@@ -144,12 +152,13 @@ fun ShopHomeScreen(
                         onSeeAllClick = {
                             productViewModel?.setListType(ListType.FEATURED)
                             navController.navigate(Screen.ProductListScreen.route)
-                        }
+                        },
+                        cartViewModel = cartViewModel
                     )
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 item {
@@ -165,13 +174,14 @@ fun ShopHomeScreen(
                         onSeeAllClick = {
                             productViewModel?.setListType(ListType.NEW)
                             navController.navigate(Screen.ProductListScreen.route)
-                        }
+                        },
+                        cartViewModel = cartViewModel
 
                     )
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 item {
@@ -187,12 +197,13 @@ fun ShopHomeScreen(
                         onSeeAllClick = {
                             productViewModel?.setListType(ListType.ALL)
                             navController.navigate(Screen.ProductListScreen.route)
-                        }
+                        },
+                        cartViewModel = cartViewModel
 
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                    Spacer(modifier = Modifier.height(100.dp))
                 }
             }
         }
@@ -209,7 +220,8 @@ fun ProductRowSection(
     getProducts: () -> Unit,
     onProductSelect: () -> Unit,
     productViewModel: ProductViewModel? = null,
-    onSeeAllClick: () -> Unit
+    onSeeAllClick: () -> Unit,
+    cartViewModel: CartViewModel
 ) {
 
     val context = LocalContext.current
@@ -217,7 +229,7 @@ fun ProductRowSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge3 + MaterialTheme.dimens.large3)
+            .wrapContentHeight()
     ) {
         Row(
             modifier = Modifier
@@ -281,7 +293,8 @@ fun ProductRowSection(
                                 onProductSelect = {
                                     onProductSelect()
                                     productViewModel?.setProduct(product)
-                                }
+                                },
+                                cartViewModel = cartViewModel
                             )
                         }
                     }
@@ -295,15 +308,16 @@ fun ProductRowSection(
 fun ProductItem(
     modifier: Modifier = Modifier,
     product: Product,
-    onProductSelect: () -> Unit
+    onProductSelect: () -> Unit,
+    cartViewModel: CartViewModel
 ) {
     Surface(
         modifier = modifier
-            .width(MaterialTheme.dimens.extraLarge2)
-            .fillMaxHeight()
+            .width(180.dp)
+            .height(240.dp)
             .clickable { onProductSelect() },
-        shape = RoundedCornerShape(MaterialTheme.dimens.small1),
-        shadowElevation = 5.dp,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 2.dp,
         color = Color.White
     ) {
         Column(
@@ -314,78 +328,141 @@ fun ProductItem(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(MaterialTheme.dimens.extraLarge3),
+                    .height(130.dp),
                 shape = RoundedCornerShape(
-                    topStart = MaterialTheme.dimens.small1,
-                    topEnd = MaterialTheme.dimens.small1
+                    topStart = 16.dp,
+                    topEnd = 16.dp
                 ),
                 color = Color.LightGray.copy(0.4f)
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(product.firstImageUri)
-                        .crossfade(true)
-                        .error(R.drawable.login)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
+                if (product.firstImage?.fetchUrl?.toUri() != Uri.EMPTY) {
+                    AsyncImage(
+                        model = product.firstImage?.fetchUrl?.toUri(),
+                        contentDescription = "Product image",
+                        modifier = Modifier.fillMaxWidth(),
+                        contentScale = ContentScale.Fit,
+                        error = painterResource(R.drawable.login)
+                    )
+                } else {
+                    Image(
+                        painterResource(R.drawable.login),
+                        contentDescription = "product image",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
             }
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(0.2f))
             ) {
                 Text(
                     text = product.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.extraSmall),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(horizontal = 6.dp),
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.size(MaterialTheme.dimens.small1))
+                Text(
+                    text = product.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                    fontWeight = FontWeight.W500,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Gray
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp)
-                        .padding(horizontal = MaterialTheme.dimens.extraSmall),
+                        .padding(bottom = 1.dp)
+                        .padding(horizontal = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    if (product.discount > 0) {
+                        Text(
+                            text = formatCurrency(product.price),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier,
+                            fontWeight = FontWeight.W500,
+                            color = Color.Gray,
+                            textDecoration = TextDecoration.LineThrough,
+                            fontStyle = FontStyle.Italic
+                        )
+
+                    }
                     Text(
-                        text = formatCurrency(product.price),
-                        style = MaterialTheme.typography.headlineMedium,
+                        text = formatCurrency(product.discountedPrice),
+                        style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier,
                         fontWeight = FontWeight.SemiBold
                     )
+                    if (product.discount > 0) {
+                        Text(
+                            text = product.discount.toString() + "% OFF",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(0.7f)
+                        )
 
-                    Button(
-                        onClick = { /*TODO*/ },
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, end = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.width(115.dp)
+                    ) {
+                        if (product.isRated && product.averageStars > 0.0 && product.totalReviews > 0) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = "Rating",
+                                tint = Color(0xFFFFC700)
+                            )
+                            Text(
+                                text = "${product.averageStars}",
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier,
+                                fontWeight = FontWeight.W500
+                            )
+                            Text (
+                                " ~ (${product.totalReviews})",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500,
+                                color = Color.Gray,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    FloatingActionButton(
+                        onClick = { cartViewModel.addToCart(product.id, 1, true) },
                         modifier = Modifier
-                            .height(35.dp)
-                            .width(80.dp),
-                        shape = RoundedCornerShape(13.dp),
-                        colors = ButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.secondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(
-                                0.3f
-                            ),
-                            disabledContentColor = Color.White
+                            .size(35.dp),
+                        shape = CircleShape,
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        elevation = FloatingActionButtonDefaults.elevation(
+                            defaultElevation = 2.dp
                         )
                     ) {
-                        Text(
-                            text = "Add",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.W600
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Add",
+                            tint = MaterialTheme.colorScheme.secondary
                         )
                     }
 
                 }
-
             }
 
         }
@@ -460,7 +537,7 @@ fun ProductCategorySection(
                 fontStyle = if (categories.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
-                    .bounceClick{}
+                    .bounceClick {}
             )
         }
         Box(

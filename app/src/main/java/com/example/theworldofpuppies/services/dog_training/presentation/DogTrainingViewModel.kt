@@ -32,13 +32,13 @@ class DogTrainingViewModel(
         _toastEvent.emit(message)
     }
 
-    fun onBookNowClick(navController: NavController) {
+    fun onProceedClick(navController: NavController) {
         viewModelScope.launch {
             val selectedFeatures = dogTrainingUiState.value.selectedDogTrainingFeatures
             if (selectedFeatures.isEmpty()) {
                 showToast("Please select at least one feature")
             } else {
-                navController.navigate(Screen.DogTrainingBookingScreen.route)
+                navController.navigate(Screen.PetListScreen.route)
             }
         }
     }

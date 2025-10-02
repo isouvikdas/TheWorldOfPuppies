@@ -65,7 +65,8 @@ fun DogTrainingScreen(
     modifier: Modifier = Modifier,
     dogTrainingViewModel: DogTrainingViewModel,
     dogTrainingUiState: DogTrainingUiState,
-    navController: NavController
+    navController: NavController,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -201,7 +202,8 @@ fun DogTrainingScreen(
                             .align(Alignment.BottomCenter)
                             .zIndex(1f),
                         dogTrainingViewModel = dogTrainingViewModel,
-                        navController = navController
+                        navController = navController,
+                        changePetSelectionView = { changePetSelectionView(true) }
                     )
 
                 }
@@ -382,7 +384,8 @@ fun DogTrainingHeader(
 fun DogTrainingBottomSection(
     modifier: Modifier = Modifier,
     dogTrainingViewModel: DogTrainingViewModel,
-    navController: NavController
+    navController: NavController,
+    changePetSelectionView: (Boolean) -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -406,7 +409,8 @@ fun DogTrainingBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
             Button(
                 onClick = {
-                    dogTrainingViewModel.onBookNowClick(navController)
+                    dogTrainingViewModel.onProceedClick(navController)
+                    changePetSelectionView(true)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -421,7 +425,7 @@ fun DogTrainingBottomSection(
                 )
             ) {
                 Text(
-                    text = "Book Now",
+                    text = "Proceed",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )

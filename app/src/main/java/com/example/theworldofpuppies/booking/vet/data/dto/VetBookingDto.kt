@@ -30,4 +30,5 @@ data class VetBookingDto(
     val paymentStatus: PaymentStatus,
     val creationDate: Long,
     val serviceDate: Long? = null,
+    val isRated: Boolean = false
 )

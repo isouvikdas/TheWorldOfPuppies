@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,23 +101,24 @@ fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
                 Text(
-                    text = "Let's Register",
+                    text = "Welcome Back!",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 27.sp,
+                    style = MaterialTheme.typography.displaySmall,
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
-                        .padding(top = 30.dp),
+                        .padding(top = 20.dp, bottom = 10.dp),
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Welcome!",
-                    fontWeight = FontWeight.W400,
-                    fontSize = 23.sp,
+                    text = "Let's Register",
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
-                        .padding(vertical = 10.dp),
-                    color = Color.Black
+                        .padding(top = 10.dp),
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -129,8 +132,6 @@ fun RegisterScreen(
                 TextTextField(
                     value = name,
                     onValueChange = { name = it },
-                    textColor = Color.Black,
-                    fontSize = 18.sp,
                     isNeeded = true,
                     placeHolder = "Name",
                     hint = "Enter Name",
@@ -142,8 +143,6 @@ fun RegisterScreen(
                 TextTextField(
                     value = email,
                     onValueChange = { email = it },
-                    textColor = Color.Black,
-                    fontSize = 18.sp,
                     isNeeded = true,
                     placeHolder = "Email",
                     hint = "Enter Email",
@@ -158,25 +157,28 @@ fun RegisterScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
                     placeHolder = "Phone Number",
-                    fontSize = 18.sp,
                     isNeeded = true,
                     textColor = Color.Black,
                     country = selectedCountry,
                     number = phoneNumber,
-                    onNumberChange = { phoneNumber = it },
+                    onValueChange = {_, value, _ -> phoneNumber = value },
                     onCountryChange = { selectedCountry = it },
                     isVisible = phoneNumber.isNotEmpty(),
+                    keyBoardType = KeyboardType.Number,
+                    countryList = Country.entries,
                 )
 
             }
             Text(
                 text = "Do you have a referral code ? (optional)",
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 17.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .clickable { }
+                    .clickable { },
+                textAlign = TextAlign.Center
             )
             Column(
                 modifier = Modifier

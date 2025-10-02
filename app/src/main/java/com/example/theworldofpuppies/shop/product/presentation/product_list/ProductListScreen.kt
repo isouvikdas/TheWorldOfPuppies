@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.domain.util.ListType
 import com.example.theworldofpuppies.shop.product.domain.util.SortProduct
@@ -65,7 +66,8 @@ fun ProductListScreen(
     onLoadMore: (() -> Unit)? = null,
     productTypeLabel: ListType,
     categoryListState: CategoryListState,
-    productViewModel: ProductViewModel
+    productViewModel: ProductViewModel,
+    cartViewModel: CartViewModel
 ) {
     val lazyGridState = rememberLazyGridState()
     val filteredSortedProducts by productViewModel.filteredSortedProducts.collectAsStateWithLifecycle(
@@ -171,7 +173,8 @@ fun ProductListScreen(
                     product = product,
                     onProductSelect = {
                         onProductSelect(product)
-                    }
+                    },
+                    cartViewModel = cartViewModel
                 )
             }
         }

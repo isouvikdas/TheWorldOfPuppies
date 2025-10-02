@@ -24,5 +24,6 @@ data class DogTrainingBookingDto(
     var paymentStatus: PaymentStatus,
     var creationDate: Long,
     var serviceStartDate: Long? = null,
-    var serviceEndDate: Long? = null
+    var serviceEndDate: Long? = null,
+    val isRated: Boolean = false
 )

@@ -34,7 +34,7 @@ class BookingPetWalkViewModel(
 
     fun createBooking(
         serviceId: String,
-        petId: String = "",
+        petId: String,
         notes: String = "",
         serviceDate: LocalDateTime? = null,
         dateRange: PetWalkDateRange? = null,

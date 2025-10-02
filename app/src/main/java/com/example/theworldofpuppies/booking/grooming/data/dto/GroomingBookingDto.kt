@@ -22,5 +22,6 @@ data class GroomingBookingDto(
     val paymentStatus: PaymentStatus,
     val creationDate: Long,
     val serviceDate: Long,
-    val groomingTimeSlot: GroomingSlotDto
+    val groomingTimeSlot: GroomingSlotDto,
+    val isRated: Boolean = false
 )

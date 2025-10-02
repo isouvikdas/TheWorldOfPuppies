@@ -15,11 +15,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -109,25 +115,80 @@ fun PetProfileSection(
         )
 
         Spacer(modifier = Modifier.fillMaxHeight(.04f))
-
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(MaterialTheme.dimens.small1),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
-        ) {
-            items(pets) { pet ->
-                PetProfileCard(
-                    isPetListView = false,
-                    isPetSelectionView = false,
-                    isHomeScreenView = true,
-                    pet = pet,
-                    selectPet = {
-                        petProfileViewModel.fillExistingPetData(pet)
+        if (pets.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        petProfileViewModel.resetPetUiState()
                         navController.navigate(Screen.PetProfileScreen.route)
+                    },
+                    shape = CircleShape,
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.tertiary
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null
+                    )
+                }
+
+
+            }
+        } else {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentPadding = PaddingValues(MaterialTheme.dimens.small1),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+            ) {
+                items(pets) { pet ->
+                    PetProfileCard(
+                        isPetListView = false,
+                        isPetSelectionView = false,
+                        isHomeScreenView = true,
+                        pet = pet,
+                        selectPet = {
+                            petProfileViewModel.fillExistingPetData(pet)
+                            navController.navigate(Screen.PetProfileScreen.route)
+                        }
+                    )
+                }
+
+                item {
+                    Box(
+                        modifier = Modifier
+                            .width(if (pets.isEmpty()) 300.dp else 100.dp)
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        FloatingActionButton(
+                            onClick = {
+                                petProfileViewModel.resetPetUiState()
+                                navController.navigate(Screen.PetProfileScreen.route)
+                            },
+                            shape = CircleShape,
+                            elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.tertiary
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null
+                            )
+                        }
+
+
                     }
-                )
+
+                }
+
             }
 
         }

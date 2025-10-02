@@ -31,4 +31,5 @@ data class PetWalkBookingDto(
     val startDate: Long? = null,
     val endDate: Long? = null,
     val selectedDays: List<Days>? = null,
+    val isRated: Boolean = false
 )

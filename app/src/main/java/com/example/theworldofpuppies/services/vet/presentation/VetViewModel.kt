@@ -36,7 +36,7 @@ class VetViewModel(
         _toastEvent.emit(message)
     }
 
-    fun onBookNowClick(navController: NavController) {
+    fun onProceedClick(navController: NavController) {
         val selectedVetOption = vetUiState.value.selectedVetOption
         val selectedSlot = vetUiState.value.selectedSlot
         viewModelScope.launch {
@@ -48,7 +48,7 @@ class VetViewModel(
                 showToast("Please select a vet option")
                 return@launch
             }
-            navController.navigate(Screen.VetIssuesScreen.route)
+            navController.navigate(Screen.PetListScreen.route)
         }
     }
 

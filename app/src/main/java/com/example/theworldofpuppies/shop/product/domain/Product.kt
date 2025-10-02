@@ -10,14 +10,15 @@ data class Product(
     val discount: Int = 0,
     val inventory: Int,
     val categoryName: String,
-    val imageIds: List<String> = ArrayList(),
-    val firstImageId: String? = null,
-    val firstImageUri: String? = "",
+    val images: List<Image> = emptyList(),
+    val firstImage: Image? = null,
     val isFeatured: Boolean? = false,
     val isDetailsFetched: Boolean = false,
     val isImagesFetched: Boolean = false,
     val isRecommended: Boolean = false,
-    val rating: Double = 0.0
+    val isRated: Boolean = false,
+    val averageStars : Double = 0.0,
+    val totalReviews: Int
 ) {
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombinations = listOf(

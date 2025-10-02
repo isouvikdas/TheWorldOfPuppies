@@ -22,5 +22,7 @@ data class GroomingBooking(
     val paymentStatus: PaymentStatus,
     val creationDate: LocalDateTime,
     val serviceDate: LocalDateTime,
-    val groomingSlot: GroomingSlot
+    val groomingSlot: GroomingSlot,
+    val isRated: Boolean
+
 )

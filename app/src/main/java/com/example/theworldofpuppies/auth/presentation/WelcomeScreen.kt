@@ -9,15 +9,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -30,14 +29,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.R
-import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
+import com.example.theworldofpuppies.ui.theme.AppTheme
+import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,7 +47,7 @@ fun WelcomeScreen(
     val scope = rememberCoroutineScope()
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().navigationBarsPadding(),
         color = Color.White
     ) {
         Column(
@@ -85,7 +84,7 @@ fun WelcomeScreen(
                 Text(
                     text = "Pet Grooming - Vet on Call - Dog Walking",
                     color = MaterialTheme.colorScheme.primary,
-                    fontSize = 17.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .padding(horizontal = 30.dp, vertical = 20.dp),
@@ -94,8 +93,8 @@ fun WelcomeScreen(
 
                 Text(
                     text = "We Connect Pet Parents with people who'll treat their Pets like family",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.W400,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.W500,
                     modifier = Modifier
                         .padding(horizontal = 30.dp),
                     textAlign = TextAlign.Center
@@ -105,7 +104,7 @@ fun WelcomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 40.dp),
+                    .padding(bottom = 20.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
@@ -118,8 +117,8 @@ fun WelcomeScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .padding(start = 20.dp, end = 5.dp)
-                        .size(50.dp)
-                        .bounceClick{},
+                        .size(MaterialTheme.dimens.buttonHeight)
+                        .bounceClick {},
                     shape = RoundedCornerShape(15.dp),
                     border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary)
 
@@ -140,8 +139,8 @@ fun WelcomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 5.dp, end = 20.dp)
-                        .size(50.dp)
-                        .bounceClick{},
+                        .size(MaterialTheme.dimens.buttonHeight)
+                        .bounceClick {},
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

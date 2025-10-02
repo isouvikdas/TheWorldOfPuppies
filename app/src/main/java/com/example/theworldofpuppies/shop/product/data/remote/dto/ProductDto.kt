@@ -12,9 +12,11 @@ data class ProductDto(
     val discount: Int,
     val inventory: Int,
     val categoryName: String,
-    val imageIds: List<String> = ArrayList(),
-    val firstImageId: String? = null,
+    val images: List<ImageDto> = emptyList(),
+    val firstImage: ImageDto? = null,
     val isFeatured: Boolean? = false,
     val isRecommended: Boolean = false,
-    val rating: Double = 0.0
+    val isRated: Boolean = false,
+    val averageStars : Double = 0.0,
+    val totalReviews: Int
 )

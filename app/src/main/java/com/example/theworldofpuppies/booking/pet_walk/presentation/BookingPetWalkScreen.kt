@@ -46,6 +46,7 @@ import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.util.calculateSession
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkDateRange
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkingUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
@@ -62,7 +63,8 @@ fun BookingPetWalkScreen(
     petWalkingUiState: PetWalkingUiState,
     addressUiState: AddressUiState,
     addressViewModel: AddressViewModel,
-    bookingPetWalkViewModel: BookingPetWalkViewModel
+    bookingPetWalkViewModel: BookingPetWalkViewModel,
+    selectedPetForBooking: Pet?
 ) {
 
     val context = LocalContext.current
@@ -158,7 +160,8 @@ fun BookingPetWalkScreen(
                     serviceId = id ?: "",
                     serviceDate = singleDate,
                     bookingPetWalkViewModel = bookingPetWalkViewModel,
-                    context = context
+                    context = context,
+                    petId = selectedPetForBooking?.id ?: ""
                 )
             }
         }
@@ -191,7 +194,8 @@ fun BookingPetWalkBottomSection(
     serviceId: String,
     serviceDate: LocalDateTime? = null,
     bookingPetWalkViewModel: BookingPetWalkViewModel,
-    context: Context
+    context: Context,
+    petId: String
 ) {
 
     val discountedPrice = basePrice.times(100 - discount).div(100)
@@ -258,7 +262,8 @@ fun BookingPetWalkBottomSection(
                             ),
                             frequency = it,
                             context = context,
-                            selectedDays = selectedDays
+                            selectedDays = selectedDays,
+                            petId = petId
                         )
 
                     }

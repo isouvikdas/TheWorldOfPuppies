@@ -10,8 +10,6 @@ interface ProductRepository {
     suspend fun fetchAndStoreProducts(cursor: String?): String?
     suspend fun clearAllProducts()
     suspend fun getProductDetails(productId: String): ProductEntity?
-    suspend fun getProductImages(imageId: String): ByteArray?
-    suspend fun cacheFirstImage(productEntity: ProductEntity, context: Context): String
     suspend fun fetchAndStoreFeaturedProducts(): Result<Boolean, NetworkError>
     suspend fun getAllFeaturedProducts(): List<ProductEntity>
 }

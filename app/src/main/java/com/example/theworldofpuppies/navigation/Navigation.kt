@@ -16,6 +16,7 @@ import com.example.theworldofpuppies.auth.presentation.login.LoginScreen
 import com.example.theworldofpuppies.auth.presentation.login.LoginViewModel
 import com.example.theworldofpuppies.auth.presentation.register.RegisterScreen
 import com.example.theworldofpuppies.auth.presentation.register.RegistrationViewModel
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.dog_training.presentation.DogTrainingBookingScreen
 import com.example.theworldofpuppies.booking.dog_training.presentation.DogTrainingBookingViewModel
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingGroomingScreen
@@ -35,6 +36,8 @@ import com.example.theworldofpuppies.profile.pet.presentation.PetProfileScreen
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileScreen
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.review.presentation.ReviewScreen
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingScreen
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
@@ -80,6 +83,7 @@ sealed class Screen(val route: String) {
     data object DogTrainingScreen : Screen("DogTrainingScreen")
     data object DogTrainingBookingScreen : Screen("DogTrainingBookingScreen")
     data object PetInsuranceScreen : Screen("PetInsuranceScreen")
+    data object ReviewScreen : Screen("ReviewScreen")
 }
 
 @Composable
@@ -138,6 +142,7 @@ fun AppNavigation(
     val petProfileViewModel = koinViewModel<PetProfileViewModel>()
     val petProfileUiState by petProfileViewModel.editState.collectAsStateWithLifecycle()
     val petListUiState by petProfileViewModel.petListUiState.collectAsStateWithLifecycle()
+    val selectedPetForService by petProfileViewModel.selectedPetForService.collectAsStateWithLifecycle()
 
     val groomingBookingViewModel = koinViewModel<GroomingBookingViewModel>()
 
@@ -157,6 +162,9 @@ fun AppNavigation(
     val petInsuranceViewModel = koinViewModel<PetInsuranceViewModel>()
     val petInsuranceUiState by petInsuranceViewModel.petInsuranceUiState.collectAsStateWithLifecycle()
     val petInsuranceBookingUiState by petInsuranceViewModel.petInsuranceBookingUiState.collectAsStateWithLifecycle()
+
+    val reviewViewModel = koinViewModel<ReviewViewModel>()
+    val reviewUiState by reviewViewModel.reviewUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -264,7 +272,8 @@ fun AppNavigation(
                 getCategories = { productViewModel.fetchCategories() },
                 getProducts = { productViewModel.fetchNextPage() },
                 getFeaturedProducts = { productViewModel.fetchFeaturedProducts() },
-                navController = navController
+                navController = navController,
+                cartViewModel = cartViewModel
             )
         }
 
@@ -286,6 +295,7 @@ fun AppNavigation(
             ProfileScreen(
                 navController = navController,
                 profileViewModel = profileViewModel,
+                petProfileViewModel = petProfileViewModel
             )
         }
 
@@ -297,7 +307,8 @@ fun AppNavigation(
             searchIconVisibilityChanged(false)
             SearchScreen(
                 productViewModel = productViewModel,
-                navController = navController
+                navController = navController,
+                cartViewModel = cartViewModel
             )
         }
 
@@ -318,7 +329,8 @@ fun AppNavigation(
                 onLoadMore = { productViewModel.fetchNextPage() },
                 productTypeLabel = productType,
                 categoryListState = categoryListState,
-                productViewModel = productViewModel
+                productViewModel = productViewModel,
+                cartViewModel = cartViewModel
             )
         }
         composable(route = Screen.ProductDetailScreen.route) {
@@ -405,7 +417,9 @@ fun AppNavigation(
             )
             OrderHistoryScreen(
                 navController = navController,
-                orderHistoryUiState = orderHistoryUiState
+                orderHistoryUiState = orderHistoryUiState,
+                reviewViewModel = reviewViewModel,
+                reviewUiState = reviewUiState
             )
         }
 
@@ -435,7 +449,10 @@ fun AppNavigation(
             GroomingScreen(
                 navController = navController,
                 groomingUiState = groomingUiState,
-                groomingViewModel = groomingViewModel
+                groomingViewModel = groomingViewModel,
+                changePetSelectionView = { value ->
+                    petProfileViewModel.changePetSelectionView(value, Category.GROOMING)
+                }
             )
         }
         composable(route = Screen.BookingGroomingScreen.route) {
@@ -451,7 +468,8 @@ fun AppNavigation(
                 groomingBookingViewModel = groomingBookingViewModel,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
-                groomingUiState = groomingUiState
+                groomingUiState = groomingUiState,
+                selectedPetForBooking = selectedPetForService
             )
         }
 
@@ -466,7 +484,10 @@ fun AppNavigation(
             PetWalkingScreen(
                 navController = navController,
                 petWalkingViewModel = petWalkingViewModel,
-                petWalkingUiState = petWalkingUiState
+                petWalkingUiState = petWalkingUiState,
+                changePetSelectionView = { value ->
+                    petProfileViewModel.changePetSelectionView(value, Category.WALKING)
+                }
             )
         }
         composable(route = Screen.BookingPetWalkScreen.route) {
@@ -482,7 +503,8 @@ fun AppNavigation(
                 petWalkingUiState = petWalkingUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
-                bookingPetWalkViewModel = bookingPetWalkViewModel
+                bookingPetWalkViewModel = bookingPetWalkViewModel,
+                selectedPetForBooking = selectedPetForService
             )
         }
         composable(route = Screen.VetScreen.route) {
@@ -496,7 +518,10 @@ fun AppNavigation(
             VetScreen(
                 navController = navController,
                 vetViewModel = vetViewModel,
-                vetUiState = vetUiState
+                vetUiState = vetUiState,
+                changePetSelectionView = { value ->
+                    petProfileViewModel.changePetSelectionView(value, Category.VETERINARY)
+                }
             )
         }
         composable(route = Screen.VetIssuesScreen.route) {
@@ -526,7 +551,8 @@ fun AppNavigation(
                 vetBookingViewModel = vetBookingViewModel,
                 vetUiState = vetUiState,
                 addressUiState = addressUiState,
-                addressViewModel = addressViewModel
+                addressViewModel = addressViewModel,
+                selectedPetForBooking = selectedPetForService
             )
         }
 
@@ -541,7 +567,13 @@ fun AppNavigation(
             DogTrainingScreen(
                 navController = navController,
                 dogTrainingViewModel = dogTrainingViewModel,
-                dogTrainingUiState = dogTrainingUiState
+                dogTrainingUiState = dogTrainingUiState,
+                changePetSelectionView = { value ->
+                    petProfileViewModel.changePetSelectionView(
+                        value,
+                        selectedService = Category.DOG_TRAINING
+                    )
+                }
             )
         }
 
@@ -559,7 +591,8 @@ fun AppNavigation(
                 dogTrainingUiState = dogTrainingUiState,
                 dogTrainingBookingUiState = dogTrainingBookingUiState,
                 addressUiState = addressUiState,
-                addressViewModel = addressViewModel
+                addressViewModel = addressViewModel,
+                selectedPetForBooking = selectedPetForService
             )
         }
         composable(route = Screen.PetInsuranceScreen.route) {
@@ -588,7 +621,22 @@ fun AppNavigation(
             PetListScreen(
                 navController = navController,
                 petListUiState = petListUiState,
-                petProfileViewModel = petProfileViewModel
+                petProfileViewModel = petProfileViewModel,
+            )
+        }
+
+        composable(route = Screen.ReviewScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            ReviewScreen(
+                navController = navController,
+                reviewViewModel = reviewViewModel,
+                reviewUiState = reviewUiState
             )
         }
 

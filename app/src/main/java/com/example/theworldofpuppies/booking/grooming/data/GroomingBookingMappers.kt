@@ -39,6 +39,7 @@ fun GroomingBookingDto.toGroomingBooking(): GroomingBooking {
         paymentStatus = this.paymentStatus,
         creationDate = this.creationDate.toLocalDateTime(),
         serviceDate = this.serviceDate.toLocalDateTime(),
-        groomingSlot = this.groomingTimeSlot.toGroomingSlot()
+        groomingSlot = this.groomingTimeSlot.toGroomingSlot(),
+        isRated = isRated
     )
 }

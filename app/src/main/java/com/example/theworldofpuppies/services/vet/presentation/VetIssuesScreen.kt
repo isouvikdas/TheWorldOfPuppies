@@ -370,7 +370,7 @@ fun VetIssuesBottomSection(
             ) {
                 Text(
                     text = "Save Issue",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

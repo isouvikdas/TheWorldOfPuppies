@@ -56,7 +56,6 @@ fun VerifyRegSheet(
     registrationViewModel: RegistrationViewModel? = null
 ) {
 
-    val scope = rememberCoroutineScope()
     var skipPartially by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartially)
 
@@ -74,9 +73,6 @@ fun VerifyRegSheet(
                     .fillMaxSize(),
                 registrationUiState = registrationUiState,
                 registrationViewModel = registrationViewModel,
-                scope = scope,
-                bottomSheetState = bottomSheetState,
-                showModalBottomSheet = showModalBottomSheet
             )
 
         }
@@ -89,9 +85,6 @@ fun VerifyRegScreen(
     modifier: Modifier = Modifier,
     registrationUiState: RegistrationUiState,
     registrationViewModel: RegistrationViewModel? = null,
-    scope: CoroutineScope,
-    bottomSheetState: SheetState,
-    showModalBottomSheet: MutableState<Boolean>
 ) {
     val otp = rememberSaveable { mutableStateOf(registrationUiState.otp) }
 
@@ -113,27 +106,9 @@ fun VerifyRegScreen(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                IconButton(onClick = {
-                    scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                        if (!bottomSheetState.isVisible) {
-                            showModalBottomSheet.value = false
-                        }
-                    }
-                    registrationViewModel?.toggleOtpSentState()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBackIos,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(22.dp)
-                            .bounceClick{}
-                    )
-                }
-
                 Text(
                     text = "OTP Verification",
                     fontWeight = FontWeight.SemiBold,
@@ -142,24 +117,6 @@ fun VerifyRegScreen(
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                 )
-
-                IconButton(onClick = {
-                    scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                        if (!bottomSheetState.isVisible) {
-                            showModalBottomSheet.value = false
-                        }
-                    }
-                    registrationViewModel?.toggleOtpSentState()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(25.dp)
-                            .bounceClick{}
-                    )
-                }
-
             }
 
 

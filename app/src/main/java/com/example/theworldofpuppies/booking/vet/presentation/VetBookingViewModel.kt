@@ -32,7 +32,7 @@ class VetBookingViewModel(
 
     fun createBooking(
         serviceId: String?,
-        petId: String = "",
+        petId: String,
         healthIssues: List<HealthIssue>,
         healthIssueDescription: String,
         vetTimeSlot: VetTimeSlot?,

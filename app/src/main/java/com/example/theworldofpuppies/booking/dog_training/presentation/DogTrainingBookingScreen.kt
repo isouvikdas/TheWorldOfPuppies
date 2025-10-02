@@ -45,6 +45,7 @@ import com.example.theworldofpuppies.booking.vet.presentation.VetBookingNameSect
 import com.example.theworldofpuppies.booking.vet.presentation.VetBookingViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.calculateDiscountedPrice
+import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingOption
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingUiState
@@ -65,7 +66,8 @@ fun DogTrainingBookingScreen(
     dogTrainingBookingUiState: DogTrainingBookingUIState,
     dogTrainingUiState: DogTrainingUiState,
     addressUiState: AddressUiState,
-    addressViewModel: AddressViewModel
+    addressViewModel: AddressViewModel,
+    selectedPetForBooking: Pet?
 ) {
 
     val context = LocalContext.current
@@ -152,6 +154,7 @@ fun DogTrainingBookingScreen(
                     serviceId = id,
                     dogTrainingBookingViewModel = dogTrainingBookingViewModel,
                     context = context,
+                    petId = selectedPetForBooking?.id ?: ""
                 )
 
             }
@@ -181,7 +184,8 @@ fun DogTrainingBookingBottomSection(
     selectedDogTrainingOption: DogTrainingOption? = null,
     serviceId: String?,
     dogTrainingBookingViewModel: DogTrainingBookingViewModel,
-    context: Context
+    context: Context,
+    petId: String
 ) {
 
     val totalPrice = selectedFeatures.sumOf { calculateDiscountedPrice(discount, it.price) }
@@ -230,7 +234,7 @@ fun DogTrainingBookingBottomSection(
                 onClick = {
                     dogTrainingBookingViewModel.createBooking(
                         serviceId = serviceId,
-                        petId = "",
+                        petId = petId,
                         notes = "",
                         dogTrainingOption = selectedDogTrainingOption,
                         dogTrainingFeatures = selectedFeatures,

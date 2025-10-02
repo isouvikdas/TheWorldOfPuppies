@@ -1,6 +1,6 @@
 package com.example.theworldofpuppies.shop.product.presentation.product_detail
 
-import android.util.Base64
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,14 +50,15 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
@@ -65,6 +66,7 @@ import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
+import com.example.theworldofpuppies.shop.product.domain.Image
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -89,8 +91,12 @@ fun ProductDetailScreen(
     )
 
     val product = productDetailState.product
+    val images = product?.images ?: emptyList()
+    val finalImageList = images.toMutableList().apply {
+        if (product?.firstImage != null)
+            add(product.firstImage)
+    }
     val discount = remember(product?.discount) { product?.discount ?: 0 }
-    val images = remember(productDetailState.images) { productDetailState.images }
     val description = product?.description.orEmpty()
     val price = remember(product?.price) { product?.price ?: 0.0 }
     val discountedPrice = remember(product?.discountedPrice) { product?.discountedPrice ?: 0.0 }
@@ -102,10 +108,6 @@ fun ProductDetailScreen(
         cartViewModel?.toastEvent?.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    LaunchedEffect(product?.id) {
-        product?.let { productViewModel?.fetchImagesIfNeeded(product) }
     }
 
     Scaffold(
@@ -135,7 +137,7 @@ fun ProductDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(MaterialTheme.dimens.large3.times(2)),
-                            images = images
+                            images = finalImageList
                         )
                     }
                     item {
@@ -150,9 +152,16 @@ fun ProductDetailScreen(
                             productName = productName,
                             description = description,
                             originalPrice = price,
-                            discountedPrice = discountedPrice
-                        )
+                            discountedPrice = discountedPrice,
+                            isRated = product?.isRated ?: false,
+                            averageStars = product?.averageStars ?: 0.0,
+                            totalReviews = product?.totalReviews ?: 0
 
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
                     }
                 }
 
@@ -197,7 +206,7 @@ fun ProductHeader(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ProductImageSection(
-    images: List<String>?,
+    images: List<Image>?,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(
@@ -293,7 +302,10 @@ fun ProductDetailSection(
     description: String?,
     discount: Int,
     originalPrice: Double,
-    discountedPrice: Double
+    discountedPrice: Double,
+    isRated: Boolean = false,
+    averageStars: Double = 0.0,
+    totalReviews: Int = 0
 ) {
     Column(
         modifier = modifier,
@@ -307,26 +319,49 @@ fun ProductDetailSection(
         ) {
             Text(
                 text = productName.toString(),
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth(0.65f),
                 fontWeight = FontWeight.W600
             )
             /*Discount Card*/
-            Surface(
-                modifier = Modifier.wrapContentSize(),
-                shape = RoundedCornerShape(MaterialTheme.dimens.extraSmall.times(3).div(2)),
-                color = MaterialTheme.colorScheme.tertiary,
-                shadowElevation = 1.dp
-            ) {
-                Text(
-                    text = "$discount% Off",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(MaterialTheme.dimens.extraSmall.times(3) / 2),
-                    fontWeight = FontWeight.W500,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+            if (discount.toString().isNotEmpty() && discount > 0) {
+                Box(
+                    modifier = Modifier.size(55.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.discount_badge),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                MaterialTheme.dimens.extraSmall.times(
+                                    3
+                                ) / 2
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "$discount%",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Text(
+                            text = "OFF",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+
+
             }
         }
 
@@ -335,27 +370,28 @@ fun ProductDetailSection(
             modifier = Modifier
                 .wrapContentHeight()
                 .wrapContentWidth()
-                .padding(vertical = MaterialTheme.dimens.small1 / 3),
+                .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 text = "MRP :",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.W400,
             )
             /*without discounted price*/
             Text(
                 text = formatCurrency(originalPrice),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 textDecoration = TextDecoration.LineThrough,
+                fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Gray
             )
             /*discounted price*/
             Text(
                 text = formatCurrency(discountedPrice),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold,
             )
         }
@@ -379,16 +415,28 @@ fun ProductDetailSection(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    Icon(
-                        Icons.Default.Star,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(MaterialTheme.dimens.small1.times(3) / 2)
-                    )
-                    Text(
-                        text = "(4.2)",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    if (isRated && averageStars > 0.0 && totalReviews > 0) {
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = "Rating",
+                            tint = Color(0xFFFFC700)
+                        )
+                        Text(
+                            text = "$averageStars",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier,
+                            fontWeight = FontWeight.W500
+                        )
+                        Text (
+                            " ~ (${totalReviews})",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.W500,
+                            color = Color.Gray,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
 
                 }
             }
@@ -412,17 +460,22 @@ fun ProductDetailSection(
 }
 
 @Composable
-fun ProductImage(base64Image: String) {
-    val byteArray = Base64.decode(base64Image, Base64.DEFAULT)
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(byteArray)
-            .error(R.drawable.login)
-            .build(),
-        contentDescription = null,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Fit
-    )
+fun ProductImage(image: Image?) {
+    if (image?.fetchUrl?.toUri() != Uri.EMPTY) {
+        AsyncImage(
+            model = image?.fetchUrl?.toUri(),
+            contentDescription = "product image",
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Fit,
+            error = painterResource(R.drawable.login)
+        )
+    } else {
+        Image(
+            painterResource(R.drawable.login),
+            contentDescription = "Pet profile pic",
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -484,11 +537,11 @@ fun ProductBottomSection(
                 ) {
                     Text(
                         text = "Total :",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = formatCurrency(totalPrice.value),
+                        text = formatCurrency(totalPrice.doubleValue),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )
