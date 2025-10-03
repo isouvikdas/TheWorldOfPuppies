@@ -42,6 +42,7 @@ import com.example.theworldofpuppies.services.dog_training.presentation.DogTrain
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
+import com.example.theworldofpuppies.services.history.presentation.BookingHistoryScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.services.vet.presentation.VetIssuesScreen
@@ -252,7 +253,7 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            MessageScreen()
+            BookingHistoryScreen(navController = navController)
         }
 
         composable(route = BottomNavigationItems.Shop.route) {

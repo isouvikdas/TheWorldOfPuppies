@@ -122,7 +122,7 @@ fun OrderHistoryScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(
-                            MaterialTheme.dimens.small1
+                            16.dp
                         )
                     ) {
                         val sortedOrders = orders.sortedByDescending { order ->
@@ -395,7 +395,6 @@ fun OrderItemRow(
 
         }
     }
-
 }
 
 @Composable
@@ -466,7 +465,7 @@ fun OrderHistoryHeader(
 
         Icon(
             painterResource(R.drawable.bag_outline),
-            contentDescription = "Orders",
+            contentDescription = "cart",
             modifier = Modifier
                 .size(21.dp)
                 .bounceClick {
