@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -57,7 +58,7 @@ import com.example.theworldofpuppies.ui.theme.dimens
 @Composable
 fun PetProfileCard(
     modifier: Modifier = Modifier,
-    elevation: Dp = 2.dp,
+    elevation: Dp = 4.dp,
     isPetSelectionView: Boolean,
     selectPet: (Pet) -> Unit = {},
     isPetListView: Boolean,
@@ -68,7 +69,7 @@ fun PetProfileCard(
     selectPetForService: (Pet) -> Unit = {}
 ) {
     val horizontalPadding = MaterialTheme.dimens.small1
-    var showDeleteDialog = remember { mutableStateOf(false) }
+    val showDeleteDialog = remember { mutableStateOf(false) }
     if (showDeleteDialog.value) {
         DeleteDialog(
             onDismiss = { showDeleteDialog.value = false },
@@ -91,14 +92,14 @@ fun PetProfileCard(
         Surface(
             modifier = Modifier.clickable {
                 pet?.let {
-                    if (isPetSelectionView){
+                    if (isPetSelectionView) {
                         selectPetForService(pet)
                     } else {
                         selectPet(pet)
                     }
                 }
             },
-            color = MaterialTheme.colorScheme.secondary.copy(0.3f),
+            color = Color.LightGray.copy(0.4f),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.2.dp, MaterialTheme.colorScheme.secondary)
         ) {
@@ -113,7 +114,7 @@ fun PetProfileCard(
                     modifier = Modifier
                         .size(70.dp)
                         .clip(CircleShape),
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    color = MaterialTheme.colorScheme.secondary,
                 ) {
                     AsyncImage(
                         modifier = Modifier
@@ -173,7 +174,7 @@ fun PetProfileCard(
                             horizontalArrangement = Arrangement.End
                         ) {
                             Icon(
-                                Icons.Default.Delete,
+                                Icons.Outlined.Delete,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(20.dp)
@@ -197,7 +198,7 @@ fun PetProfileCard(
                                     .clickable { }
                                     .background(
                                         MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                            0.6f
+                                            alpha = 1f
                                         )
                                     )
                                     .align(Alignment.Center),
@@ -208,7 +209,8 @@ fun PetProfileCard(
                                     Icons.AutoMirrored.Default.ArrowForwardIos,
                                     contentDescription = "profile button",
                                     modifier = Modifier
-                                        .size(11.dp)
+                                        .size(11.dp),
+                                    tint = MaterialTheme.colorScheme.secondary
                                 )
                             }
 
@@ -218,7 +220,8 @@ fun PetProfileCard(
 
                     else -> {
                         Row(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .padding(top = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {

@@ -12,13 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,22 +42,22 @@ import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.core.domain.toString
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
-import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
-import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingOptionCard
+import com.example.theworldofpuppies.services.history.presentation.component.DogTrainingBookingItem
+import com.example.theworldofpuppies.services.history.presentation.component.GroomingBookingItem
+import com.example.theworldofpuppies.services.history.presentation.component.PetWalkBookingItem
+import com.example.theworldofpuppies.services.history.presentation.component.VetBookingItem
 import com.example.theworldofpuppies.ui.theme.dimens
-import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingHistoryScreen(
-    modifier: Modifier = Modifier,
-    navController: NavController
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val serviceList = Category.entries - Category.PET_INSURANCE
-    var selectedService by remember { mutableStateOf<Category?>(null) }
+    var selectedService by remember { mutableStateOf(Category.GROOMING) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
@@ -97,12 +92,26 @@ fun BookingHistoryScreen(
                 }
             }
             item {
-                GroomingBookingItem()
+                when (selectedService) {
+                    Category.DOG_TRAINING -> {
+                        DogTrainingBookingItem(context = context)
+                    }
+                    Category.VETERINARY -> {
+                        VetBookingItem(context = context)
+                    }
+                    Category.WALKING -> {
+                        PetWalkBookingItem(context = context)
+                    }
+                    Category.GROOMING -> {
+                        GroomingBookingItem(context = context)
+                    }
+
+                    Category.PET_INSURANCE -> {}
+                    null -> {}
+                }
             }
         }
     }
-
-
 }
 
 @Composable
@@ -140,138 +149,6 @@ fun BookingHistoryTypeCard(
                     color = if (isSelected) MaterialTheme.colorScheme.onTertiaryContainer else Color.Black
                 )
 
-            }
-        }
-    }
-
-}
-
-
-@Composable
-fun GroomingBookingItem(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = MaterialTheme.dimens.small1),
-        color = Color.White,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Surface(
-            color = Color.LightGray.copy(0.4f)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(MaterialTheme.dimens.small1),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Text(
-                            "Booking:",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.W500
-                        )
-                        Text(
-                            "345g234w",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Text(
-                            "Placed On: ",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500,
-                            modifier = Modifier.padding(end = 5.dp)
-                        )
-                        Text(
-                            formatEpochMillis(LocalDateTime.now().toEpochMillis()),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(verticalArrangement = Arrangement.Center) {
-                        Text(
-                            "Grooming",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            "(Bath & Spa)",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500,
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Text(
-                            "Appointment Date: ",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500
-                        )
-                        Text(
-                            formatEpochMillis(LocalDateTime.now().toEpochMillis()),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 10.dp)
-                ) {
-                    Icon(
-                        Icons.Outlined.LocationOn,
-                        modifier = Modifier.size(15.dp),
-                        contentDescription = "Location",
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Agartala, Tripura, India",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.W500,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                    )
-                }
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "(+91) 6009-181-866",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.W500,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
-
-
-                PetDetailsRow()
-
-                BookingTotalRow(total = 2000.00)
             }
         }
     }

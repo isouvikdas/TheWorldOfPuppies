@@ -253,7 +253,7 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            BookingHistoryScreen(navController = navController)
+            BookingHistoryScreen()
         }
 
         composable(route = BottomNavigationItems.Shop.route) {
