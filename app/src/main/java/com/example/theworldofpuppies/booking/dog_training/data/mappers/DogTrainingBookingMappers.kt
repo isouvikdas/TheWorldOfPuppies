@@ -11,6 +11,9 @@ fun DogTrainingBookingDto.toDogTrainingBooking(): DogTrainingBooking {
         publicBookingId = publicBookingId,
         providerId = providerId ?: "",
         petId = petId,
+        name = petName,
+        breed = breed,
+        age = age,
         dogTrainingSnapshot = dogTrainingSnapshot,
         address = address.toAddress(),
         basePrice = basePrice,
@@ -21,6 +24,7 @@ fun DogTrainingBookingDto.toDogTrainingBooking(): DogTrainingBooking {
         cancellationStatus = cancellationStatus,
         paymentStatus = paymentStatus,
         creationDate = creationDate.toLocalDateTime(),
+        serviceTime = serviceTime?.toLocalDateTime(),
         serviceStartDate = serviceStartDate?.toLocalDateTime(),
         serviceEndDate = serviceEndDate?.toLocalDateTime(),
         isRated = isRated

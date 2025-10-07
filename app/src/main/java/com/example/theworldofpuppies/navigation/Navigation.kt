@@ -42,7 +42,8 @@ import com.example.theworldofpuppies.services.dog_training.presentation.DogTrain
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
-import com.example.theworldofpuppies.services.history.presentation.BookingHistoryScreen
+import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryScreen
+import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.services.vet.presentation.VetIssuesScreen
@@ -167,6 +168,9 @@ fun AppNavigation(
     val reviewViewModel = koinViewModel<ReviewViewModel>()
     val reviewUiState by reviewViewModel.reviewUiState.collectAsStateWithLifecycle()
 
+    val bookingHistoryViewModel = koinViewModel<BookingHistoryViewModel>()
+    val bookingHistoryUiState by bookingHistoryViewModel.bookingHistoryUiState.collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
         startDestination = startingRoute,
@@ -253,7 +257,10 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            BookingHistoryScreen()
+            BookingHistoryScreen(
+                bookingHistoryViewModel = bookingHistoryViewModel,
+                bookingHistoryUiState = bookingHistoryUiState
+            )
         }
 
         composable(route = BottomNavigationItems.Shop.route) {

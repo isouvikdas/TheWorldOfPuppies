@@ -13,6 +13,9 @@ data class VetBooking(
     val publicBookingId: String,
     val providerId: String? = null,
     val petId: String,
+    val name: String,
+    val breed: String,
+    val age: String,
     val vetBookingSnapshot: VetBookingSnapshot,
     val vetTimeSlot: VetTimeSlot,
     val healthIssues: List<HealthIssue>,
@@ -25,7 +28,7 @@ data class VetBooking(
     val bookingStatus: BookingStatus,
     val cancellationStatus: CancellationStatus,
     val paymentStatus: PaymentStatus,
-    val creationDate: Long,
+    val creationDate: LocalDateTime,
     val serviceDate: LocalDateTime? = null,
     val isRated: Boolean
 )

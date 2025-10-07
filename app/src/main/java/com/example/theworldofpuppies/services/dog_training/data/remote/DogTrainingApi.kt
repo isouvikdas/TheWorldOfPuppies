@@ -12,7 +12,6 @@ import io.ktor.client.request.get
 class DogTrainingApi(
     private val httpClient: HttpClient
 ) {
-
     suspend fun getDogTraining()
             : Result<ApiResponse<DogTrainingDto>, NetworkError> {
         return safeCall {

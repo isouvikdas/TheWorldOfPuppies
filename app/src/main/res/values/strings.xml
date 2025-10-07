@@ -48,6 +48,11 @@
     <string name="home_visit_description">Expert care at your doorstep for stress-free checkups</string>
     <string name="dog">Dog</string>
     <string name="cat">Cat</string>
-    <string name="other">Other</string>">
+    <string name="other">Other</string>
+    <string name="empty_list">No data found</string>
+    <string name="no_booking_found">You haven\'t placed any booking yet with this service\n</string>
+    <string name="awaiting_payment">Payment Pending</string>
+    <string name="failed">Failed</string>
+    <string name="paid">Paid</string>
 
 </resources>

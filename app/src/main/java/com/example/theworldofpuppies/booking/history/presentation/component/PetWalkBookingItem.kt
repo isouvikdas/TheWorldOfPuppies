@@ -1,4 +1,4 @@
-package com.example.theworldofpuppies.services.history.presentation.component
+package com.example.theworldofpuppies.booking.history.presentation.component
 
 import android.content.Context
 import androidx.compose.foundation.clickable
@@ -29,25 +29,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.theworldofpuppies.address.data.mappers.toAddress
+import com.example.theworldofpuppies.address.presentation.util.getAddressDescription
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.core.domain.toString
+import com.example.theworldofpuppies.booking.history.presentation.BookingTotalRow
+import com.example.theworldofpuppies.booking.history.presentation.PetDetailsRow
+import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkBooking
 import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
+import com.example.theworldofpuppies.core.presentation.util.formatPhoneNumber
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.review.presentation.RatingCard
-import com.example.theworldofpuppies.services.history.presentation.BookingTotalRow
-import com.example.theworldofpuppies.services.history.presentation.PetDetailsRow
+import com.example.theworldofpuppies.services.pet_walking.domain.enums.Frequency
+import com.example.theworldofpuppies.services.pet_walking.domain.enums.toString
 import com.example.theworldofpuppies.ui.theme.dimens
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 @Composable
-fun DogTrainingBookingItem(
+fun PetWalkBookingItem(
     modifier: Modifier = Modifier,
-    category: Category = Category.DOG_TRAINING,
-    context: Context
+    context: Context,
+    category: Category = Category.WALKING,
+    petWalkBooking: PetWalkBooking
 ) {
 
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
 
     Surface(
         modifier = modifier
@@ -73,20 +80,23 @@ fun DogTrainingBookingItem(
                         .padding(bottom = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Text(
-                            "Booking:",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.W500
-                        )
-                        Text(
-                            "345g234w",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500
-                        )
+                    if (petWalkBooking.publicBookingId.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(
+                                "Booking:",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.W500
+                            )
+                            Text(
+                                petWalkBooking.publicBookingId,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
+
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -100,75 +110,122 @@ fun DogTrainingBookingItem(
                             modifier = Modifier.padding(end = 5.dp)
                         )
                         Text(
-                            formatEpochMillis(LocalDateTime.now().toEpochMillis()),
+                            formatEpochMillis(petWalkBooking.creationDate.toEpochMillis()),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.W500
                         )
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
-                        modifier = Modifier.padding(end = 10.dp),
-                        text = category.toString(context),
+                        category.toString(context),
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(end = 10.dp)
                     )
                     Text(
-                        "(Home Training)",
+                        "(${petWalkBooking.frequency.toString(context)})",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.W500,
                     )
                     Icon(
-                        if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
+                        if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
                         contentDescription = null,
                         modifier = Modifier.clickable {
                             isExpanded = !isExpanded
                         }
                     )
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column {
+
+                if (petWalkBooking.frequency == Frequency.ONE_TIME) {
+                    petWalkBooking.serviceDate?.let {
                         Row(
+                            modifier = Modifier.padding(top = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             Text(
-                                "Appointment Date: ",
-                                modifier = Modifier.fillMaxWidth(0.4f),
+                                "Start Date: ",
                                 style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.W500
+                                fontWeight = FontWeight.W500,
+                                modifier = Modifier.fillMaxWidth(0.4f)
                             )
                             Text(
-                                formatEpochMillis(LocalDateTime.now().toEpochMillis()),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.W500
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Text(
-                                "Appointment Time: ",
-                                modifier = Modifier.fillMaxWidth(0.4f),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.W500
-                            )
-                            Text(
-                                "${LocalTime.now().hour} : ${LocalTime.now().minute} ",
+                                formatEpochMillis(it.toEpochMillis()),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.W500
                             )
                         }
 
                     }
+                } else {
+                    petWalkBooking.startDate?.let {
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(
+                                "Start Date: ",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500,
+                                modifier = Modifier.fillMaxWidth(0.4f)
+                            )
+                            Text(
+                                formatEpochMillis(it.toEpochMillis()),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
+
+                        petWalkBooking.endDate?.let {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                Text(
+                                    "End Date: ",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.W500,
+                                    modifier = Modifier.fillMaxWidth(0.4f)
+                                )
+                                Text(
+                                    formatEpochMillis(petWalkBooking.endDate.toEpochMillis()),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.W500
+                                )
+                            }
+
+                        }
+                    }
+
                 }
 
+                petWalkBooking.serviceDate?.let {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Text(
+                            "Service Time: ",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.W500,
+                            modifier = Modifier.fillMaxWidth(0.4f)
+                        )
+                        Text(
+                            "${it.hour} : ${it.minute}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.W500
+                        )
+                    }
+
+                }
+
+
+                val addressDescription = getAddressDescription(petWalkBooking.address.toAddress())
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(vertical = 10.dp)
@@ -180,7 +237,7 @@ fun DogTrainingBookingItem(
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "Agartala, Tripura, India",
+                        text = addressDescription,
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.W500,
                         overflow = TextOverflow.Ellipsis,
@@ -188,19 +245,27 @@ fun DogTrainingBookingItem(
                     )
                 }
 
+
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "(+91) 6009-181-866",
+                    text = formatPhoneNumber(petWalkBooking.address.contactNumber),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.W500,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )
 
+                PetDetailsRow(
+                    petName = petWalkBooking.name,
+                    breed = petWalkBooking.breed,
+                    age = petWalkBooking.age
+                )
 
-                PetDetailsRow()
-
-                BookingTotalRow(total = 2000.00)
+                BookingTotalRow(
+                    total = petWalkBooking.totalPrice,
+                    paymentStatus = petWalkBooking.paymentStatus,
+                    context = context
+                )
                 RatingCard(
                     maxStars = 5,
                     stars = 5f,

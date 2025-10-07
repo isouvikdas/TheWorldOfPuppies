@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 data class GroomingSnapshot(
     val name: String,
     val category: ServiceCategory,
-    val petSubService: GroomingSubService? = null,
+    val groomingSubService: GroomingSubService? = null,
     val description: String
 )

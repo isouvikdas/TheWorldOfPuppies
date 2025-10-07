@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEvent
+import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEventManager
 import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkBookingRepository
 import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkBookingUiState
 import com.example.theworldofpuppies.core.domain.util.Result
@@ -21,7 +24,8 @@ import java.time.LocalDateTime
 import kotlin.math.log
 
 class BookingPetWalkViewModel(
-    private val petWalkBookingRepository: PetWalkBookingRepository
+    private val petWalkBookingRepository: PetWalkBookingRepository,
+    private val bookingEventManager: BookingEventManager
 ) : ViewModel() {
 
     private val _petWalkBookingUiState = MutableStateFlow(PetWalkBookingUiState())
@@ -65,6 +69,7 @@ class BookingPetWalkViewModel(
                                 showSuccessDialog = true
                             )
                         }
+                        bookingEventManager.sendEvent(BookingEvent.BookingPlaced(Category.WALKING))
                     }
                     is Result.Error -> {
                         _petWalkBookingUiState.update {

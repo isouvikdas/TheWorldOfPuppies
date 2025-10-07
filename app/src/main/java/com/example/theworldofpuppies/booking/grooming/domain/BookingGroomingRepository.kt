@@ -10,6 +10,7 @@ interface BookingGroomingRepository {
 
     suspend fun getGroomingTimeSlots(forDate: LocalDateTime? = null): Result<List<GroomingSlot>, NetworkError>
     suspend fun bookGrooming(
+        petId: String,
         serviceId: String,
         subService: GroomingSubService,
         selectedSlot: GroomingSlot,

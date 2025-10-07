@@ -23,9 +23,12 @@ fun VetBookingDto.toVetBooking(): VetBooking {
         bookingStatus = bookingStatus,
         cancellationStatus = cancellationStatus,
         paymentStatus = paymentStatus,
-        creationDate = creationDate,
+        creationDate = creationDate.toLocalDateTime(),
         serviceDate = serviceDate?.toLocalDateTime(),
-        isRated = isRated
+        isRated = isRated,
+        name = petName,
+        breed = breed,
+        age = age
     )
 }
 

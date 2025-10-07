@@ -51,6 +51,7 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
+import com.example.theworldofpuppies.address.presentation.util.getAddressDescription
 import com.example.theworldofpuppies.address.presentation.util.getIconRes
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatPhoneNumber
@@ -274,11 +275,7 @@ fun AddressCard(
                     fontWeight = FontWeight.W500
                 )
 
-                val addressDescription = if (address.houseNumber.isBlank()) {
-                    "${address.landmark}, ${address.street}, ${address.city}, ${address.state}, ${address.pinCode}"
-                } else {
-                    "${address.houseNumber}, ${address.landmark}, ${address.street}, ${address.city}, ${address.state}, ${address.pinCode}"
-                }
+                val addressDescription = getAddressDescription(address)
 
                 Text(
                     text = addressDescription,

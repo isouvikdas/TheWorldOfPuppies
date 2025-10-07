@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.booking.grooming.data
 
 import com.example.theworldofpuppies.address.domain.Address
+import com.example.theworldofpuppies.booking.dog_training.data.remote.dto.DogTrainingBookingDto
 import com.example.theworldofpuppies.booking.grooming.data.dto.GroomingBookingDto
 import com.example.theworldofpuppies.booking.grooming.data.dto.GroomingSlotDto
 import com.example.theworldofpuppies.booking.grooming.data.request.CreateGroomingBookingRequest
@@ -14,6 +15,7 @@ import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import java.time.LocalDateTime
@@ -30,14 +32,14 @@ class GroomingBookingApi(
             )
         }
     }
-
     suspend fun bookGrooming(
         serviceId: String,
         subService: GroomingSubService,
         selectedSlot: GroomingSlotDto,
         selectedDate: LocalDateTime,
         selectedAddress: Address? = null,
-        token: String
+        token: String,
+        petId: String
     ): Result<ApiResponse<GroomingBookingDto>, NetworkError> {
         return safeCall {
             httpClient.post(
@@ -48,7 +50,7 @@ class GroomingBookingApi(
                     CreateGroomingBookingRequest(
                         subServiceId = subService.id,
                         serviceId = serviceId,
-                        petId = "",
+                        petId = petId,
                         notes = "Please be Gentle",
                         serviceDate = selectedDate.toEpochMillis(),
                         groomingTimeSlot = selectedSlot

@@ -29,6 +29,9 @@ fun GroomingBookingDto.toGroomingBooking(): GroomingBooking {
         publicBookingId = this.publicBookingId,
         providerId = this.providerId ?: "",
         petId = this.petId,
+        name = this.petName,
+        breed = this.breed,
+        age = this.age,
         serviceSnapshot = this.groomingSnapshot,
         address = address,
         basePrice = this.basePrice,
@@ -40,6 +43,7 @@ fun GroomingBookingDto.toGroomingBooking(): GroomingBooking {
         creationDate = this.creationDate.toLocalDateTime(),
         serviceDate = this.serviceDate.toLocalDateTime(),
         groomingSlot = this.groomingTimeSlot.toGroomingSlot(),
-        isRated = isRated
+        isRated = isRated,
+        totalPrice = totalPrice
     )
 }
