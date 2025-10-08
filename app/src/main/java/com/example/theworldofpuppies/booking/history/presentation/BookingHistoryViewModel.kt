@@ -9,6 +9,8 @@ import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEven
 import com.example.theworldofpuppies.booking.history.domain.BookingHistoryRepository
 import com.example.theworldofpuppies.booking.history.domain.BookingHistoryUiState
 import com.example.theworldofpuppies.core.domain.util.Result
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,8 @@ import kotlinx.coroutines.launch
 
 class BookingHistoryViewModel(
     private val bookingHistoryRepository: BookingHistoryRepository,
-    private val bookingEventManager: BookingEventManager
+    private val bookingEventManager: BookingEventManager,
+    private val reviewEventManager: ReviewEventManager
 ) : ViewModel() {
 
     private val _bookingHistoryUiState = MutableStateFlow(BookingHistoryUiState())
@@ -26,6 +29,7 @@ class BookingHistoryViewModel(
 
     init {
         observeBookingEvents()
+        observeReviewEvents()
     }
 
     fun getGroomingBookings() {
@@ -151,11 +155,48 @@ class BookingHistoryViewModel(
                         Category.VETERINARY -> {
                             getVetBookings()
                         }
-
                         else -> {}
                     }
                 }
             }
         }
     }
+
+    private fun observeReviewEvents() {
+        viewModelScope.launch {
+            reviewEventManager.events.collect { event ->
+                if (event is ReviewEvent.ReviewConfirmed) {
+                    val targetId = event.targetId
+
+                    _bookingHistoryUiState.update { state ->
+                        // For each booking list, map and update if targetId matches
+                        val updatedGrooming = state.groomingBookings.map {
+                            if (it.id == targetId) it.copy(isRated = true) else it
+                        }
+
+                        val updatedDogTraining = state.dogTrainingBookings.map {
+                            if (it.id == targetId) it.copy(isRated = true) else it
+                        }
+
+                        val updatedPetWalk = state.petWalkBookings.map {
+                            if (it.id == targetId) it.copy(isRated = true) else it
+                        }
+
+                        val updatedVet = state.vetBookings.map {
+                            if (it.id == targetId) it.copy(isRated = true) else it
+                        }
+
+                        // Return updated state
+                        state.copy(
+                            groomingBookings = updatedGrooming,
+                            dogTrainingBookings = updatedDogTraining,
+                            petWalkBookings = updatedPetWalk,
+                            vetBookings = updatedVet
+                        )
+                    }
+                }
+            }
+        }
+    }
+
 }

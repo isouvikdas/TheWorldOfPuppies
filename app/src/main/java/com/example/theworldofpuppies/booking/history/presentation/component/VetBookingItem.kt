@@ -1,7 +1,6 @@
 package com.example.theworldofpuppies.booking.history.presentation.component
 
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,8 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.data.mappers.toAddress
 import com.example.theworldofpuppies.address.presentation.util.getAddressDescription
 import com.example.theworldofpuppies.booking.core.domain.Category
@@ -40,7 +38,10 @@ import com.example.theworldofpuppies.booking.vet.domain.VetBooking
 import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.formatPhoneNumber
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
+import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.review.presentation.RatingCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.services.vet.domain.toString
 import com.example.theworldofpuppies.ui.theme.dimens
 
@@ -49,7 +50,10 @@ fun VetBookingItem(
     modifier: Modifier = Modifier,
     category: Category = Category.VETERINARY,
     context: Context,
-    vetBooking: VetBooking
+    vetBooking: VetBooking,
+    reviewViewModel: ReviewViewModel,
+    navController: NavController,
+    reviewUiState: ReviewUiState
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     Surface(
@@ -223,12 +227,15 @@ fun VetBookingItem(
                 if (!vetBooking.isRated && vetBooking.bookingStatus == BookingStatus.COMPLETED) {
                     RatingCard(
                         maxStars = 5,
-                        stars = 5f,
+                        stars = reviewUiState.stars,
                         onStarsChange = { stars ->
-//                        reviewViewModel.resetReviewState()
-//                        reviewViewModel.onStarsChange(stars)
-//                        reviewViewModel.setOrderType(targetId = orderItem.id)
-//                        navController.navigate(Screen.ReviewScreen.route)
+                            reviewViewModel.resetReviewState()
+                            reviewViewModel.onStarsChange(stars)
+                            reviewViewModel.setBookingType(
+                                targetId = vetBooking.id,
+                                subType = Category.VETERINARY
+                            )
+                            navController.navigate(Screen.ReviewScreen.route)
 
                         }
                     )

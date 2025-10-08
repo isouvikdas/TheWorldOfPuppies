@@ -93,7 +93,7 @@ class ReviewViewModel(
                     description = state.description
                 )) {
                     is Result.Success -> {
-                        reviewEvenManager.sendEvent(ReviewEvent.ReviewConfirmed(state.targetId))
+                        reviewEvenManager.sendEvent(ReviewEvent.ReviewConfirmed(state.targetId, targetType = state.targetType))
                         sendToastEvent("Review submitted successfully")
                         navController.popBackStack()
                     }

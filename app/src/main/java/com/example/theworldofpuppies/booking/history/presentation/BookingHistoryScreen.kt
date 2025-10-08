@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,6 +57,8 @@ import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewUiState
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +66,10 @@ import com.example.theworldofpuppies.ui.theme.dimens
 fun BookingHistoryScreen(
     modifier: Modifier = Modifier,
     bookingHistoryViewModel: BookingHistoryViewModel,
-    bookingHistoryUiState: BookingHistoryUiState
+    bookingHistoryUiState: BookingHistoryUiState,
+    reviewViewModel: ReviewViewModel,
+    navController: NavController,
+    reviewUiState: ReviewUiState
 ) {
     val context = LocalContext.current
     val serviceList = Category.entries - Category.PET_INSURANCE
@@ -84,7 +90,6 @@ fun BookingHistoryScreen(
     val vetLoading = bookingHistoryUiState.vetLoading
     val petWalkLoading = bookingHistoryUiState.petWalkLoading
 
-    // Load bookings for selected service (only if not loaded yet)
     LaunchedEffect(selectedService) {
         when (selectedService) {
             Category.GROOMING -> {
@@ -111,117 +116,148 @@ fun BookingHistoryScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        // Top horizontal tab selector
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items(serviceList) { service ->
-                    val isSelected = selectedService == service
-                    BookingHistoryTypeCard(
-                        modifier = Modifier
-                            .padding(
-                                start = if (serviceList.first() == service) MaterialTheme.dimens.small1 else 0.dp,
-                                end = if (serviceList.last() == service) MaterialTheme.dimens.small1 else 0.dp
-                            ),
-                        name = service.toString(context),
-                        onSelect = { selectedService = service },
-                        isSelected = isSelected
-                    )
-                }
-            }
-
-            // Category-specific content
-            when (selectedService) {
-                Category.DOG_TRAINING -> {
-                    if (dogTrainingLoading) {
-                        LoaderItem()
-
-                    } else if (dogTrainingBookings.isEmpty() && dogTrainingError != null) {
-                        EmptyBookingMessage(message = dogTrainingError.toString(context))
-
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(dogTrainingBookings) { booking ->
-                                DogTrainingBookingItem(
-                                    dogTrainingBooking = booking,
-                                    context = context
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Category.VETERINARY -> {
-                    if (vetLoading) {
-                        LoaderItem()
-
-                    } else if (vetBookings.isEmpty() && vetError != null) {
-                        EmptyBookingMessage(message = vetError.toString(context))
-
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(vetBookings) { booking ->
-                                VetBookingItem(vetBooking = booking, context = context)
-                            }
-
-                        }
-                    }
-                }
-
-                Category.WALKING -> {
-                    if (petWalkLoading) {
-                        LoaderItem()
-                    } else if (petWalkBookings.isEmpty() && petWalkError != null) {
-                        EmptyBookingMessage(message = petWalkError.toString(context))
-
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(petWalkBookings) { booking ->
-                                PetWalkBookingItem(petWalkBooking = booking, context = context)
-                            }
-                        }
-                    }
-                }
-
-                Category.GROOMING -> {
-                    if (groomingLoading) {
-                        LoaderItem()
-                    } else if (groomingBookings.isEmpty() && groomingError != null) {
-                        EmptyBookingMessage(message = groomingError.toString(context))
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(groomingBookings) { booking ->
-                                GroomingBookingItem(groomingBooking = booking, context = context)
-                            }
-                        }
-
-                    }
-                }
-
-                Category.PET_INSURANCE -> {}
+            items(serviceList) { service ->
+                val isSelected = selectedService == service
+                BookingHistoryTypeCard(
+                    modifier = Modifier
+                        .padding(
+                            start = if (serviceList.first() == service) MaterialTheme.dimens.small1 else 0.dp,
+                            end = if (serviceList.last() == service) MaterialTheme.dimens.small1 else 0.dp
+                        ),
+                    name = service.toString(context),
+                    onSelect = { selectedService = service },
+                    isSelected = isSelected
+                )
             }
         }
 
+        // Category-specific content
+        when (selectedService) {
+            Category.DOG_TRAINING -> {
+                if (dogTrainingLoading) {
+                    LoaderItem()
 
+                } else if (dogTrainingBookings.isEmpty() && dogTrainingError != null) {
+                    EmptyBookingMessage(message = dogTrainingError.toString(context))
+
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(dogTrainingBookings) { booking ->
+                            DogTrainingBookingItem(
+                                dogTrainingBooking = booking,
+                                context = context,
+                                reviewViewModel = reviewViewModel,
+                                navController = navController,
+                                reviewUiState = reviewUiState
+                            )
+                        }
+                        item {
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+                }
+            }
+
+            Category.VETERINARY -> {
+                if (vetLoading) {
+                    LoaderItem()
+
+                } else if (vetBookings.isEmpty() && vetError != null) {
+                    EmptyBookingMessage(message = vetError.toString(context))
+
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(vetBookings) { booking ->
+                            VetBookingItem(
+                                vetBooking = booking,
+                                context = context,
+                                reviewViewModel = reviewViewModel,
+                                navController = navController,
+                                reviewUiState = reviewUiState
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+
+                    }
+                }
+            }
+
+            Category.WALKING -> {
+                if (petWalkLoading) {
+                    LoaderItem()
+                } else if (petWalkBookings.isEmpty() && petWalkError != null) {
+                    EmptyBookingMessage(message = petWalkError.toString(context))
+
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(petWalkBookings) { booking ->
+                            PetWalkBookingItem(
+                                petWalkBooking = booking,
+                                context = context,
+                                reviewViewModel = reviewViewModel,
+                                navController = navController,
+                                reviewUiState = reviewUiState
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+                }
+            }
+
+            Category.GROOMING -> {
+                if (groomingLoading) {
+                    LoaderItem()
+                } else if (groomingBookings.isEmpty() && groomingError != null) {
+                    EmptyBookingMessage(message = groomingError.toString(context))
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(groomingBookings) { booking ->
+                            GroomingBookingItem(
+                                groomingBooking = booking,
+                                context = context,
+                                reviewViewModel = reviewViewModel,
+                                navController = navController,
+                                reviewUiState = reviewUiState
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+
+                }
+            }
+
+            Category.PET_INSURANCE -> {}
+        }
     }
 }
 

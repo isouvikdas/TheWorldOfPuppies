@@ -7,6 +7,8 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetRepository

@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.data.mappers.toAddress
 import com.example.theworldofpuppies.address.presentation.util.getAddressDescription
 import com.example.theworldofpuppies.booking.core.domain.Category
@@ -40,7 +41,10 @@ import com.example.theworldofpuppies.booking.history.presentation.PetDetailsRow
 import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.formatPhoneNumber
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
+import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.review.presentation.RatingCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @Composable
@@ -48,7 +52,10 @@ fun GroomingBookingItem(
     modifier: Modifier = Modifier,
     category: Category = Category.GROOMING,
     context: Context,
-    groomingBooking: GroomingBooking
+    groomingBooking: GroomingBooking,
+    reviewViewModel: ReviewViewModel,
+    navController: NavController,
+    reviewUiState: ReviewUiState
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val groomingSubService = groomingBooking.serviceSnapshot.groomingSubService
@@ -236,12 +243,12 @@ fun GroomingBookingItem(
                 if (!groomingBooking.isRated && groomingBooking.bookingStatus == BookingStatus.COMPLETED) {
                     RatingCard(
                         maxStars = 5,
-                        stars = 5f,
+                        stars = reviewUiState.stars,
                         onStarsChange = { stars ->
-//                        reviewViewModel.resetReviewState()
-//                        reviewViewModel.onStarsChange(stars)
-//                        reviewViewModel.setOrderType(targetId = orderItem.id)
-//                        navController.navigate(Screen.ReviewScreen.route)
+                        reviewViewModel.resetReviewState()
+                        reviewViewModel.onStarsChange(stars)
+                        reviewViewModel.setBookingType(targetId = groomingBooking.id, subType = Category.GROOMING)
+                        navController.navigate(Screen.ReviewScreen.route)
 
                         }
                     )

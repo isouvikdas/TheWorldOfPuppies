@@ -59,6 +59,8 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
@@ -75,7 +77,8 @@ fun GroomingScreen(
     navController: NavController,
     groomingViewModel: GroomingViewModel,
     groomingUiState: GroomingUiState,
-    changePetSelectionView: (Boolean) -> Unit
+    changePetSelectionView: (Boolean) -> Unit,
+    reviewEventManager: ReviewEventManager
 ) {
     val grooming = groomingUiState.grooming
     val discount = grooming?.discount
@@ -86,6 +89,16 @@ fun GroomingScreen(
     val selectedServiceId = groomingUiState.selectedSubServiceId
 
     val context = LocalContext.current
+
+    LaunchedEffect(reviewEventManager) {
+        reviewEventManager.events.collect { event ->
+            if (event is ReviewEvent.ReviewConfirmed) {
+                if (event.targetId == groomingUiState.grooming?.id) {
+                    groomingViewModel.getGrooming()
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         groomingViewModel.toastEvent.collectLatest { message ->
