@@ -111,44 +111,7 @@ fun DogTrainingBookingItem(
                                 fontWeight = FontWeight.W500
                             )
                         }
-
                     }
-                }
-                dogTrainingOption?.name?.let {
-                    Row {
-                        Text(
-                            modifier = Modifier.padding(end = 10.dp),
-                            text = category.toString(context),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.padding(bottom = 5.dp)
-                        ) {
-                            Row {
-                                Text(
-                                    "($it)",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.W500,
-                                )
-                                Icon(
-                                    if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
-                                    contentDescription = null,
-                                    modifier = Modifier.clickable {
-                                        isExpanded = !isExpanded
-                                    }
-                                )
-                            }
-                            if (isExpanded) {
-                                dogTrainingOption.dogTrainingFeatures.forEach { feature ->
-                                    FeatureItem(name = feature.name)
-                                }
-                            }
-
-                        }
-                    }
-
                 }
 
                 Text(
@@ -162,6 +125,36 @@ fun DogTrainingBookingItem(
                         else -> MaterialTheme.colorScheme.error
                     }
                 )
+
+                dogTrainingOption?.name?.let {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            modifier = Modifier.padding(end = 10.dp),
+                            text = category.toString(context),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            "($it)",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.W500,
+                        )
+                        Icon(
+                            if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                isExpanded = !isExpanded
+                            }
+                        )
+                    }
+                    if (isExpanded) {
+                        dogTrainingOption.dogTrainingFeatures.forEach { feature ->
+                            FeatureItem(name = feature.name)
+                        }
+                    }
+
+                }
 
                 if (dogTrainingBooking.serviceStartDate != null && dogTrainingBooking.serviceEndDate != null) {
                     Row(
@@ -295,7 +288,9 @@ fun FeatureItem(modifier: Modifier = Modifier, name: String) {
             Icons.Default.CheckCircle,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(end = 5.dp).size(16.dp)
+            modifier = Modifier
+                .padding(end = 5.dp)
+                .size(16.dp)
         )
         Text(
             text = name,

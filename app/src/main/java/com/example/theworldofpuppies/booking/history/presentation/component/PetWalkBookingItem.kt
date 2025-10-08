@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.booking.history.presentation.component
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import com.example.theworldofpuppies.address.data.mappers.toAddress
 import com.example.theworldofpuppies.address.presentation.util.getAddressDescription
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.core.domain.toString
+import com.example.theworldofpuppies.booking.grooming.domain.enums.BookingStatus
 import com.example.theworldofpuppies.booking.history.presentation.BookingTotalRow
 import com.example.theworldofpuppies.booking.history.presentation.PetDetailsRow
 import com.example.theworldofpuppies.booking.pet_walk.domain.PetWalkBooking
@@ -131,13 +133,6 @@ fun PetWalkBookingItem(
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.W500,
                     )
-                    Icon(
-                        if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                            isExpanded = !isExpanded
-                        }
-                    )
                 }
 
                 if (petWalkBooking.frequency == Frequency.ONE_TIME) {
@@ -181,49 +176,27 @@ fun PetWalkBookingItem(
                             )
                         }
 
-                        petWalkBooking.endDate?.let {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Text(
-                                    "End Date: ",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.W500,
-                                    modifier = Modifier.fillMaxWidth(0.4f)
-                                )
-                                Text(
-                                    formatEpochMillis(petWalkBooking.endDate.toEpochMillis()),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.W500
-                                )
-                            }
-
+                    }
+                    petWalkBooking.endDate?.let {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(
+                                "End Date: ",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500,
+                                modifier = Modifier.fillMaxWidth(0.4f)
+                            )
+                            Text(
+                                formatEpochMillis(petWalkBooking.endDate.toEpochMillis()),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.W500
+                            )
                         }
+
                     }
-
                 }
-
-                petWalkBooking.serviceDate?.let {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Text(
-                            "Service Time: ",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500,
-                            modifier = Modifier.fillMaxWidth(0.4f)
-                        )
-                        Text(
-                            "${it.hour} : ${it.minute}",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-
-                }
-
 
                 val addressDescription = getAddressDescription(petWalkBooking.address.toAddress())
                 Row(
@@ -245,7 +218,6 @@ fun PetWalkBookingItem(
                     )
                 }
 
-
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = formatPhoneNumber(petWalkBooking.address.contactNumber),
@@ -266,17 +238,20 @@ fun PetWalkBookingItem(
                     paymentStatus = petWalkBooking.paymentStatus,
                     context = context
                 )
-                RatingCard(
-                    maxStars = 5,
-                    stars = 5f,
-                    onStarsChange = { stars ->
+                if (!petWalkBooking.isRated && petWalkBooking.bookingStatus == BookingStatus.COMPLETED) {
+                    RatingCard(
+                        maxStars = 5,
+                        stars = 5f,
+                        onStarsChange = { stars ->
 //                        reviewViewModel.resetReviewState()
 //                        reviewViewModel.onStarsChange(stars)
 //                        reviewViewModel.setOrderType(targetId = orderItem.id)
 //                        navController.navigate(Screen.ReviewScreen.route)
 
-                    }
-                )
+                        }
+                    )
+
+                }
             }
 
         }

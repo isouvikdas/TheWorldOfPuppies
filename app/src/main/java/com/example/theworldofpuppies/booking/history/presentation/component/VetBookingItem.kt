@@ -33,6 +33,7 @@ import com.example.theworldofpuppies.address.data.mappers.toAddress
 import com.example.theworldofpuppies.address.presentation.util.getAddressDescription
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.core.domain.toString
+import com.example.theworldofpuppies.booking.grooming.domain.enums.BookingStatus
 import com.example.theworldofpuppies.booking.history.presentation.BookingTotalRow
 import com.example.theworldofpuppies.booking.history.presentation.PetDetailsRow
 import com.example.theworldofpuppies.booking.vet.domain.VetBooking
@@ -108,6 +109,20 @@ fun VetBookingItem(
                         )
                     }
                 }
+
+                Text(
+                    vetBooking.bookingStatus.toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = when (vetBooking.bookingStatus) {
+                        BookingStatus.PENDING -> Color.Gray
+                        BookingStatus.CONFIRMED -> MaterialTheme.colorScheme.primary
+                        BookingStatus.COMPLETED -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.error
+                    }
+                )
+
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -126,13 +141,6 @@ fun VetBookingItem(
                         })",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.W500,
-                    )
-                    Icon(
-                        if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                            isExpanded = !isExpanded
-                        }
                     )
                 }
                 vetBooking.serviceDate?.let {
@@ -166,7 +174,7 @@ fun VetBookingItem(
                         modifier = Modifier.fillMaxWidth(0.4f)
                     )
                     Text(
-                        "${vetBooking.vetTimeSlot.dateTime.hour} : ${vetBooking.vetTimeSlot.dateTime.minute} ",
+                        "${vetBooking.vetTimeSlot.dateTime.toLocalTime()}",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.W500
                     )
@@ -212,17 +220,21 @@ fun VetBookingItem(
                     paymentStatus = vetBooking.paymentStatus,
                     context = context
                 )
-                RatingCard(
-                    maxStars = 5,
-                    stars = 5f,
-                    onStarsChange = { stars ->
+                if (!vetBooking.isRated && vetBooking.bookingStatus == BookingStatus.COMPLETED) {
+                    RatingCard(
+                        maxStars = 5,
+                        stars = 5f,
+                        onStarsChange = { stars ->
 //                        reviewViewModel.resetReviewState()
 //                        reviewViewModel.onStarsChange(stars)
 //                        reviewViewModel.setOrderType(targetId = orderItem.id)
 //                        navController.navigate(Screen.ReviewScreen.route)
 
-                    }
-                )
+                        }
+                    )
+
+                }
+
             }
 
         }

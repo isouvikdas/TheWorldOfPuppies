@@ -1,7 +1,6 @@
 package com.example.theworldofpuppies.booking.history.presentation.component
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,8 +51,8 @@ fun GroomingBookingItem(
     groomingBooking: GroomingBooking
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val groomingSubService = groomingBooking.serviceSnapshot.groomingSubService
 
-    Log.d("grooming", groomingBooking.toString())
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -111,44 +110,6 @@ fun GroomingBookingItem(
                         )
                     }
                 }
-                groomingBooking.serviceSnapshot.groomingSubService?.let {
-                    Row {
-                        Text(
-                            category.toString(context),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(end = 10.dp)
-                        )
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.padding(bottom = 5.dp)
-                        ) {
-                            Row {
-                                Text(
-                                    "(${it.name})",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.W500,
-                                )
-
-                                Icon(
-                                    if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
-                                    contentDescription = null,
-                                    modifier = Modifier.clickable {
-                                        isExpanded = !isExpanded
-                                    }
-                                )
-                            }
-
-                            if (isExpanded) {
-                                groomingBooking.serviceSnapshot.groomingSubService.features.forEach { feature ->
-                                    FeatureItem(name = feature)
-                                }
-                            }
-                        }
-
-                    }
-
-                }
 
                 Text(
                     groomingBooking.bookingStatus.toString(),
@@ -161,6 +122,42 @@ fun GroomingBookingItem(
                         else -> MaterialTheme.colorScheme.error
                     }
                 )
+
+                groomingSubService?.let {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            category.toString(context),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+
+                        Text(
+                            "(${it.name})",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.W500,
+                        )
+
+                        Icon(
+                            if (!isExpanded) Icons.Default.ArrowDropDown
+                            else Icons.Default.ArrowDropUp,
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                isExpanded = !isExpanded
+                            }
+                        )
+
+                    }
+
+                    if (isExpanded) {
+                        groomingSubService.features.forEach { feature ->
+                            FeatureItem(name = feature)
+                        }
+                    }
+                }
 
                 Row(
                     modifier = Modifier.padding(top = 10.dp),
@@ -189,7 +186,7 @@ fun GroomingBookingItem(
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        "${groomingBooking.groomingSlot.startTime.hour} : ${groomingBooking.groomingSlot.startTime.minute} ",
+                        "${groomingBooking.groomingSlot.startTime.toLocalTime()} ",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.W500
                     )

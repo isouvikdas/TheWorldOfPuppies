@@ -52,7 +52,7 @@
     <string name="empty_list">No data found</string>
     <string name="no_booking_found">You haven\'t placed any booking yet with this service\n</string>
     <string name="awaiting_payment">Payment Pending</string>
-    <string name="failed">Failed</string>
+    <string name="failed">Payment Failed</string>
     <string name="paid">Paid</string>
 
 </resources>
