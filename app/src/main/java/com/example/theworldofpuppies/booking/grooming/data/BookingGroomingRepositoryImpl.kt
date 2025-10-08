@@ -48,6 +48,7 @@ class BookingGroomingRepositoryImpl(
     }
 
     override suspend fun bookGrooming(
+        petId: String,
         serviceId: String,
         subService: GroomingSubService,
         selectedSlot: GroomingSlot,
@@ -63,7 +64,8 @@ class BookingGroomingRepositoryImpl(
                 selectedAddress = selectedAddress,
                 selectedSlot = selectedSlot.toGroomingSlotDto(),
                 selectedDate = selectedDate,
-                serviceId = serviceId
+                serviceId = serviceId,
+                petId = petId
             )) {
                 is Result.Success -> {
                     val response = result.data

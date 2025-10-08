@@ -54,6 +54,8 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingUiState
@@ -66,7 +68,8 @@ fun DogTrainingScreen(
     dogTrainingViewModel: DogTrainingViewModel,
     dogTrainingUiState: DogTrainingUiState,
     navController: NavController,
-    changePetSelectionView: (Boolean) -> Unit
+    changePetSelectionView: (Boolean) -> Unit,
+    reviewEventManager: ReviewEventManager
 ) {
     val context = LocalContext.current
 
@@ -79,6 +82,16 @@ fun DogTrainingScreen(
     val selectedTrainingOption = dogTrainingUiState.selectedDogTrainingOption
     val trainingFeatures = selectedTrainingOption?.dogTrainingFeatures
     val selectedFeatures = dogTrainingUiState.selectedDogTrainingFeatures
+
+    LaunchedEffect(reviewEventManager) {
+        reviewEventManager.events.collect { event ->
+            if (event is ReviewEvent.ReviewConfirmed) {
+                if (event.targetId == dogTrainingUiState.id) {
+                    dogTrainingViewModel.getDogTraining(context)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         dogTrainingViewModel.toastEvent.collect { message ->

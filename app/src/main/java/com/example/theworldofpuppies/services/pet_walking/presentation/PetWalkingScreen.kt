@@ -65,6 +65,8 @@ import com.example.theworldofpuppies.booking.grooming.presentation.DatePickerMod
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkingUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
@@ -82,7 +84,8 @@ fun PetWalkingScreen(
     navController: NavController,
     petWalkingViewModel: PetWalkingViewModel,
     petWalkingUiState: PetWalkingUiState,
-    changePetSelectionView: (Boolean) -> Unit
+    changePetSelectionView: (Boolean) -> Unit,
+    reviewEventManager: ReviewEventManager
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -100,6 +103,16 @@ fun PetWalkingScreen(
     val days = petWalkingUiState.days
 
     val description = petWalkingUiState.description
+
+    LaunchedEffect(reviewEventManager) {
+        reviewEventManager.events.collect { event ->
+            if (event is ReviewEvent.ReviewConfirmed) {
+                if (event.targetId == petWalkingUiState.id) {
+                    petWalkingViewModel.getPetWalking(context)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         petWalkingViewModel.toastEvent.collectLatest { message ->

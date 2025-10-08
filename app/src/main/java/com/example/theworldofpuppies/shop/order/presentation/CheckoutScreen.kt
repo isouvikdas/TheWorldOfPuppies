@@ -3,6 +3,7 @@ package com.example.theworldofpuppies.shop.order.presentation
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -239,14 +240,14 @@ fun AddressSection(
         ) {
             Text(
                 text = heading,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
             if (!addressList.isNullOrEmpty()) {
                 Text(
                     text = "Change",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.W500,
                     modifier = Modifier
                         .bounceClick {
@@ -313,11 +314,11 @@ fun DeliverySection(modifier: Modifier = Modifier) {
             .wrapContentHeight()
             .fillMaxWidth()
             .padding(horizontal = MaterialTheme.dimens.small1),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
             text = "Delivery Details",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -366,11 +367,11 @@ fun OrderSection(
         modifier = modifier
             .wrapContentHeight()
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small1)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
             text = "Payment Methods",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -423,6 +424,7 @@ fun PaymentMethods(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .clickable {onClick()}
             .padding(vertical = MaterialTheme.dimens.small1),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -451,8 +453,8 @@ fun PaymentMethods(
                 Text(
                     text = method,
                     modifier = Modifier,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.W500
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     methodDescription,
@@ -472,7 +474,7 @@ fun PaymentMethods(
                 Icon(
                     if (selected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
                     contentDescription = null,
-                    modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                    modifier = Modifier.size(24.dp),
                     tint = Color.Red
                 )
             }
@@ -541,7 +543,7 @@ fun CheckoutBottomSection(
                     top = MaterialTheme.dimens.small2,
                     bottom = MaterialTheme.dimens.small1
                 ),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.SpaceAround
         ) {
 
             PriceSection(priceTitle = "Shipping fee", price = shippingFee)
@@ -549,9 +551,9 @@ fun CheckoutBottomSection(
             PriceSection(
                 priceTitle = "Total",
                 price = total,
-                priceStyle = MaterialTheme.typography.headlineLarge,
+                priceStyle = MaterialTheme.typography.titleMedium,
                 priceWeight = FontWeight.SemiBold,
-                priceTitleStyle = MaterialTheme.typography.titleLarge,
+                priceTitleStyle = MaterialTheme.typography.titleSmall,
                 priceTitleWeight = FontWeight.SemiBold
             )
 
@@ -578,7 +580,7 @@ fun CheckoutBottomSection(
                 } else {
                     Text(
                         text = "Place Order",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.SemiBold
                     )
 
@@ -593,9 +595,9 @@ fun PriceSection(
     modifier: Modifier = Modifier,
     priceTitle: String,
     price: Double,
-    priceTitleStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    priceTitleStyle: TextStyle = MaterialTheme.typography.titleSmall,
     priceTitleWeight: FontWeight = FontWeight.W500,
-    priceStyle: TextStyle = MaterialTheme.typography.titleLarge,
+    priceStyle: TextStyle = MaterialTheme.typography.titleMedium,
     priceWeight: FontWeight = FontWeight.SemiBold
 ) {
     Row(

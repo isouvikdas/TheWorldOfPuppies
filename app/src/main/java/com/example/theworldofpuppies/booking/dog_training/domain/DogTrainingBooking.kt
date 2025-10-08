@@ -11,6 +11,9 @@ data class DogTrainingBooking(
     var publicBookingId: String,
     var providerId: String,
     var petId: String,
+    val name: String,
+    val breed: String,
+    val age: String,
     var dogTrainingSnapshot: DogTrainingSnapshot,
     var address: Address,
     var basePrice: Double,
@@ -21,6 +24,7 @@ data class DogTrainingBooking(
     var cancellationStatus: CancellationStatus,
     var paymentStatus: PaymentStatus,
     var creationDate: LocalDateTime? = null,
+    var serviceTime: LocalDateTime? = null,
     var serviceStartDate: LocalDateTime? = null,
     var serviceEndDate: LocalDateTime? = null,
     val isRated: Boolean

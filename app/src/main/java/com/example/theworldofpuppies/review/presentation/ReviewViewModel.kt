@@ -12,7 +12,6 @@ import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.review.domain.TargetType
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -44,9 +43,16 @@ class ReviewViewModel(
             _reviewUiState.update { it.copy(targetType = TargetType.ORDER, targetId = targetId) }
         }
     }
+
     fun setBookingType(targetId: String, subType: Category) {
         viewModelScope.launch {
-            _reviewUiState.update { it.copy(targetType = TargetType.BOOKING, subType = subType, targetId = targetId) }
+            _reviewUiState.update {
+                it.copy(
+                    targetType = TargetType.BOOKING,
+                    subType = subType,
+                    targetId = targetId
+                )
+            }
         }
     }
 
@@ -56,15 +62,17 @@ class ReviewViewModel(
 
     fun resetReviewState() {
         viewModelScope.launch {
-            _reviewUiState.update { it.copy(
-                stars = 0f,
-                description = "",
-                isLoading = false,
-                errorMessage = null,
-                targetId = "",
-                targetType = TargetType.NULL,
-                subType = null
-            ) }
+            _reviewUiState.update {
+                it.copy(
+                    stars = 0f,
+                    description = "",
+                    isLoading = false,
+                    errorMessage = null,
+                    targetId = "",
+                    targetType = TargetType.NULL,
+                    subType = null
+                )
+            }
 
         }
     }
@@ -85,7 +93,7 @@ class ReviewViewModel(
                     description = state.description
                 )) {
                     is Result.Success -> {
-                        reviewEvenManager.sendEvent(ReviewEvent.ReviewConfirmed(state.targetId))
+                        reviewEvenManager.sendEvent(ReviewEvent.ReviewConfirmed(state.targetId, targetType = state.targetType))
                         sendToastEvent("Review submitted successfully")
                         navController.popBackStack()
                     }

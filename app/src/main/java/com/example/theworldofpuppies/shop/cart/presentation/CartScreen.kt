@@ -207,7 +207,7 @@ fun CartItemSection(
             Icon(
                 if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
                 contentDescription = null,
-                modifier = Modifier.size(MaterialTheme.dimens.small2 + MaterialTheme.dimens.extraSmall / 2),
+                modifier = Modifier.size(24.dp),
                 tint = Color.Red
             )
         }

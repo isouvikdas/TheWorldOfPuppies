@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEvent
+import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEventManager
 import com.example.theworldofpuppies.booking.dog_training.domain.DogTrainingBookingRepository
 import com.example.theworldofpuppies.booking.dog_training.domain.DogTrainingBookingUIState
 import com.example.theworldofpuppies.core.domain.util.Result
@@ -18,7 +21,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DogTrainingBookingViewModel(
-    private val dogTrainingBookingRepository: DogTrainingBookingRepository
+    private val dogTrainingBookingRepository: DogTrainingBookingRepository,
+    private val bookingEventManager: BookingEventManager
 ) : ViewModel() {
 
     private val _dogTrainingBookingUiState = MutableStateFlow(DogTrainingBookingUIState())
@@ -60,6 +64,7 @@ class DogTrainingBookingViewModel(
                                 showSuccessDialog = true
                             )
                         }
+                        bookingEventManager.sendEvent(BookingEvent.BookingPlaced(Category.DOG_TRAINING))
                     }
 
                     is Result.Error -> {

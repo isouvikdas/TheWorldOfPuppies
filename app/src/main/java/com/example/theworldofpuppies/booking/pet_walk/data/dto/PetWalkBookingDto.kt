@@ -1,7 +1,6 @@
 package com.example.theworldofpuppies.booking.pet_walk.data.dto
 
 import com.example.theworldofpuppies.address.data.dto.AddressDto
-import com.example.theworldofpuppies.booking.grooming.data.dto.GroomingSnapshot
 import com.example.theworldofpuppies.booking.grooming.domain.enums.BookingStatus
 import com.example.theworldofpuppies.booking.grooming.domain.enums.CancellationStatus
 import com.example.theworldofpuppies.booking.grooming.domain.enums.PaymentStatus
@@ -16,6 +15,9 @@ data class PetWalkBookingDto(
     val publicBookingId: String,
     val providerId: String? = null,
     val petId: String,
+    val petName: String,
+    val breed: String,
+    val age: String,
     val petWalkSnapshot: PetWalkSnapshot,
     val frequency: Frequency,
     val address: AddressDto,

@@ -13,6 +13,9 @@ data class DogTrainingBookingDto(
     var publicBookingId: String,
     var providerId: String? = null,
     var petId: String,
+    val petName: String,
+    val breed: String,
+    val age: String,
     var dogTrainingSnapshot: DogTrainingSnapshot,
     var address: AddressDto,
     var basePrice: Double,
@@ -23,6 +26,7 @@ data class DogTrainingBookingDto(
     var cancellationStatus: CancellationStatus,
     var paymentStatus: PaymentStatus,
     var creationDate: Long,
+    var serviceTime: Long? = null,
     var serviceStartDate: Long? = null,
     var serviceEndDate: Long? = null,
     val isRated: Boolean = false

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class GroomingSubService(
     val id: String,
     val name: String,
-    val features: MutableList<String> = mutableListOf(),
+    val features: List<String> = emptyList(),
     val price: Double = 0.0,
     val discountedPrice: Double = 0.0
 )

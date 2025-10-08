@@ -10,6 +10,9 @@ fun PetWalkBookingDto.toPetWalkBooking(): PetWalkBooking {
         publicBookingId = publicBookingId,
         providerId = providerId,
         petId = petId,
+        name = petName,
+        breed = breed,
+        age = age,
         serviceSnapshot = petWalkSnapshot,
         frequency = frequency,
         address = address,
@@ -22,8 +25,8 @@ fun PetWalkBookingDto.toPetWalkBooking(): PetWalkBooking {
         paymentStatus = paymentStatus,
         creationDate = creationDate.toLocalDateTime(),
         serviceDate = serviceDate?.toLocalDateTime(),
-        startDate = serviceDate?.toLocalDateTime(),
-        endDate = serviceDate?.toLocalDateTime(),
+        startDate = startDate?.toLocalDateTime(),
+        endDate = endDate?.toLocalDateTime(),
         days = selectedDays,
         isRated = isRated
     )

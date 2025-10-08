@@ -42,6 +42,9 @@ import com.example.theworldofpuppies.services.dog_training.presentation.DogTrain
 import com.example.theworldofpuppies.services.dog_training.presentation.DogTrainingViewModel
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingScreen
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
+import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryScreen
+import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.services.vet.presentation.VetIssuesScreen
@@ -166,6 +169,11 @@ fun AppNavigation(
     val reviewViewModel = koinViewModel<ReviewViewModel>()
     val reviewUiState by reviewViewModel.reviewUiState.collectAsStateWithLifecycle()
 
+    val bookingHistoryViewModel = koinViewModel<BookingHistoryViewModel>()
+    val bookingHistoryUiState by bookingHistoryViewModel.bookingHistoryUiState.collectAsStateWithLifecycle()
+
+    val reviewEventManager = ReviewEventManager()
+
     NavHost(
         navController = navController,
         startDestination = startingRoute,
@@ -252,7 +260,13 @@ fun AppNavigation(
             onTopBarVisibilityChanged(true)
             searchIconVisibilityChanged(false)
             onGesturesChanged(true)
-            MessageScreen()
+            BookingHistoryScreen(
+                bookingHistoryViewModel = bookingHistoryViewModel,
+                bookingHistoryUiState = bookingHistoryUiState,
+                reviewViewModel = reviewViewModel,
+                navController = navController,
+                reviewUiState = reviewUiState
+            )
         }
 
         composable(route = BottomNavigationItems.Shop.route) {
@@ -452,7 +466,8 @@ fun AppNavigation(
                 groomingViewModel = groomingViewModel,
                 changePetSelectionView = { value ->
                     petProfileViewModel.changePetSelectionView(value, Category.GROOMING)
-                }
+                },
+                reviewEventManager = reviewEventManager
             )
         }
         composable(route = Screen.BookingGroomingScreen.route) {
@@ -487,7 +502,8 @@ fun AppNavigation(
                 petWalkingUiState = petWalkingUiState,
                 changePetSelectionView = { value ->
                     petProfileViewModel.changePetSelectionView(value, Category.WALKING)
-                }
+                },
+                reviewEventManager = reviewEventManager
             )
         }
         composable(route = Screen.BookingPetWalkScreen.route) {
@@ -521,7 +537,8 @@ fun AppNavigation(
                 vetUiState = vetUiState,
                 changePetSelectionView = { value ->
                     petProfileViewModel.changePetSelectionView(value, Category.VETERINARY)
-                }
+                },
+                reviewEventManager = reviewEventManager
             )
         }
         composable(route = Screen.VetIssuesScreen.route) {
@@ -573,7 +590,8 @@ fun AppNavigation(
                         value,
                         selectedService = Category.DOG_TRAINING
                     )
-                }
+                },
+                reviewEventManager = reviewEventManager
             )
         }
 

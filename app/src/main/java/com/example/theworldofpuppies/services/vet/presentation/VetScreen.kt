@@ -66,6 +66,8 @@ import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
+import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
@@ -85,7 +87,8 @@ fun VetScreen(
     navController: NavController,
     vetViewModel: VetViewModel,
     vetUiState: VetUiState,
-    changePetSelectionView: (Boolean) -> Unit
+    changePetSelectionView: (Boolean) -> Unit,
+    reviewEventManager: ReviewEventManager
 ) {
 
     val context = LocalContext.current
@@ -95,6 +98,16 @@ fun VetScreen(
     )
 
     val id = vetUiState.id
+
+    LaunchedEffect(reviewEventManager) {
+        reviewEventManager.events.collect { event ->
+            if (event is ReviewEvent.ReviewConfirmed) {
+                if (event.targetId == vetUiState.id) {
+                    vetViewModel.getVet(context)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         vetViewModel.toastEvent.collectLatest { message ->

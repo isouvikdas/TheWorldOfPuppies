@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.domain.Address
+import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEvent
+import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEventManager
 import com.example.theworldofpuppies.booking.grooming.domain.BookingGroomingRepository
 import com.example.theworldofpuppies.booking.grooming.domain.GroomingBookingUiState
 import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
@@ -23,7 +26,8 @@ import java.time.LocalDateTime
 import kotlin.collections.emptyList
 
 class GroomingBookingViewModel(
-    private val bookingGroomingRepository: BookingGroomingRepository
+    private val bookingGroomingRepository: BookingGroomingRepository,
+    private val bookingEventManager: BookingEventManager
 ) : ViewModel() {
 
     private val _groomingBookingUiState = MutableStateFlow(GroomingBookingUiState())
@@ -149,7 +153,8 @@ class GroomingBookingViewModel(
                     selectedSlot = selectedSlot,
                     selectedDate = selectedDate,
                     selectedAddress = selectedAddress,
-                    serviceId = serviceId
+                    serviceId = serviceId,
+                    petId = petId
                 )) {
                     is Result.Success -> {
                         _groomingBookingUiState.update {
@@ -158,6 +163,7 @@ class GroomingBookingViewModel(
                                 showBookingSuccessDialog = true
                             )
                         }
+                        bookingEventManager.sendEvent(BookingEvent.BookingPlaced(Category.GROOMING))
                     }
 
                     is Result.Error -> {

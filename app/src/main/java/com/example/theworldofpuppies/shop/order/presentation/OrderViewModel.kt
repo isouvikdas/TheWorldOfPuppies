@@ -14,6 +14,7 @@ import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.TargetType
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentRequest
@@ -389,7 +390,9 @@ class OrderViewModel(
         viewModelScope.launch {
             reviewEventManager.events.collect { event ->
                 if (event is ReviewEvent.ReviewConfirmed) {
-                    getOrders()
+                    if (event.targetType == TargetType.ORDER) {
+                        getOrders()
+                    }
                 }
             }
         }
