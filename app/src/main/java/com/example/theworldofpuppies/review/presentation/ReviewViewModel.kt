@@ -1,12 +1,15 @@
 package com.example.theworldofpuppies.review.presentation
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.booking.core.domain.Category
+import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
+import com.example.theworldofpuppies.review.domain.ReviewListState
 import com.example.theworldofpuppies.review.domain.ReviewRepository
 import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.review.domain.TargetType
@@ -26,6 +29,9 @@ class ReviewViewModel(
 
     private val _reviewUiState = MutableStateFlow(ReviewUiState())
     val reviewUiState = _reviewUiState.asStateFlow()
+
+    private val _reviewListState = MutableStateFlow(ReviewListState())
+    val reviewListState = _reviewListState.asStateFlow()
 
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
@@ -93,7 +99,12 @@ class ReviewViewModel(
                     description = state.description
                 )) {
                     is Result.Success -> {
-                        reviewEvenManager.sendEvent(ReviewEvent.ReviewConfirmed(state.targetId, targetType = state.targetType))
+                        reviewEvenManager.sendEvent(
+                            ReviewEvent.ReviewConfirmed(
+                                state.targetId,
+                                targetType = state.targetType
+                            )
+                        )
                         sendToastEvent("Review submitted successfully")
                         navController.popBackStack()
                     }
@@ -107,6 +118,121 @@ class ReviewViewModel(
             } finally {
                 _reviewUiState.update { it.copy(isLoading = false) }
                 resetReviewState()
+            }
+        }
+    }
+
+    fun getProductReviews(productId: String) {
+        viewModelScope.launch {
+            try {
+                _reviewListState.update {
+                    it.copy(
+                        productReviewLoading = true,
+                        productReviewError = null
+                    )
+                }
+                when (val result = reviewRepository.getProductReviews(productId)) {
+                    is Result.Success -> {
+                        _reviewListState.update {
+                            it.copy(
+                                productReviews = result.data + it.productReviews
+                            )
+                        }
+                    }
+
+                    is Result.Error -> {
+                        _reviewListState.update {
+                            it.copy(
+                                productReviewError = result.error
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _reviewListState.update {
+                    it.copy(
+                        productReviewError = NetworkError.UNKNOWN
+                    )
+                }
+            } finally {
+                _reviewListState.update { it.copy(productReviewLoading = false) }
+            }
+        }
+    }
+
+    fun getBookingReviews(subType: Category) {
+        viewModelScope.launch {
+            try {
+                handleBookingLoadingAndError(subType, true)
+                when (val result = reviewRepository.getBookingReviews(subType)) {
+                    is Result.Success -> {
+                        _reviewListState.update { state ->
+                            when (subType) {
+                                Category.GROOMING -> {
+                                    state.copy(
+                                        groomingReviews = result.data,
+                                        groomingReviewLoading = false
+                                    )
+                                }
+
+                                Category.WALKING -> state.copy(
+                                    petWalkReviews = result.data,
+                                    petWalkReviewLoading = false
+                                )
+
+                                Category.DOG_TRAINING -> state.copy(
+                                    dogTrainingReviews = result.data,
+                                    dogTrainingReviewLoading = false
+                                )
+
+                                Category.VETERINARY -> state.copy(
+                                    vetReviews = result.data,
+                                    vetReviewLoading = false
+                                )
+
+                                else -> state
+                            }
+                        }
+                    }
+
+                    is Result.Error -> {
+                        handleBookingLoadingAndError(subType, false, result.error)
+                    }
+                }
+            } catch (e: Exception) {
+                handleBookingLoadingAndError(subType, false, NetworkError.UNKNOWN)
+            }
+        }
+    }
+
+    private fun handleBookingLoadingAndError(
+        subType: Category,
+        value: Boolean,
+        error: NetworkError? = null
+    ) {
+        _reviewListState.update { state ->
+            when (subType) {
+                Category.GROOMING -> state.copy(
+                    groomingReviewLoading = value,
+                    groomingReviewError = if (!value) error else null
+                )
+
+                Category.WALKING -> state.copy(
+                    petWalkReviewLoading = value,
+                    petWalkReviewError = if (!value) error else null
+                )
+
+                Category.DOG_TRAINING -> state.copy(
+                    dogTrainingReviewLoading = value,
+                    dogTrainingReviewError = if (!value) error else null
+                )
+
+                Category.VETERINARY -> state.copy(
+                    vetReviewLoading = value,
+                    vetReviewError = if (!value) error else null
+                )
+
+                else -> state
             }
         }
     }

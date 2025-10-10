@@ -18,7 +18,8 @@ data class Dimens(
     val extraLarge2: Dp = 0.dp,
     val extraLarge3: Dp = 0.dp,
     val buttonHeight: Dp = 0.dp,
-    val logoSize: Dp = 0.dp
+    val logoSize: Dp = 0.dp,
+    val ratingCard: Dp = 0.dp
 )
 
 val CompactSmallDimens = Dimens(
@@ -48,7 +49,8 @@ val CompactMediumDimens = Dimens(
     extraLarge2 = 180.dp,
     extraLarge3 = 200.dp,
     buttonHeight = 45.dp,
-    logoSize = 56.dp
+    logoSize = 56.dp,
+    ratingCard = 320.dp
 )
 
 val CompactDimens = Dimens(

@@ -31,5 +31,7 @@ data class PetWalkBooking(
     val startDate: LocalDateTime? = null,
     val endDate: LocalDateTime? = null,
     val days: List<Days>? = null,
-    val isRated: Boolean
+    val isRated: Boolean = false,
+    val averageStars: Double = 0.0,
+    val totalReviews: Int = 0
 )

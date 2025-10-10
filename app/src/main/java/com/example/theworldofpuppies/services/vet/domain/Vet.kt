@@ -11,5 +11,8 @@ data class Vet(
     val active: Boolean,
     val vetOptions: List<VetOption>,
     val vetTimeSlots: List<VetTimeSlot>,
-    val healthIssues: List<HealthIssue>
+    val healthIssues: List<HealthIssue>,
+    val isRated: Boolean = false,
+    val averageStars: Double = 0.0,
+    val totalReviews: Int = 0
 )

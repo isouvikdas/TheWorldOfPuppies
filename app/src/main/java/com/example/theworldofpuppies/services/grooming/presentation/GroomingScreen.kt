@@ -1,6 +1,8 @@
 package com.example.theworldofpuppies.services.grooming.presentation
 
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,11 +59,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
+import com.example.theworldofpuppies.review.domain.ReviewListState
+import com.example.theworldofpuppies.review.presentation.ReviewCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
@@ -78,7 +83,8 @@ fun GroomingScreen(
     groomingViewModel: GroomingViewModel,
     groomingUiState: GroomingUiState,
     changePetSelectionView: (Boolean) -> Unit,
-    reviewEventManager: ReviewEventManager
+    reviewListState: ReviewListState,
+    reviewViewModel: ReviewViewModel
 ) {
     val grooming = groomingUiState.grooming
     val discount = grooming?.discount
@@ -86,19 +92,14 @@ fun GroomingScreen(
     val showFullscreenLoader = grooming == null && groomingUiState.isLoading
     val isRefreshing = grooming != null && groomingUiState.isLoading
 
+    val isRated = grooming?.isRated
+    val totalReviews = grooming?.totalReviews ?: 0
+
     val selectedServiceId = groomingUiState.selectedSubServiceId
 
     val context = LocalContext.current
 
-    LaunchedEffect(reviewEventManager) {
-        reviewEventManager.events.collect { event ->
-            if (event is ReviewEvent.ReviewConfirmed) {
-                if (event.targetId == groomingUiState.grooming?.id) {
-                    groomingViewModel.getGrooming()
-                }
-            }
-        }
-    }
+    val reviews = reviewListState.groomingReviews
 
     LaunchedEffect(Unit) {
         groomingViewModel.toastEvent.collectLatest { message ->
@@ -116,6 +117,11 @@ fun GroomingScreen(
     LaunchedEffect(Unit) {
         if (grooming == null) {
             groomingViewModel.loadGrooming()
+        }
+    }
+    LaunchedEffect(isRated) {
+        if (isRated != null && isRated) {
+            reviewViewModel.getBookingReviews(Category.GROOMING)
         }
     }
 
@@ -165,6 +171,89 @@ fun GroomingScreen(
                                 item {
                                     Row(
                                         modifier = Modifier
+                                            .wrapContentHeight()
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (totalReviews > 0) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    Icons.Default.Star,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFFFFC700),
+                                                    modifier = Modifier.size(
+                                                        24.dp
+                                                    )
+                                                )
+                                                Text(
+                                                    text = grooming?.averageStars.toString(),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.W500
+                                                )
+                                                Text(
+                                                    "~",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    fontWeight = FontWeight.W400,
+                                                    modifier = Modifier.padding(horizontal = 3.dp)
+                                                )
+                                                Text(
+                                                    text = "($totalReviews ratings)",
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = Color.Gray
+                                                )
+                                            }
+
+                                        }
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            discount?.let {
+                                                Box(
+                                                    modifier = Modifier.size(55.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.discount_badge),
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.tertiary
+                                                    )
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxSize()
+                                                            .padding(
+                                                                9.dp
+                                                            ),
+                                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                                        verticalArrangement = Arrangement.Center
+                                                    ) {
+                                                        Text(
+                                                            text = "$discount%",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.secondary
+                                                        )
+                                                        Text(
+                                                            text = "OFF",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.secondary
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                        }
+
+                                    }
+                                }
+
+                                item {
+                                    Row(
+                                        modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = MaterialTheme.dimens.small1)
                                             .padding(top = MaterialTheme.dimens.extraSmall),
@@ -196,100 +285,61 @@ fun GroomingScreen(
                                     }
                                 }
 
-                                item {
-                                    Row(
-                                        modifier = Modifier
-                                            .wrapContentHeight()
-                                            .fillMaxWidth()
-                                            .padding(horizontal = MaterialTheme.dimens.small1)
-                                            .padding(top = MaterialTheme.dimens.extraSmall),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                Icons.Default.Star,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.secondary,
-                                                modifier = Modifier.size(
-                                                    MaterialTheme.dimens.small1.times(
-                                                        3
-                                                    ) / 2
-                                                )
-                                            )
-                                            Text(
-                                                text = "(4.2)",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = FontWeight.W500
-                                            )
-                                            Text(
-                                                "~",
-                                                style = MaterialTheme.typography.displaySmall,
-                                                fontWeight = FontWeight.W400,
-                                                modifier = Modifier.padding(horizontal = 3.dp)
-                                            )
-                                            Text(
-                                                text = "(1,268 ratings)",
-                                                style = MaterialTheme.typography.titleSmall,
-                                                color = Color.Gray
-                                            )
-                                        }
-
-                                        discount?.let {
-                                            Box(
-                                                modifier = Modifier.size(55.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.discount_badge),
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.tertiary
-                                                )
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .padding(
-                                                            MaterialTheme.dimens.extraSmall.times(
-                                                                3
-                                                            ) / 2
-                                                        ),
-                                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                                    verticalArrangement = Arrangement.Center
-                                                ) {
-                                                    Text(
-                                                        text = "$discount%",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.secondary
-                                                    )
-                                                    Text(
-                                                        text = "OFF",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.secondary
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
                                 item { Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1)) }
                                 if (groomingUiState.subServices.isNotEmpty()) {
                                     items(groomingUiState.subServices) { serviceFeature ->
                                         val isSelected = selectedServiceId == serviceFeature.id
                                         ServiceFeatureItem(
                                             serviceFeature = serviceFeature,
-                                            modifier = Modifier.padding(vertical = 16.dp),
+                                            modifier = Modifier.padding(vertical = 8.dp),
                                             isSelected = isSelected,
                                             onClick = {
                                                 groomingViewModel.selectSubService(serviceFeature.id)
                                             }
                                         )
                                     }
+                                }
+
+                                if (reviews.isNotEmpty()) {
                                     item {
-                                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
+                                        Text(
+                                            text = "What Pet Parents Are Saying",
+                                            style = MaterialTheme.typography.titleSmall.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            modifier = Modifier
+                                                .padding(horizontal = MaterialTheme.dimens.small1)
+                                                .padding(top = 20.dp, bottom = 8.dp)
+                                        )
                                     }
+                                    item {
+                                        LazyRow(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            items(reviews) { review ->
+                                                ReviewCard(
+                                                    modifier = Modifier.padding(
+                                                        start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                                        else 0.dp,
+                                                        end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                                        else 0.dp
+                                                    ),
+                                                    maxStars = 5,
+                                                    stars = review.stars.toDouble(),
+                                                    name = review.userName,
+                                                    review = review.description,
+                                                    date = review.createdAt,
+                                                    color = Color.White.copy(0.5f)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
                                 }
                             }
                         }
@@ -298,7 +348,8 @@ fun GroomingScreen(
                             onProceedClick = {
                                 groomingViewModel.onProceedClick(navController)
                                 changePetSelectionView(true)
-                            })
+                            }
+                        )
                     }
 
                 }
@@ -318,7 +369,6 @@ fun GroomingScreen(
                 )
             }
         }
-
     }
 }
 
@@ -342,7 +392,9 @@ fun ServiceFeatureItem(
             .clickable {
                 onClick()
             },
-        color = Color.White,
+        border = if (isSelected)
+            BorderStroke(1.2.dp, MaterialTheme.colorScheme.secondary)
+        else BorderStroke(0.dp, Color.Transparent), color = Color.White,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = if (isSelected) 8.dp else 0.dp
     ) {
@@ -431,12 +483,12 @@ fun ServiceFeatureItem(
                                 Icons.Default.CheckCircle,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.tertiaryContainer,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(16.dp)
                             )
 
                             Text(
                                 feature,
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.W500,
                                 modifier = Modifier.padding(
                                     start = MaterialTheme.dimens.small1.div(

@@ -10,5 +10,8 @@ data class DogTrainingUiState(
     val id: String = "",
     val name: String = "",
     val description: String = "",
-    val discount: Int = 0,
+    val discount: Int? = 0,
+    val isRated: Boolean = false,
+    val totalReviews: Int = 0,
+    val averageReviews: Double = 0.0
 )

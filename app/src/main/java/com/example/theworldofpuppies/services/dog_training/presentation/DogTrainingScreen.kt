@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,10 +54,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.navigation.Screen
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
+import com.example.theworldofpuppies.review.domain.ReviewListState
+import com.example.theworldofpuppies.review.presentation.ReviewCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingUiState
@@ -69,7 +73,8 @@ fun DogTrainingScreen(
     dogTrainingUiState: DogTrainingUiState,
     navController: NavController,
     changePetSelectionView: (Boolean) -> Unit,
-    reviewEventManager: ReviewEventManager
+    reviewViewModel: ReviewViewModel,
+    reviewListState: ReviewListState
 ) {
     val context = LocalContext.current
 
@@ -82,16 +87,16 @@ fun DogTrainingScreen(
     val selectedTrainingOption = dogTrainingUiState.selectedDogTrainingOption
     val trainingFeatures = selectedTrainingOption?.dogTrainingFeatures
     val selectedFeatures = dogTrainingUiState.selectedDogTrainingFeatures
+    val discount = dogTrainingUiState.discount
+    val isRated = dogTrainingUiState.isRated
 
-    LaunchedEffect(reviewEventManager) {
-        reviewEventManager.events.collect { event ->
-            if (event is ReviewEvent.ReviewConfirmed) {
-                if (event.targetId == dogTrainingUiState.id) {
-                    dogTrainingViewModel.getDogTraining(context)
-                }
-            }
+    LaunchedEffect(isRated) {
+        if (isRated) {
+            reviewViewModel.getBookingReviews(Category.DOG_TRAINING)
         }
     }
+
+    val reviews = reviewListState.dogTrainingReviews
 
     LaunchedEffect(Unit) {
         dogTrainingViewModel.toastEvent.collect { message ->
@@ -145,6 +150,87 @@ fun DogTrainingScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = MaterialTheme.dimens.small1),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                if (dogTrainingUiState.totalReviews > 0) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            Icons.Default.Star,
+                                            contentDescription = null,
+                                            tint = Color(0xFFFFC700),
+                                            modifier = Modifier.size(
+                                                24.dp
+                                            )
+                                        )
+                                        Text(
+                                            text = dogTrainingUiState.averageReviews.toString(),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.W500
+                                        )
+                                        Text(
+                                            "~",
+                                            style = MaterialTheme.typography.displaySmall,
+                                            fontWeight = FontWeight.W400,
+                                            modifier = Modifier.padding(horizontal = 3.dp)
+                                        )
+                                        Text(
+                                            text = "(${dogTrainingUiState.totalReviews} ratings)",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = Color.Gray
+                                        )
+                                    }
+
+                                }
+
+                                discount?.let {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Box(
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.discount_badge),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.tertiary,
+                                                modifier = Modifier
+                                                    .size(55.dp)
+                                            )
+                                            Column(
+                                                modifier = Modifier
+                                                    .padding(
+                                                        9.dp
+                                                    ),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = "$discount%",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                                Text(
+                                                    text = "OFF",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+
+                        }
+                        item {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 Text(
                                     "Choose the Right Training for Your Dog",
@@ -164,7 +250,6 @@ fun DogTrainingScreen(
                                         .padding(horizontal = MaterialTheme.dimens.small1),
                                     textAlign = TextAlign.Center
                                 )
-
                             }
                         }
 
@@ -200,14 +285,88 @@ fun DogTrainingScreen(
                         }
 
                         item {
-                            DogTrainingFeatureSection(
-                                trainingFeatures = trainingFeatures,
-                                selectedFeatures = selectedFeatures,
-                                onSelect = { feature ->
-                                    dogTrainingViewModel.onTrainingFeatureSelect(feature)
+                            if (selectedTrainingOption != null) {
+                                DogTrainingFeatureSection(
+                                    trainingFeatures = trainingFeatures,
+                                    selectedFeatures = selectedFeatures,
+                                    onSelect = { feature ->
+                                        dogTrainingViewModel.onTrainingFeatureSelect(feature)
+                                    }
+                                )
+                            } else {
+                                Surface(
+                                    modifier = modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = MaterialTheme.dimens.small1)
+                                        .padding(
+                                            top = 16.dp,
+                                            bottom = 190.dp
+                                        ),
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = Color.LightGray.copy(0.4f)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.wrapContentSize(),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                "Please select a package",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.W500,
+                                                modifier = Modifier.padding(
+                                                    vertical = 50.dp,
+                                                    horizontal = MaterialTheme.dimens.small1
+                                                )
+                                            )
+                                        }
+                                    }
                                 }
-                            )
+                            }
                         }
+
+                        if (reviews.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "What Pet Parents Are Saying",
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier
+                                        .padding(horizontal = MaterialTheme.dimens.small1)
+                                        .padding(top = 20.dp, bottom = 8.dp)
+                                )
+                            }
+                            item {
+                                LazyRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    items(reviews) { review ->
+                                        ReviewCard(
+                                            modifier = Modifier.padding(
+                                                start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                                else 0.dp,
+                                                end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                                else 0.dp
+                                            ),
+                                            maxStars = 5,
+                                            stars = review.stars.toDouble(),
+                                            name = review.userName,
+                                            review = review.description,
+                                            date = review.createdAt,
+                                            color = Color.White.copy(0.5f)
+                                        )
+                                    }
+                                }
+                            }
+
+                        }
+
                     }
 
                     DogTrainingBottomSection(

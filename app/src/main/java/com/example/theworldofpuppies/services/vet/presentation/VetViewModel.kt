@@ -145,7 +145,10 @@ class VetViewModel(
                                 category = vet.category,
                                 active = vet.active,
                                 id = vet.id,
-                                healthIssues = vet.healthIssues
+                                healthIssues = vet.healthIssues,
+                                averageReviews = vet.averageStars,
+                                totalReviews = vet.totalReviews,
+                                isRated = vet.isRated
                             )
                         }
                     }

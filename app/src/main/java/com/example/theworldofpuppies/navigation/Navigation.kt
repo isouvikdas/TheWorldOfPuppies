@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.navigation
 
+import android.util.Log
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -168,11 +169,10 @@ fun AppNavigation(
 
     val reviewViewModel = koinViewModel<ReviewViewModel>()
     val reviewUiState by reviewViewModel.reviewUiState.collectAsStateWithLifecycle()
+    val reviewListState by reviewViewModel.reviewListState.collectAsStateWithLifecycle()
 
     val bookingHistoryViewModel = koinViewModel<BookingHistoryViewModel>()
     val bookingHistoryUiState by bookingHistoryViewModel.bookingHistoryUiState.collectAsStateWithLifecycle()
-
-    val reviewEventManager = ReviewEventManager()
 
     NavHost(
         navController = navController,
@@ -358,8 +358,9 @@ fun AppNavigation(
             ProductDetailScreen(
                 productDetailState = productDetailState,
                 cartViewModel = cartViewModel,
-                productViewModel = productViewModel,
-                navController = navController
+                navController = navController,
+                reviewListState = reviewListState,
+                reviewViewModel = reviewViewModel
             )
         }
         composable(route = Screen.CartScreen.route) {
@@ -467,7 +468,8 @@ fun AppNavigation(
                 changePetSelectionView = { value ->
                     petProfileViewModel.changePetSelectionView(value, Category.GROOMING)
                 },
-                reviewEventManager = reviewEventManager
+                reviewViewModel = reviewViewModel,
+                reviewListState = reviewListState
             )
         }
         composable(route = Screen.BookingGroomingScreen.route) {
@@ -503,7 +505,8 @@ fun AppNavigation(
                 changePetSelectionView = { value ->
                     petProfileViewModel.changePetSelectionView(value, Category.WALKING)
                 },
-                reviewEventManager = reviewEventManager
+                reviewListState = reviewListState,
+                reviewViewModel = reviewViewModel
             )
         }
         composable(route = Screen.BookingPetWalkScreen.route) {
@@ -538,7 +541,8 @@ fun AppNavigation(
                 changePetSelectionView = { value ->
                     petProfileViewModel.changePetSelectionView(value, Category.VETERINARY)
                 },
-                reviewEventManager = reviewEventManager
+                reviewListState = reviewListState,
+                reviewViewModel = reviewViewModel
             )
         }
         composable(route = Screen.VetIssuesScreen.route) {
@@ -591,7 +595,8 @@ fun AppNavigation(
                         selectedService = Category.DOG_TRAINING
                     )
                 },
-                reviewEventManager = reviewEventManager
+                reviewListState = reviewListState,
+                reviewViewModel = reviewViewModel
             )
         }
 

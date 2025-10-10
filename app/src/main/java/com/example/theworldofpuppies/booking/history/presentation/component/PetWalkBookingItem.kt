@@ -125,6 +125,20 @@ fun PetWalkBookingItem(
                         )
                     }
                 }
+
+                Text(
+                    petWalkBooking.bookingStatus.toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = when (petWalkBooking.bookingStatus) {
+                        BookingStatus.PENDING -> Color.Gray
+                        BookingStatus.CONFIRMED -> MaterialTheme.colorScheme.primary
+                        BookingStatus.COMPLETED -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.error
+                    }
+                )
+
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

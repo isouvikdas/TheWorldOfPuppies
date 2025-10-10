@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -64,11 +66,13 @@ import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewListState
+import com.example.theworldofpuppies.review.presentation.ReviewCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.shop.cart.presentation.CartQuantitySection
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.domain.Image
 import com.example.theworldofpuppies.shop.product.presentation.ErrorSection
-import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -81,9 +85,10 @@ import kotlinx.coroutines.flow.collectLatest
 fun ProductDetailScreen(
     modifier: Modifier = Modifier,
     productDetailState: ProductDetailState,
-    productViewModel: ProductViewModel? = null,
     cartViewModel: CartViewModel? = null,
-    navController: NavController
+    navController: NavController,
+    reviewViewModel: ReviewViewModel,
+    reviewListState: ReviewListState
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -103,6 +108,16 @@ fun ProductDetailScreen(
     val productName = remember(product?.name) { product?.name ?: "" }
     val productId = remember(product?.id) { product?.id ?: "" }
     val context = LocalContext.current
+
+    val isRated = product?.isRated
+
+    val reviews = reviewListState.productReviews.filter { it.productId == productId }
+
+    LaunchedEffect(isRated) {
+        if (isRated != null && isRated) {
+            reviewViewModel.getProductReviews(productId)
+        }
+    }
 
     LaunchedEffect(Unit) {
         cartViewModel?.toastEvent?.collectLatest { message ->
@@ -136,7 +151,7 @@ fun ProductDetailScreen(
                         ProductImageSection(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(MaterialTheme.dimens.large3.times(2)),
+                                .height(280.dp),
                             images = finalImageList
                         )
                     }
@@ -160,8 +175,46 @@ fun ProductDetailScreen(
                         )
                     }
 
+                    if (reviews.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "What Pet Parents Are Saying",
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier
+                                    .padding(horizontal = MaterialTheme.dimens.small1)
+                                    .padding(top = 20.dp, bottom = 8.dp)
+                            )
+                        }
+                        item {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                items(reviews) { review ->
+                                    ReviewCard(
+                                        modifier = Modifier.padding(
+                                            start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                            else 0.dp,
+                                            end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                            else 0.dp
+                                        ),
+                                        maxStars = 5,
+                                        stars = review.stars.toDouble(),
+                                        name = review.userName,
+                                        review = review.description,
+                                        date = review.createdAt,
+                                        color = Color.White.copy(0.5f)
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+
                     item {
-                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+                        Spacer(modifier = Modifier.height(180.dp))
                     }
                 }
 
@@ -427,7 +480,7 @@ fun ProductDetailSection(
                             modifier = Modifier,
                             fontWeight = FontWeight.W500
                         )
-                        Text (
+                        Text(
                             " ~ (${totalReviews})",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.W500,
@@ -492,7 +545,7 @@ fun ProductBottomSection(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge1)
+            .height(130.dp)
             .clip(
                 RoundedCornerShape(
                     topStart = MaterialTheme.dimens.small3,
@@ -542,7 +595,7 @@ fun ProductBottomSection(
                     )
                     Text(
                         text = formatCurrency(totalPrice.doubleValue),
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -570,7 +623,7 @@ fun ProductBottomSection(
             ) {
                 Text(
                     text = "Add to cart",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }

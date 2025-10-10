@@ -147,7 +147,7 @@ fun DogTrainingBookingScreen(
 
                 DogTrainingBookingBottomSection(
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    discount = discount,
+                    discount = discount ?: 0,
                     name = name,
                     selectedFeatures = dogTrainingFeatures,
                     selectedDogTrainingOption = dogTrainingOption,

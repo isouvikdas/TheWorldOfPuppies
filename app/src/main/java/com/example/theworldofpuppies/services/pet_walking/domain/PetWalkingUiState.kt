@@ -18,4 +18,7 @@ data class PetWalkingUiState(
     val description: String? = null,
     val basePrice: Double? = null,
     val discount: Int? = null,
+    val isRated: Boolean = false,
+    val totalReviews: Int = 0,
+    val averageReviews: Double = 0.0
 )

@@ -21,5 +21,8 @@ data class VetUiState(
     val healthIssues: List<HealthIssue> = emptyList(),
     val healthIssueDescription: String = "",
     val selectedHealthIssues: List<HealthIssue> = emptyList(),
-    val isDateSectionLoading: Boolean = false
+    val isDateSectionLoading: Boolean = false,
+    val isRated: Boolean = false,
+    val averageReviews: Double = 0.0,
+    val totalReviews: Int = 0
 )

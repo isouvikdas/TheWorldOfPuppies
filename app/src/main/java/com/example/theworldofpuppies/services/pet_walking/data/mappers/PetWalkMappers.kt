@@ -12,6 +12,10 @@ fun PetWalkDto.toPetWalk(): PetWalk {
         frequencies = frequencies,
         description = description,
         basePrice = basePrice,
-        active = active
+        active = active,
+        isRated = isRated,
+        totalReviews = totalReviews,
+        averageReviews = averageReviews
+
     )
 }
