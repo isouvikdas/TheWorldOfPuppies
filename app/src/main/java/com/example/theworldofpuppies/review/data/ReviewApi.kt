@@ -36,7 +36,7 @@ class ReviewApi(private val httpClient: HttpClient) {
         }
     }
 
-    suspend fun getOrderReviews(subType: Category)
+    suspend fun getBookingReviews(subType: Category)
             : Result<ApiResponse<List<ReviewDto>>, NetworkError> {
         return safeCall {
             httpClient.get(constructUrl("review/booking")) {

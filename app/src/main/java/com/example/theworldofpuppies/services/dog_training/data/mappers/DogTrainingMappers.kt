@@ -11,6 +11,9 @@ fun DogTrainingDto.toDogTraining(): DogTraining {
         discount = discount,
         category = category,
         dogTrainingOptions = dogTrainingOptions,
-        active = active
+        active = active,
+        isRated = isRated,
+        averageStars = averageStars,
+        totalReviews = totalReviews
     )
 }

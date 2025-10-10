@@ -28,6 +28,8 @@ fun PetWalkBookingDto.toPetWalkBooking(): PetWalkBooking {
         startDate = startDate?.toLocalDateTime(),
         endDate = endDate?.toLocalDateTime(),
         days = selectedDays,
-        isRated = isRated
+        isRated = isRated,
+        averageStars = averageStars,
+        totalReviews = totalReviews
     )
 }

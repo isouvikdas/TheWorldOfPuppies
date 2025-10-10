@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.review.data.mappers
 
+import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.review.data.dto.ReviewDto
 import com.example.theworldofpuppies.review.domain.Review
 
@@ -11,6 +12,9 @@ fun ReviewDto.toReview(): Review {
         targetType = targetType,
         stars = stars,
         description = description,
-        subType = subType
+        subType = subType,
+        userId = userId,
+        userName = userName,
+        createdAt = createdAt?.toLocalDateTime()
     )
 }

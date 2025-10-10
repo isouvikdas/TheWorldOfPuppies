@@ -101,6 +101,7 @@ fun SearchScreen(
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(top = 6.dp)
                     ) {
                         items(categoryList) { category ->
                             val isSelected = selectedCategory.value == category
@@ -110,17 +111,16 @@ fun SearchScreen(
                                 },
                                 label = { Text(category.name) },
                                 selected = isSelected,
-                                shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                                shape = RoundedCornerShape(16.dp),
                                 modifier = Modifier
                                     .padding(end = MaterialTheme.dimens.small1.div(2))
-                                    .animateItem(),
+                                    .animateItem()
+                                    .height(35.dp),
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                        0.8f
-                                    ),
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
                                     selectedLabelColor = Color.White
                                 ),
-                                border = BorderStroke(0.1.dp, color = Color.LightGray)
+                                border = BorderStroke(1.0.dp, color = MaterialTheme.colorScheme.primary)
                             )
                         }
                     }

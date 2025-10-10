@@ -16,7 +16,6 @@ interface ReviewRepository {
     suspend fun getProductReviews(productId: String)
             : Result<List<Review>, NetworkError>
 
-    suspend fun getOrderReviews(subType: Category)
+    suspend fun getBookingReviews(subType: Category)
             : Result<List<Review>, NetworkError>
-
 }

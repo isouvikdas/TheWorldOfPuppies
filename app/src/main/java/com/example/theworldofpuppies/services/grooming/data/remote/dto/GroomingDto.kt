@@ -14,5 +14,8 @@ data class GroomingDto(
     val subServiceIds: List<String>,
     val groomingSubServices: List<GroomingSubService>,
     val basePrice: Double,
-    val active: Boolean
+    val active: Boolean,
+    val isRated: Boolean = false,
+    val averageStars: Double = 0.0,
+    val totalReviews: Int = 0
 )

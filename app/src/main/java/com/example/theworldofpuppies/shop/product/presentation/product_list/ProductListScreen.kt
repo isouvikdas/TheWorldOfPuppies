@@ -100,7 +100,7 @@ fun ProductListScreen(
             state = lazyGridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(5.dp),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.extraSmall),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.extraSmall)
         ) {
             item(span = { GridItemSpan(maxCurrentLineSpan) }) {
@@ -113,7 +113,7 @@ fun ProductListScreen(
                     ) {
                         Text(
                             text = productTypeLabel.toString(context),
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -154,15 +154,17 @@ fun ProductListScreen(
                             },
                             label = { Text(category.name) },
                             selected = isSelected,
-                            shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                            shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
                                 .padding(end = MaterialTheme.dimens.small1.div(2))
+                                .padding(start = if (category == categoryList.first()) 6.dp else 0.dp,
+                                    end = if (category == categoryList.last()) 6.dp else 0.dp)
                                 .animateItem(),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(0.8f),
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = Color.White
                             ),
-                            border = BorderStroke(0.1.dp, color = Color.LightGray)
+                            border = BorderStroke(1.0.dp, color = MaterialTheme.colorScheme.primary)
                         )
                     }
                 }

@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.address.presentation
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -192,6 +193,9 @@ fun AddressCard(
                 .wrapContentHeight()
                 .padding(horizontal = MaterialTheme.dimens.small1)
                 .clickable { addressViewModel.updateAddressSelection(address) },
+        border = if (isSelected)
+            BorderStroke(1.2.dp, MaterialTheme.colorScheme.secondary)
+        else BorderStroke(0.dp, Color.Transparent),
         color = Color.White,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = if (isCheckoutScreen) 0.dp else if (isSelected) 8.dp else 0.dp

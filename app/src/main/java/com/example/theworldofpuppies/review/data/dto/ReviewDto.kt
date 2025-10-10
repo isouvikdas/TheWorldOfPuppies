@@ -8,9 +8,12 @@ import kotlinx.serialization.Serializable
 data class ReviewDto(
     val id: String,
     val targetId: String,
-    val productId: String = "",
+    val userId: String,
+    val userName: String,
+    val productId: String? = null,
     val targetType: TargetType,
     val stars: Int,
     val description: String,
-    val subType: Category? = null
+    val subType: Category? = null,
+    val createdAt: Long? = null
 )

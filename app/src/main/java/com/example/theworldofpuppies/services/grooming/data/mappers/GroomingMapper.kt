@@ -13,6 +13,10 @@ fun GroomingDto.toGrooming(): Grooming {
         subServiceIds = subServiceIds,
         subServices = groomingSubServices,
         basePrice = basePrice,
-        active = active
+        active = active,
+        isRated = isRated,
+        averageStars = averageStars,
+        totalReviews = totalReviews
+
     )
 }

@@ -13,6 +13,9 @@ data class PetWalkDto(
     val frequencies: List<Frequency>,
     val description: String,
     val basePrice: Double,
-    val active: Boolean
+    val active: Boolean,
+    val isRated: Boolean = false,
+    val totalReviews: Int = 0,
+    val averageReviews: Double = 0.0
 )
 

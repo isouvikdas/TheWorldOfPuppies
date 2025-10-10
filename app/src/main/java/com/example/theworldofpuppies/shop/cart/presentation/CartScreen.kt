@@ -330,7 +330,7 @@ fun CartQuantitySection(
         )
         Box(
             modifier = Modifier
-                .size(MaterialTheme.dimens.small1.times(3) / 2)
+                .size(24.dp)
                 .clip(CircleShape)
                 .clickable {
                     increaseQuantity()

@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.review.data.request
 
+import android.util.Log
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
@@ -13,7 +14,7 @@ import com.example.theworldofpuppies.review.domain.TargetType
 class ReviewRepositoryImpl(
     private val userRepository: UserRepository,
     private val api: ReviewApi
-) : ReviewRepository{
+) : ReviewRepository {
 
     override suspend fun addReview(
         targetType: TargetType,
@@ -54,14 +55,17 @@ class ReviewRepositoryImpl(
                     response.success && !response.data.isNullOrEmpty() -> {
                         Result.Success(response.data.map { it.toReview() })
                     }
+
                     response.success && response.data!!.isEmpty() -> {
                         Result.Success(emptyList())
                     }
+
                     else -> {
                         Result.Error(NetworkError.SERVER_ERROR)
                     }
                 }
             }
+
             is Result.Error -> {
                 Result.Error(result.error)
             }
@@ -69,27 +73,31 @@ class ReviewRepositoryImpl(
 
     }
 
-    override suspend fun getOrderReviews(subType: Category)
+    override suspend fun getBookingReviews(subType: Category)
             : Result<List<Review>, NetworkError> {
-        return when (val result = api.getOrderReviews(subType)) {
+        val result = api.getBookingReviews(subType)
+        return when (result) {
             is Result.Success -> {
                 val response = result.data
+
                 when {
                     response.success && !response.data.isNullOrEmpty() -> {
-                        Result.Success(response.data.map { it.toReview() })
+                        val reviews = response.data.map { it.toReview() }
+                        Result.Success(reviews)
                     }
-                    response.success && response.data!!.isEmpty() -> {
-                        Result.Success(emptyList())
+
+                    response.success && response.data?.isEmpty() == true -> {
+                        Result.Error(NetworkError.NO_BOOKING_FOUND)
                     }
+
                     else -> {
                         Result.Error(NetworkError.SERVER_ERROR)
                     }
                 }
             }
+
             is Result.Error -> {
                 Result.Error(result.error)
             }
         }
-
-    }
-}
+    }}

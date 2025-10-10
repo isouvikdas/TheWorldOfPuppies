@@ -9,5 +9,8 @@ data class DogTraining(
     val discount: Int,
     val category: Category,
     val dogTrainingOptions: List<DogTrainingOption>,
-    val active: Boolean
+    val active: Boolean,
+    val isRated: Boolean = false,
+    val averageStars: Double = 0.0,
+    val totalReviews: Int = 0
 )

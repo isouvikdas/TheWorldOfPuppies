@@ -101,7 +101,9 @@ fun PetProfileCard(
             },
             color = Color.LightGray.copy(0.4f),
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.2.dp, MaterialTheme.colorScheme.secondary)
+            border = if (isPetSelectionView && isSelected)
+                BorderStroke(1.3.dp, MaterialTheme.colorScheme.secondary)
+            else BorderStroke(0.8.dp, MaterialTheme.colorScheme.secondary)
         ) {
             Row(
                 modifier = Modifier

@@ -1,7 +1,9 @@
 package com.example.theworldofpuppies.services.vet.presentation
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,9 +25,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,12 +65,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.grooming.presentation.DatePickerModal
 import com.example.theworldofpuppies.booking.grooming.presentation.DaySelectorCard
+import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.review.domain.ReviewListState
+import com.example.theworldofpuppies.review.presentation.ReviewCard
+import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
@@ -88,7 +99,8 @@ fun VetScreen(
     vetViewModel: VetViewModel,
     vetUiState: VetUiState,
     changePetSelectionView: (Boolean) -> Unit,
-    reviewEventManager: ReviewEventManager
+    reviewViewModel: ReviewViewModel,
+    reviewListState: ReviewListState
 ) {
 
     val context = LocalContext.current
@@ -98,16 +110,6 @@ fun VetScreen(
     )
 
     val id = vetUiState.id
-
-    LaunchedEffect(reviewEventManager) {
-        reviewEventManager.events.collect { event ->
-            if (event is ReviewEvent.ReviewConfirmed) {
-                if (event.targetId == vetUiState.id) {
-                    vetViewModel.getVet(context)
-                }
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         vetViewModel.toastEvent.collectLatest { message ->
@@ -124,7 +126,7 @@ fun VetScreen(
     var showDateDialog by remember { mutableStateOf(false) }
 
     val vetOptions = vetUiState.vetOptions
-    val discount = vetUiState.discount ?: 0
+    val discount = vetUiState.discount
     val selectedVetOption = vetUiState.selectedVetOption
     val description = vetUiState.description ?: ""
 
@@ -139,6 +141,16 @@ fun VetScreen(
     } else {
         timeSlots
     }
+
+    val isRated = vetUiState.isRated
+
+    LaunchedEffect(isRated) {
+        if (isRated) {
+            reviewViewModel.getBookingReviews(Category.VETERINARY)
+        }
+    }
+
+    val reviews = reviewListState.vetReviews
 
     val dateDisplayPattern = when (selectedDate.toLocalDate()) {
         currentDate -> "'Today', dd MMM yyyy"
@@ -195,6 +207,86 @@ fun VetScreen(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize()
                         ) {
+
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = MaterialTheme.dimens.small1),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    if (vetUiState.totalReviews > 0) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                Icons.Default.Star,
+                                                contentDescription = null,
+                                                tint = Color(0xFFFFC700),
+                                                modifier = Modifier.size(
+                                                    24.dp
+                                                )
+                                            )
+                                            Text(
+                                                text = vetUiState.averageReviews.toString(),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.W500
+                                            )
+                                            Text(
+                                                "~",
+                                                style = MaterialTheme.typography.displaySmall,
+                                                fontWeight = FontWeight.W400,
+                                                modifier = Modifier.padding(horizontal = 3.dp)
+                                            )
+                                            Text(
+                                                text = "(${vetUiState.totalReviews} ratings)",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        discount?.let {
+                                            Box(
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.discount_badge),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.tertiary,
+                                                    modifier = Modifier
+                                                        .size(55.dp)
+                                                )
+                                                Column(
+                                                    modifier = Modifier
+                                                        .padding(
+                                                            9.dp
+                                                        ),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.Center
+                                                ) {
+                                                    Text(
+                                                        text = "$discount%",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                    Text(
+                                                        text = "OFF",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+
+                            }
                             item {
                                 Text(
                                     description,
@@ -228,7 +320,7 @@ fun VetScreen(
                                     onVetOptionSelected = { vetOption ->
                                         vetViewModel.onVetOptionSelect(vetOption)
                                     },
-                                    discount = discount
+                                    discount = discount ?: 0
                                 )
                             }
 
@@ -254,10 +346,50 @@ fun VetScreen(
                                         vetViewModel.onTimeSlotSelection(
                                             slot
                                         )
-                                    }
+                                    },
+                                    context = context
                                 )
 
                             }
+
+                            if (reviews.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        text = "What Pet Parents Are Saying",
+                                        style = MaterialTheme.typography.titleSmall.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier
+                                            .padding(horizontal = MaterialTheme.dimens.small1)
+                                            .padding(top = 20.dp, bottom = 8.dp)
+                                    )
+                                }
+                                item {
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        items(reviews) { review ->
+                                            ReviewCard(
+                                                modifier = Modifier.padding(
+                                                    start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                                    else 0.dp,
+                                                    end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                                    else 0.dp
+                                                ),
+                                                maxStars = 5,
+                                                stars = review.stars.toDouble(),
+                                                name = review.userName,
+                                                review = review.description,
+                                                date = review.createdAt,
+                                                color = Color.White.copy(0.5f)
+                                            )
+                                        }
+                                    }
+                                }
+
+                            }
+
 
                             item {
                                 Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
@@ -303,13 +435,14 @@ fun VetDateSelectionSection(
     heading: String,
     vetViewModel: VetViewModel,
     onShowDateDialogChange: (Boolean) -> Unit = {},
-    timeSlots: List<VetTimeSlot>,
+    timeSlots: List<VetTimeSlot>?,
     selectedVetOptions: VetOption? = null,
-    selectedDate: LocalDateTime,
+    selectedDate: LocalDateTime?,
     error: String? = null,
     isDateSectionLoading: Boolean,
     selectedSlot: VetTimeSlot?,
-    onTimeSlotSelection: (VetTimeSlot) -> Unit = {}
+    onTimeSlotSelection: (VetTimeSlot) -> Unit = {},
+    context: Context
 ) {
 
     Column(
@@ -343,7 +476,7 @@ fun VetDateSelectionSection(
             )
         }
         DaySelectorCard(
-            selectedDate = selectedDate,
+            selectedDate = selectedDate ?: LocalDateTime.now(),
             onDateSelect = {
                 vetViewModel.onDateSelect(it)
             }
@@ -370,7 +503,7 @@ fun VetDateSelectionSection(
                             )
                         )
                     }
-                } else if (timeSlots.isNotEmpty()) {
+                } else if (!timeSlots.isNullOrEmpty()) {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -434,11 +567,12 @@ fun VetDateSelectionSection(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val errorText = if (selectedVetOptions != null) error
-                            ?: "No slots available for the selected date"
-                        else "Please select a vet option"
+                        val errorText =
+                            if (selectedDate != null && selectedVetOptions == null && timeSlots.isNullOrEmpty()) "No slots available for the selected date"
+                            else if (selectedVetOptions == null) "Please select a vet option"
+                            else error
                         Text(
-                            errorText,
+                            errorText ?: NetworkError.UNKNOWN.toString(context),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.W500,
                             modifier = Modifier.padding(
@@ -479,9 +613,12 @@ fun VetOptionSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp),
+                    border = if (isSelected)
+                        BorderStroke(1.2.dp, MaterialTheme.colorScheme.secondary)
+                    else BorderStroke(0.dp, Color.Transparent),
                     color = Color.White,
                     shape = RoundedCornerShape(16.dp),
-                    shadowElevation = if (isSelected) 6.dp else 0.dp
+                    shadowElevation = if (isSelected) 8.dp else 0.dp
                 ) {
                     Box(
                         modifier = Modifier
