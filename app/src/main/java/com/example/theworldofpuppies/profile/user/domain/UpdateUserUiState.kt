@@ -11,5 +11,6 @@ data class UpdateUserUiState(
     val isLoading: Boolean = false,
 
     val emailError: String? = null,
-    val usernameError: String? = null
+    val usernameError: String? = null,
+    val isRefreshing: Boolean = false
 )

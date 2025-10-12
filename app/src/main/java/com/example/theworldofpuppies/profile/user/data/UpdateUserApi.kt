@@ -23,9 +23,9 @@ class UpdateUserApi(
     suspend fun updateUser(
         token: String,
         request: UpdateUserRequest,
-        bytes: ByteArray?,
-        mimeType: String?,
-        fileName: String?
+        bytes: ByteArray? = null,
+        mimeType: String? = null,
+        fileName: String? = null
     ): Result<ApiResponse<UpdateUserDto>, NetworkError> {
         return safeCall {
             httpClient.submitFormWithBinaryData(

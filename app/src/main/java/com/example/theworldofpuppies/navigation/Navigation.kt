@@ -306,7 +306,9 @@ fun AppNavigation(
             ProfileScreen(
                 navController = navController,
                 profileViewModel = profileViewModel,
-                petProfileViewModel = petProfileViewModel
+                petProfileViewModel = petProfileViewModel,
+                updateUserUiState = updateUserUiState,
+                petListUiState = petListUiState
             )
         }
 

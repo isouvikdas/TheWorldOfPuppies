@@ -2,6 +2,7 @@ package com.example.theworldofpuppies.profile.user.data
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
@@ -24,26 +25,33 @@ class UpdateUserRepositoryImpl(
         username: String?,
         email: String?,
     ): Result<UpdateUser, NetworkError> {
+        Log.i("pet", "reached udpateUser1")
         val token = userRepository.getToken()
             ?: return Result.Error(NetworkError.UNAUTHORIZED)
+        Log.i("pet", "reached udpateUse2")
 
-        val bytes = if (imageUri != null) {
+
+        val bytes = if (imageUri != null && imageUri != Uri.EMPTY) {
             getBytes(imageUri, context)
                 ?: return Result.Error(NetworkError.UNKNOWN)
         } else {
             null
         }
-        val fileName = if (imageUri != null) {
+        Log.i("pet", "reached udpateUse3")
+        val fileName = if (imageUri != null && imageUri != Uri.EMPTY) {
             getFileName(imageUri, context)
                 ?: return Result.Error(NetworkError.UNKNOWN)
         } else {
             null
         }
-        val mimeType = if (imageUri != null) {
+        Log.i("pet", "reached udpateUse4")
+        val mimeType = if (imageUri != null && imageUri != Uri.EMPTY) {
             getMimeType(imageUri, context) ?: "image/jpeg"
         } else {
             null
         }
+
+        Log.i("pet", "reached udpateUser")
 
         val request = UpdateUserRequest(username = username, email = email)
         return when (val result =

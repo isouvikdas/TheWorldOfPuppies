@@ -135,7 +135,7 @@ fun PetProfileScreen(
     val petPictureError = editState.petPictureError
     val weightError = editState.weightError
 
-    val isRefreshing = editState.isLoading
+    val isRefreshing by petProfileViewModel.isRefreshing.collectAsStateWithLifecycle()
     val pullToRefreshState = rememberPullToRefreshState()
 
     val imagePicker = rememberLauncherForActivityResult(

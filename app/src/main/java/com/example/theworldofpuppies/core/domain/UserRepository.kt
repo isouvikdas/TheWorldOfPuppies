@@ -14,7 +14,6 @@ class UserRepository(
         private const val EMAIL_KEY = "email"
         private const val PHONE_NUMBER_KEY = "phone_number"
         private const val PET_IDS = "pet_ids"
-
         private const val FETCH_URL = "fetch_url"
     }
 
@@ -171,6 +170,8 @@ class UserRepository(
         val petIdsString = sharedPreferences.getString(PET_IDS, "")
         return petIdsString?.split(",") ?: emptyList()
     }
+
+    fun getFetchUrl(): String? = sharedPreferences.getString(FETCH_URL, "")
 
     fun getToken(): String? = sharedPreferences.getString(TOKEN_KEY, "")
     private fun getExpirationTime(): Long = sharedPreferences.getLong(EXPIRATION_TIME_KEY, 0)

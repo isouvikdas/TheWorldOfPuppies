@@ -8,7 +8,7 @@ fun UpdateUserDto.toUpdateUser(): UpdateUser {
     return UpdateUser(
         email = email,
         username = username,
-        image = image?.toImage(),
+        image = image,
         fetchUrl = fetchUrl
     )
 }

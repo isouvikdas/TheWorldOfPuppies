@@ -47,6 +47,9 @@ class PetProfileViewModel(
     private val _petListUiState = MutableStateFlow(PetListUiState())
     val petListUiState = _petListUiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     private val _selectedPet = MutableStateFlow<Pet?>(null)
 
     private val _isEditing = MutableStateFlow(false)
@@ -141,6 +144,7 @@ class PetProfileViewModel(
 
     fun fillExistingPetData(pet: Pet) {
         viewModelScope.launch {
+            _editState.update { it.copy(isLoading = true) }
             resetPetUiState()
             changeEditingState(true, pet)
             onPetPictureChange(pet.downloadUrl.toUri())
@@ -151,6 +155,7 @@ class PetProfileViewModel(
             onGenderChange(pet.gender)
             onAggressionChange(pet.aggression)
             onVaccinatedChange(pet.isVaccinated)
+            _editState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -281,14 +286,21 @@ class PetProfileViewModel(
         return isValid
     }
 
-    fun loadPetProfile(forceRefresh: Boolean = false, selectedPet: Pet? = null) {
-        val state = editState.value
-        if (forceRefresh || (!state.isLoading && state.name.isEmpty())) {
-            if (selectedPet != null) {
-                fillExistingPetData(selectedPet)
-            } else {
-                resetPetUiState()
+    fun loadPetProfile(forceRefresh: Boolean = false) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val state = _editState.value
+            if (forceRefresh || (!state.isLoading && state.name.isEmpty())) {
+                val pet = _selectedPet.value
+                if (pet != null) {
+                    fillExistingPetData(pet)
+                } else {
+                    resetPetUiState()
+                }
             }
+            delay(300)
+            _isRefreshing.value = false
+
         }
     }
 
