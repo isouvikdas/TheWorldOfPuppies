@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.services.vet.presentation
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -229,6 +230,7 @@ fun IssueDescribeField(
         }
     }
 }
+
 @Composable
 fun PetIssuesCard(
     modifier: Modifier = Modifier,
@@ -242,7 +244,13 @@ fun PetIssuesCard(
             .wrapContentHeight(),
         color = Color.White,
         shape = RoundedCornerShape(12.dp),
-        shadowElevation = if (isSelected) 7.dp else 0.dp
+        shadowElevation = if (isSelected) 7.dp else 0.dp,
+        border =
+            if (isSelected)
+                BorderStroke(1.2.dp, MaterialTheme.colorScheme.secondary)
+            else
+                BorderStroke(0.dp, Color.Transparent)
+
     ) {
         Surface(
             color = Color.LightGray.copy(0.55f),

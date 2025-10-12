@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.profile.presentation
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,12 +34,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.util.formatPhoneNumber
+import com.example.theworldofpuppies.profile.pet.domain.PetListUiState
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
+import com.example.theworldofpuppies.profile.user.domain.UpdateUserUiState
 import com.example.theworldofpuppies.ui.theme.dimens
 
 @Composable
@@ -46,8 +55,13 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     profileViewModel: ProfileViewModel,
-    petProfileViewModel: PetProfileViewModel
+    petProfileViewModel: PetProfileViewModel,
+    updateUserUiState: UpdateUserUiState,
+    petListUiState: PetListUiState
 ) {
+
+    val pet = petListUiState.pets.first()
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color.Transparent
@@ -58,15 +72,24 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
+
             item {
                 ProfileSection(
-                    onUserProfileClick = {},
+                    onUserProfileClick = {
+                        profileViewModel.onUserProfileClick(navController)
+                    },
+                    userImageUri = updateUserUiState.imageUri,
+                    username = updateUserUiState.username,
+                    userDescription = formatPhoneNumber(updateUserUiState.phoneNumber),
                     onPetProfileClick = {
                         petProfileViewModel.resetPetUiState()
                         petProfileViewModel.changePetSelectionView(false)
                         profileViewModel.onPetProfileClick(navController)
 
-                    }
+                    },
+                    petImageUri = pet.downloadUrl.toUri(),
+                    petName = pet.name,
+                    petDescription = pet.breed.breedName
                 )
             }
             item {
@@ -78,7 +101,7 @@ fun ProfileScreen(
             item {
                 CommunicationAndEngagementSection(
                     onReferClick = {},
-                    onMessageClick = { profileViewModel.onMessageClick(navController) }
+                    onMessageClick = {  }
                 )
             }
             item {
@@ -142,7 +165,13 @@ fun SignOutSection(modifier: Modifier = Modifier) {
 @Composable
 fun ProfileSection(
     onUserProfileClick: () -> Unit,
-    onPetProfileClick: () -> Unit
+    onPetProfileClick: () -> Unit,
+    userImageUri: Uri? = null,
+    username: String? = null,
+    userDescription: String? = null,
+    petImageUri: Uri? = null,
+    petName: String? = null,
+    petDescription: String? = null
 ) {
     Text(
         modifier = Modifier
@@ -167,24 +196,26 @@ fun ProfileSection(
             horizontalAlignment = Alignment.Start
         ) {
             ProfileItem(
-                image = R.drawable.profile,
-                title = "Souvik",
-                description = "Personal Info",
+                image = userImageUri ?: Uri.EMPTY,
+                title = username ?: "",
+                description = userDescription ?: "Personal Info",
                 onClick = {
                     onUserProfileClick()
-                }
+                },
+                errorImage = R.drawable.profile
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
                 modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1)
             )
             ProfileItem(
-                image = R.drawable.pet_profile,
-                title = "Pet",
-                description = "Personal Info",
+                image = petImageUri ?: Uri.EMPTY,
+                title = petName ?: "Pet",
+                description = petDescription ?: "Personal Info",
                 onClick = {
                     onPetProfileClick()
-                }
+                },
+                errorImage = R.drawable.pet_profile
             )
         }
     }
@@ -193,10 +224,11 @@ fun ProfileSection(
 @Composable
 fun ProfileItem(
     modifier: Modifier = Modifier,
-    image: Int,
+    image: Uri?,
     title: String,
     description: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    errorImage: Int
 ) {
     Row(
         modifier = modifier
@@ -208,10 +240,16 @@ fun ProfileItem(
             modifier = Modifier
                 .size(40.dp),
             shape = CircleShape,
+            color = Color.LightGray.copy(0.5f)
         ) {
-            Image(
-                painter = painterResource(image),
-                contentDescription = null
+            AsyncImage(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+                model = image,
+                contentDescription = "Pet Profile Pic",
+                contentScale = ContentScale.Crop,
+                error = painterResource(errorImage)
             )
         }
         Column(modifier = Modifier.padding(start = MaterialTheme.dimens.small1)) {
@@ -388,7 +426,8 @@ fun CommunicationAndEngagementSection(
                 title = "Messages",
                 onClick = {
                     onMessageClick()
-                }
+                },
+                isDisabled = true
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -410,7 +449,8 @@ fun CommunicationAndMembershipItem(
     modifier: Modifier = Modifier,
     image: Int,
     title: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isDisabled: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -432,8 +472,20 @@ fun CommunicationAndMembershipItem(
             title,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
+            modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
+            color = if (isDisabled) Color.Gray else Color.Black
         )
+        if (isDisabled) {
+            Text(
+                "COMING SOON",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
+                color = Color.Gray,
+                fontStyle = FontStyle.Italic
+            )
+
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -443,7 +495,7 @@ fun CommunicationAndMembershipItem(
                 modifier = Modifier
                     .size(30.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable { onClick() }
+                    .clickable(enabled = !isDisabled) { onClick() }
                     .background(Color.White.copy(0.7f)),
                 contentAlignment = Alignment.Center
 
@@ -451,7 +503,8 @@ fun CommunicationAndMembershipItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(11.dp)
+                    modifier = Modifier.size(11.dp),
+                    tint = if (isDisabled) Color.Gray else Color.Black
                 )
             }
         }

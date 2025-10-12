@@ -89,27 +89,6 @@ sealed class BottomNavigationItems(
         }
     )
 
-    data object Messages : BottomNavigationItems(
-        route = "Messages",
-        title = "Messages",
-        selectedIcon = { modifier, tint ->
-            Icon(
-                painter = painterResource(R.drawable.message_filled),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(26.dp)),
-                tint = tint
-            )
-        },
-        unselectedIcon = { modifier, tint ->
-            Icon(
-                painter = painterResource(R.drawable.message_outline),
-                contentDescription = null,
-                modifier = modifier.then(Modifier.size(26.dp)),
-                tint = tint
-            )
-        }
-    )
-
     data object Profile : BottomNavigationItems(
         route = "Profile",
         title = "Me",

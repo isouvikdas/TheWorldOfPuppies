@@ -45,6 +45,8 @@ import com.example.theworldofpuppies.services.grooming.presentation.GroomingScre
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryScreen
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
+import com.example.theworldofpuppies.profile.user.presentation.UpdateUserScreen
+import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
@@ -88,6 +90,7 @@ sealed class Screen(val route: String) {
     data object DogTrainingBookingScreen : Screen("DogTrainingBookingScreen")
     data object PetInsuranceScreen : Screen("PetInsuranceScreen")
     data object ReviewScreen : Screen("ReviewScreen")
+    data object UpdateUserScreen: Screen("UpdateUserScreen")
 }
 
 @Composable
@@ -173,6 +176,9 @@ fun AppNavigation(
 
     val bookingHistoryViewModel = koinViewModel<BookingHistoryViewModel>()
     val bookingHistoryUiState by bookingHistoryViewModel.bookingHistoryUiState.collectAsStateWithLifecycle()
+
+    val updateUserViewModel = koinViewModel<UpdateUserViewModel>()
+    val updateUserUiState by updateUserViewModel.updateUserUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -291,15 +297,6 @@ fun AppNavigation(
             )
         }
 
-        composable(route = BottomNavigationItems.Messages.route) {
-            onBottomBarVisibilityChanged(true)
-            onProfileButtonVisibilityChanged(true)
-            onTopBarVisibilityChanged(true)
-            searchIconVisibilityChanged(true)
-            onGesturesChanged(false)
-            MessageScreen()
-        }
-
         composable(route = BottomNavigationItems.Profile.route) {
             onBottomBarVisibilityChanged(true)
             onProfileButtonVisibilityChanged(false)
@@ -309,7 +306,9 @@ fun AppNavigation(
             ProfileScreen(
                 navController = navController,
                 profileViewModel = profileViewModel,
-                petProfileViewModel = petProfileViewModel
+                petProfileViewModel = petProfileViewModel,
+                updateUserUiState = updateUserUiState,
+                petListUiState = petListUiState
             )
         }
 
@@ -660,6 +659,21 @@ fun AppNavigation(
                 navController = navController,
                 reviewViewModel = reviewViewModel,
                 reviewUiState = reviewUiState
+            )
+        }
+
+        composable(route = Screen.UpdateUserScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            UpdateUserScreen(
+                navController = navController,
+                updateUserViewModel = updateUserViewModel,
+                updateUserUiState = updateUserUiState
             )
         }
 
