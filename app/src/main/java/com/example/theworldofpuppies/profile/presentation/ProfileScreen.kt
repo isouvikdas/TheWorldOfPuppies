@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -60,7 +61,9 @@ fun ProfileScreen(
         ) {
             item {
                 ProfileSection(
-                    onUserProfileClick = {},
+                    onUserProfileClick = {
+                        profileViewModel.onUserProfileClick(navController)
+                    },
                     onPetProfileClick = {
                         petProfileViewModel.resetPetUiState()
                         petProfileViewModel.changePetSelectionView(false)
@@ -78,7 +81,7 @@ fun ProfileScreen(
             item {
                 CommunicationAndEngagementSection(
                     onReferClick = {},
-                    onMessageClick = { profileViewModel.onMessageClick(navController) }
+                    onMessageClick = {  }
                 )
             }
             item {
@@ -388,7 +391,8 @@ fun CommunicationAndEngagementSection(
                 title = "Messages",
                 onClick = {
                     onMessageClick()
-                }
+                },
+                isDisabled = true
             )
             HorizontalDivider(
                 thickness = 0.15.dp,
@@ -410,7 +414,8 @@ fun CommunicationAndMembershipItem(
     modifier: Modifier = Modifier,
     image: Int,
     title: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isDisabled: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -432,8 +437,20 @@ fun CommunicationAndMembershipItem(
             title,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = MaterialTheme.dimens.small1)
+            modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
+            color = if (isDisabled) Color.Gray else Color.Black
         )
+        if (isDisabled) {
+            Text(
+                "COMING SOON",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
+                color = Color.Gray,
+                fontStyle = FontStyle.Italic
+            )
+
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -443,7 +460,7 @@ fun CommunicationAndMembershipItem(
                 modifier = Modifier
                     .size(30.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable { onClick() }
+                    .clickable(enabled = !isDisabled) { onClick() }
                     .background(Color.White.copy(0.7f)),
                 contentAlignment = Alignment.Center
 
@@ -451,7 +468,8 @@ fun CommunicationAndMembershipItem(
                 Icon(
                     Icons.AutoMirrored.Default.ArrowForwardIos,
                     contentDescription = "profile button",
-                    modifier = Modifier.size(11.dp)
+                    modifier = Modifier.size(11.dp),
+                    tint = if (isDisabled) Color.Gray else Color.Black
                 )
             }
         }

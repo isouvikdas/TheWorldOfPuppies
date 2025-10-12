@@ -16,23 +16,16 @@ class ProfileViewModel() : ViewModel() {
         }
     }
 
+    fun onUserProfileClick(navController: NavController) {
+        viewModelScope.launch {
+            navController.navigate(Screen.UpdateUserScreen.route)
+        }
+    }
+
     fun onAddressClick(navController: NavController) {
         viewModelScope.launch {
             navController.navigate(Screen.AddressScreen.route)
         }
-    }
-
-    fun onMessageClick(navController: NavController) {
-        viewModelScope.apply {
-            navController.navigate(BottomNavigationItems.Messages.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-        }
-
     }
 
     fun onBookingClick(navController: NavController) {

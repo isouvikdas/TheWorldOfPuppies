@@ -47,6 +47,10 @@ import com.example.theworldofpuppies.profile.pet.data.remote.PetApi
 import com.example.theworldofpuppies.profile.pet.domain.PetRepository
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.profile.presentation.ProfileViewModel
+import com.example.theworldofpuppies.profile.user.data.UpdateUserApi
+import com.example.theworldofpuppies.profile.user.data.UpdateUserRepositoryImpl
+import com.example.theworldofpuppies.profile.user.domain.UpdateUserRepository
+import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
 import com.example.theworldofpuppies.review.data.ReviewApi
 import com.example.theworldofpuppies.review.data.request.ReviewRepositoryImpl
 import com.example.theworldofpuppies.review.domain.ReviewRepository
@@ -138,6 +142,7 @@ val appModule = module {
     singleOf(::CategoryRepositoryImpl).bind<CategoryRepository>()
     singleOf(::CartApi)
     singleOf(::ReviewApi)
+    singleOf(::UpdateUserApi)
     singleOf(::CartRepositoryImpl).bind<CartRepository>()
     singleOf(::OrderRepositoryImpl).bind<OrderRepository>()
     singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
@@ -154,6 +159,7 @@ val appModule = module {
     singleOf(::PetRepositoryImpl).bind<PetRepository>()
     singleOf(::ReviewRepositoryImpl).bind<ReviewRepository>()
     singleOf(::BookingHistoryRepositoryImpl).bind<BookingHistoryRepository>()
+    singleOf(::UpdateUserRepositoryImpl).bind<UpdateUserRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -175,4 +181,5 @@ val appModule = module {
     viewModelOf(::PetInsuranceViewModel)
     viewModelOf(::ReviewViewModel)
     viewModelOf(::BookingHistoryViewModel)
+    viewModelOf(::UpdateUserViewModel)
 }

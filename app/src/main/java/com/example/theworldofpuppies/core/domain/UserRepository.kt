@@ -14,6 +14,8 @@ class UserRepository(
         private const val EMAIL_KEY = "email"
         private const val PHONE_NUMBER_KEY = "phone_number"
         private const val PET_IDS = "pet_ids"
+
+        private const val FETCH_URL = "fetch_url"
     }
 
     fun clearOnInconsistentData() {
@@ -24,6 +26,7 @@ class UserRepository(
         val userId = sharedPreferences.getString(USER_ID_KEY, "")
         val email = sharedPreferences.getString(EMAIL_KEY, "")
         val petIds = sharedPreferences.getString(PET_IDS, "")
+        val fetchUrl = sharedPreferences.getString(FETCH_URL, "")
 
         val currentTime = System.currentTimeMillis()
 
@@ -49,6 +52,9 @@ class UserRepository(
         if (!petIds.isNullOrEmpty()) {
             editor.remove(PET_IDS)
         }
+        if (!fetchUrl.isNullOrEmpty()) {
+            editor.remove(FETCH_URL)
+        }
         editor.apply()
     }
 
@@ -59,7 +65,8 @@ class UserRepository(
         phoneNumber: String? = null,
         username: String? = null,
         email: String? = null,
-        petIds: List<String>? = null
+        petIds: List<String>? = null,
+        fetchUrl: String? = null
     ) {
         sharedPreferences.edit().apply {
             token?.let {
@@ -92,6 +99,11 @@ class UserRepository(
                 Log.i("toggle", "savedPetIds: $it")
             }
 
+            fetchUrl?.let {
+                putString(FETCH_URL, it)
+                Log.i("toggle", "savedFetchUrl: $it")
+            }
+
             apply()
         }
     }
@@ -100,6 +112,15 @@ class UserRepository(
         sharedPreferences.edit().apply {
             email?.let {
                 putString(EMAIL_KEY, it)
+            }
+            apply()
+        }
+    }
+
+    fun saveUserFetchUrl(fetchUrl: String? = null) {
+        sharedPreferences.edit().apply {
+            fetchUrl?.let {
+                putString(FETCH_URL, it)
             }
             apply()
         }

@@ -46,7 +46,6 @@ fun BottomAppbar(
         BottomNavigationItems.Home,
         BottomNavigationItems.Booking,
         BottomNavigationItems.Shop,
-        BottomNavigationItems.Messages,
         BottomNavigationItems.Profile
     )
 
