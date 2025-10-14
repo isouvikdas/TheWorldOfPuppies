@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +59,11 @@ fun ProfileScreen(
     petListUiState: PetListUiState
 ) {
 
-    val pet = petListUiState.pets.first()
+    val pet = if (petListUiState.pets.isNotEmpty()) {
+        petListUiState.pets.first()
+    } else {
+        null
+    }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -87,9 +90,9 @@ fun ProfileScreen(
                         profileViewModel.onPetProfileClick(navController)
 
                     },
-                    petImageUri = pet.downloadUrl.toUri(),
-                    petName = pet.name,
-                    petDescription = pet.breed.breedName
+                    petImageUri = pet?.downloadUrl?.toUri(),
+                    petName = pet?.name,
+                    petDescription = pet?.breed?.breedName
                 )
             }
             item {
@@ -100,8 +103,10 @@ fun ProfileScreen(
             }
             item {
                 CommunicationAndEngagementSection(
-                    onReferClick = {},
-                    onMessageClick = {  }
+                    onReferClick = {
+                        profileViewModel.onReferClick(navController)
+                    },
+                    onMessageClick = { }
                 )
             }
             item {

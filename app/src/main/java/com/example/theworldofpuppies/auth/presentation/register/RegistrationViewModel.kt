@@ -44,6 +44,9 @@ class RegistrationViewModel(
     private val _events = Channel<Event>()
     val events = _events.receiveAsFlow()
 
+    private val _referralCode = MutableStateFlow("")
+    val referralCode = _referralCode.asStateFlow()
+
     fun resetState() {
         viewModelScope.launch {
             _registrationUiState.value = RegistrationUiState()
@@ -94,10 +97,10 @@ class RegistrationViewModel(
     }
 
 
-    fun verifyRegistration(phoneNumber: String, otp: String) {
+    fun verifyRegistration(phoneNumber: String, otp: String, referralCode: String? = null) {
         viewModelScope.launch {
             _registrationUiState.update { it.copy(isLoading = true) }
-            val result = authApi.verifyRegistration(OtpRequest(phoneNumber, otp))
+            val result = authApi.verifyRegistration(OtpRequest(phoneNumber, otp, referralCode))
             result.onSuccess { apiResponse ->
                 _registrationUiState.update {
                     if (apiResponse.success) {

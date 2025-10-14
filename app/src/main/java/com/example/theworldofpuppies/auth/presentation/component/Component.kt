@@ -57,7 +57,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.example.theworldofpuppies.ui.theme.AppTheme
 import com.rejowan.ccpc.CCPUtils
@@ -77,7 +76,8 @@ fun TextTextField(
     hint: String,
     isNeeded: Boolean,
     keyboardType: KeyboardType = KeyboardType.Text,
-    isVisible: Boolean
+    isVisible: Boolean,
+    color: Color = Color.Black
 ) {
     Column(
         modifier = modifier,
@@ -89,7 +89,8 @@ fun TextTextField(
             Text(
                 text = placeHolder,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 1.dp)
+                modifier = Modifier.padding(bottom = 1.dp),
+                color = color
             )
             if (isNeeded) {
                 Text(

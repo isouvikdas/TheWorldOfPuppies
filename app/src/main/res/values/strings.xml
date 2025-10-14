@@ -54,5 +54,13 @@
     <string name="awaiting_payment">Payment Pending</string>
     <string name="failed">Payment Failed</string>
     <string name="paid">Paid</string>
+    <string name="share_text_template">
+🐶 Hey! I’ve been using this awesome pet care app — they offer trusted services like grooming, walking, vet visits &amp; more.\n
+Use my referral code %1$s or click the link below to sign up.\n
+You’ll get ₹150 off your first booking, and I’ll earn ₹150 too!\n\n
+👉 %2$s\n\n
+Let’s make our pets happier together! 🐾💚
+</string>
+
 
 </resources>

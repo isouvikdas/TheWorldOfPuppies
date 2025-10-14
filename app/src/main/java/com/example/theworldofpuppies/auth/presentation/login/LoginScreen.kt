@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.example.theworldofpuppies.auth.presentation.component.PhoneNumberField
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.ui.theme.AppTheme
+import com.example.theworldofpuppies.ui.theme.dimens
 import com.rejowan.ccpc.Country
 import com.rejowan.ccpc.CountryPickerBottomSheet
 
@@ -110,8 +112,7 @@ fun LoginScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.displaySmall,
                     modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .padding(vertical = 10.dp),
+                        .padding(horizontal = MaterialTheme.dimens.small1, vertical = 10.dp),
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
@@ -166,9 +167,9 @@ fun LoginScreen(
                     },
                     enabled = phoneNumber.length == 10,
                     modifier = Modifier
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = MaterialTheme.dimens.small1)
                         .fillMaxWidth()
-                        .size(50.dp)
+                        .height(MaterialTheme.dimens.buttonHeight)
                         .bounceClick {},
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -186,8 +187,7 @@ fun LoginScreen(
                     } else {
                         Text(
                             text = "Login",
-                            fontSize = 17.sp,
-                            modifier = Modifier.padding(4.dp)
+                             style = MaterialTheme.typography.headlineSmall
                         )
                     }
                 }

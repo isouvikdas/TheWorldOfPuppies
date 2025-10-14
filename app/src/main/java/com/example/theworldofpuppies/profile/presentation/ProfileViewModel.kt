@@ -23,6 +23,12 @@ class ProfileViewModel(
         }
     }
 
+    fun onReferClick(navController: NavController) {
+        viewModelScope.launch {
+            navController.navigate(Screen.ReferEarnScreen.route)
+        }
+    }
+
     fun onUserProfileClick(navController: NavController) {
         viewModelScope.launch {
             navController.navigate(Screen.UpdateUserScreen.route)

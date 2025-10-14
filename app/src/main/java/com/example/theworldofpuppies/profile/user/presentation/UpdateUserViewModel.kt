@@ -71,7 +71,6 @@ class UpdateUserViewModel(
                     return@launch
                 }
                 _updateUserUiState.update { it.copy(isLoading = true) }
-                Log.i("pet", "saveProfile: ${updateUserUiState.value.isLoading}")
                 when (val result = updateUserRepository.updateUser(
                     imageUri = state.imageUri,
                     username = state.username,
@@ -93,7 +92,6 @@ class UpdateUserViewModel(
                 }
 
             } catch (e: Exception) {
-                showToastMessage(e.message.toString())
                 Log.i("pet", e.message.toString())
             } finally {
                 _updateUserUiState.update { it.copy(isLoading = false) }
