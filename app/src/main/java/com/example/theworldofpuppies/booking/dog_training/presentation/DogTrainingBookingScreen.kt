@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
+import com.example.theworldofpuppies.booking.core.presentation.WalletBalanceRow
 import com.example.theworldofpuppies.booking.dog_training.domain.DogTrainingBookingUIState
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.PriceRowSection
@@ -46,6 +47,7 @@ import com.example.theworldofpuppies.booking.vet.presentation.VetBookingViewMode
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.calculateDiscountedPrice
 import com.example.theworldofpuppies.profile.pet.domain.Pet
+import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingOption
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingUiState
@@ -67,7 +69,8 @@ fun DogTrainingBookingScreen(
     dogTrainingUiState: DogTrainingUiState,
     addressUiState: AddressUiState,
     addressViewModel: AddressViewModel,
-    selectedPetForBooking: Pet?
+    selectedPetForBooking: Pet?,
+    referEarnUiState: ReferEarnUiState
 ) {
 
     val context = LocalContext.current
@@ -149,6 +152,7 @@ fun DogTrainingBookingScreen(
                     modifier = Modifier.align(Alignment.BottomCenter),
                     discount = discount ?: 0,
                     name = name,
+                    walletBalance = referEarnUiState.walletBalance,
                     selectedFeatures = dogTrainingFeatures,
                     selectedDogTrainingOption = dogTrainingOption,
                     serviceId = id,
@@ -179,6 +183,7 @@ fun DogTrainingBookingScreen(
 fun DogTrainingBookingBottomSection(
     modifier: Modifier = Modifier,
     discount: Int = 0,
+    walletBalance: Double = 0.0,
     name: String?,
     selectedFeatures: List<DogTrainingFeature>,
     selectedDogTrainingOption: DogTrainingOption? = null,
@@ -187,8 +192,14 @@ fun DogTrainingBookingBottomSection(
     context: Context,
     petId: String
 ) {
-
-    val totalPrice = selectedFeatures.sumOf { calculateDiscountedPrice(discount, it.price) }
+    val price = selectedFeatures.sumOf { it.price }
+    val subTotal = calculateDiscountedPrice(discount, price)
+    val finalWalletBalance = if (walletBalance <= subTotal) {
+        walletBalance
+    } else {
+        subTotal
+    }
+    val totalPrice = subTotal - finalWalletBalance
 
     Surface(
         modifier = modifier
@@ -216,14 +227,19 @@ fun DogTrainingBookingBottomSection(
                 dogTrainingOption = selectedDogTrainingOption?.name
             )
             Spacer(modifier = Modifier.height(6.dp))
-            selectedFeatures.forEach { feature->
-                PriceRowSection(
-                    priceTitle = feature.name,
-                    price1 = feature.price,
-                    price2 = calculateDiscountedPrice(discount = discount, price = feature.price)
+            PriceRowSection(
+                priceTitle = "Service Fee",
+                price1 = price,
+                price2 = subTotal
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            if (finalWalletBalance > 0) {
+                WalletBalanceRow(
+                    walletBalance = finalWalletBalance
                 )
-                Spacer(modifier = Modifier.height(6.dp))
             }
+            Spacer(modifier = Modifier.height(6.dp))
+
             PriceRowSection(
                 priceTitle = "",
                 price2 = totalPrice

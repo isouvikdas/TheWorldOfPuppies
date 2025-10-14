@@ -39,10 +39,12 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
+import com.example.theworldofpuppies.booking.core.presentation.WalletBalanceRow
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.PriceRowSection
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.profile.pet.domain.Pet
+import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
@@ -60,7 +62,8 @@ fun VetBookingScreen(
     addressUiState: AddressUiState,
     addressViewModel: AddressViewModel,
     vetBookingViewModel: VetBookingViewModel,
-    selectedPetForBooking: Pet?
+    selectedPetForBooking: Pet?,
+    referEarnUiState: ReferEarnUiState
 ) {
 
     val context = LocalContext.current
@@ -156,7 +159,8 @@ fun VetBookingScreen(
                     healthIssueDescription = healthIssueDescription,
                     serviceId = id,
                     vetBookingViewModel = vetBookingViewModel,
-                    petId = selectedPetForBooking?.id ?: ""
+                    petId = selectedPetForBooking?.id ?: "",
+                    walletBalance = referEarnUiState.walletBalance
                 )
             }
         }
@@ -189,10 +193,18 @@ fun VetBookingBottomSection(
     serviceId: String?,
     vetBookingViewModel: VetBookingViewModel,
     context: Context,
-    petId: String
+    petId: String,
+    walletBalance: Double = 0.0
 ) {
 
-    val discountedPrice = basePrice.times(100 - discount).div(100)
+    val subTotal = basePrice.times(100 - discount).div(100)
+    val finalWalletBalance = if (walletBalance <= subTotal) {
+        walletBalance
+    } else {
+        subTotal
+    }
+    val totalPrice = subTotal - finalWalletBalance
+
 
     Surface(
         modifier = modifier
@@ -221,14 +233,20 @@ fun VetBookingBottomSection(
             )
             Spacer(modifier = Modifier.height(6.dp))
             PriceRowSection(
-                priceTitle = "Sessions (1)",
+                priceTitle = "Service Fee",
                 price1 = basePrice,
-                price2 = discountedPrice
+                price2 = subTotal
             )
+            Spacer(modifier = Modifier.height(6.dp))
+
+            if (finalWalletBalance > 0) {
+                WalletBalanceRow(walletBalance = finalWalletBalance)
+            }
+
             Spacer(modifier = Modifier.height(6.dp))
             PriceRowSection(
                 priceTitle = "",
-                price2 = discountedPrice
+                price2 = totalPrice
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -284,8 +302,8 @@ fun VetBookingNameSection(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            "Service",
-            style = MaterialTheme.typography.titleMedium,
+            "Service - Sessions (1)",
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.W500
         )
         if (!name.isNullOrEmpty() && !vetOptionName.isNullOrEmpty()) {
@@ -296,11 +314,11 @@ fun VetBookingNameSection(
                 Text(
                     name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.W500
                 )
                 Text(
                     "($vetOptionName)",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold
                 )
 

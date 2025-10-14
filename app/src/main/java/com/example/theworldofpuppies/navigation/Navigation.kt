@@ -491,7 +491,8 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 groomingUiState = groomingUiState,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
 
@@ -528,7 +529,8 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 bookingPetWalkViewModel = bookingPetWalkViewModel,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
         composable(route = Screen.VetScreen.route) {
@@ -578,7 +580,8 @@ fun AppNavigation(
                 vetUiState = vetUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
 
@@ -620,7 +623,8 @@ fun AppNavigation(
                 dogTrainingBookingUiState = dogTrainingBookingUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
         composable(route = Screen.PetInsuranceScreen.route) {
