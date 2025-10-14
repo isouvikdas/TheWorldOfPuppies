@@ -47,6 +47,8 @@ import com.example.theworldofpuppies.booking.history.presentation.BookingHistory
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserScreen
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
+import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnScreen
+import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnViewModel
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
@@ -91,6 +93,7 @@ sealed class Screen(val route: String) {
     data object PetInsuranceScreen : Screen("PetInsuranceScreen")
     data object ReviewScreen : Screen("ReviewScreen")
     data object UpdateUserScreen: Screen("UpdateUserScreen")
+    data object ReferEarnScreen: Screen("ReferEarnScreen")
 }
 
 @Composable
@@ -179,6 +182,9 @@ fun AppNavigation(
 
     val updateUserViewModel = koinViewModel<UpdateUserViewModel>()
     val updateUserUiState by updateUserViewModel.updateUserUiState.collectAsStateWithLifecycle()
+
+    val referEarnViewModel = koinViewModel<ReferEarnViewModel>()
+    val referEarnUiState by referEarnViewModel.referEarnUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -674,6 +680,21 @@ fun AppNavigation(
                 navController = navController,
                 updateUserViewModel = updateUserViewModel,
                 updateUserUiState = updateUserUiState
+            )
+        }
+
+        composable(route = Screen.ReferEarnScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            ReferEarnScreen(
+                navController = navController,
+                referEarnViewModel = referEarnViewModel,
+                referEarnUiState = referEarnUiState
             )
         }
 

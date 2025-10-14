@@ -9,5 +9,7 @@ data class UserResponse(
     val email: String, val token: String, val expirationTime: Long,
     val petIds: List<String>? = null,
     val image: PetImage? = null,
-    val fetchUrl: String? = null
+    val fetchUrl: String? = null,
+    val referralCode: String? = null,
+    val walletBalance: Double = 0.0
 )

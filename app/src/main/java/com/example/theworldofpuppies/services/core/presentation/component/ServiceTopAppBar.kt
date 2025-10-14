@@ -29,12 +29,13 @@ fun ServiceTopAppBar(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
     title: String,
+    containerColor: Color = Color.Transparent,
     icon: @Composable () -> Unit
 ) {
     TopAppBar(
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
+            containerColor = containerColor,
             scrolledContainerColor = Color.Transparent
         ),
         modifier = modifier

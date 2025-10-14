@@ -120,7 +120,9 @@ class LoginViewModel(
                                 username = userResponse.username,
                                 email = userResponse.email,
                                 petIds = petIds,
-                                fetchUrl = fetchUrl
+                                fetchUrl = fetchUrl,
+                                walletBalance = userResponse.walletBalance,
+                                referralCode = userResponse.referralCode
                             )
                         }
                         authEventManager.sendEvent(Event.LoggedIn)

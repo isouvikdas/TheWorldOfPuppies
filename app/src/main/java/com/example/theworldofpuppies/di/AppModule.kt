@@ -51,8 +51,12 @@ import com.example.theworldofpuppies.profile.user.data.UpdateUserApi
 import com.example.theworldofpuppies.profile.user.data.UpdateUserRepositoryImpl
 import com.example.theworldofpuppies.profile.user.domain.UpdateUserRepository
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
+import com.example.theworldofpuppies.refer_earn.data.ReferEarnRepositoryImpl
+import com.example.theworldofpuppies.refer_earn.data.remote.ReferEarnApi
+import com.example.theworldofpuppies.refer_earn.domain.ReferEarnRepository
+import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnViewModel
 import com.example.theworldofpuppies.review.data.ReviewApi
-import com.example.theworldofpuppies.review.data.request.ReviewRepositoryImpl
+import com.example.theworldofpuppies.review.data.ReviewRepositoryImpl
 import com.example.theworldofpuppies.review.domain.ReviewRepository
 import com.example.theworldofpuppies.review.presentation.ReviewViewModel
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
@@ -132,6 +136,7 @@ val appModule = module {
     singleOf(::DogTrainingBookingApi)
     singleOf(::PetApi)
     singleOf(::BookingHistoryApi)
+    singleOf(::ReferEarnApi)
     singleOf(::UserRepository)
     singleOf(::AuthEventManager)
     singleOf(::OrderEventManager)
@@ -160,6 +165,7 @@ val appModule = module {
     singleOf(::ReviewRepositoryImpl).bind<ReviewRepository>()
     singleOf(::BookingHistoryRepositoryImpl).bind<BookingHistoryRepository>()
     singleOf(::UpdateUserRepositoryImpl).bind<UpdateUserRepository>()
+    singleOf(::ReferEarnRepositoryImpl).bind<ReferEarnRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -182,4 +188,5 @@ val appModule = module {
     viewModelOf(::ReviewViewModel)
     viewModelOf(::BookingHistoryViewModel)
     viewModelOf(::UpdateUserViewModel)
+    viewModelOf(::ReferEarnViewModel)
 }

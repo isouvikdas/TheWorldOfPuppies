@@ -164,13 +164,13 @@ fun PetWalkingScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
-                            painterResource(R.drawable.dog_emoji_angry),
+                            painterResource(R.drawable.dog_sad),
                             contentDescription = "dog",
-                            modifier = Modifier.size(100.dp)
+                            modifier = Modifier.size(60.dp)
                         )
                         Text(
                             petWalkingUiState.errorMessage,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W500),
                         )
 
                     }

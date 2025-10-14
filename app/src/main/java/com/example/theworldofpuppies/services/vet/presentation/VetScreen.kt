@@ -189,11 +189,11 @@ fun VetScreen(
                     Image(
                         painterResource(R.drawable.dog_sad),
                         contentDescription = "dog",
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier.size(60.dp)
                     )
                     Text(
                         vetUiState.errorMessage ?: "Oops! Something went wrong",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W500)
                     )
                 }
             } else {

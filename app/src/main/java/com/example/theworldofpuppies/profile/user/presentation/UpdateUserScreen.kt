@@ -214,8 +214,6 @@ fun UpdateUserScreen(
                 )
             }
         }
-
-
     }
 }
 

@@ -165,11 +165,11 @@ fun PetInsuranceScreen(
                     Image(
                         painterResource(R.drawable.dog_sad),
                         contentDescription = "dog",
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier.size(60.dp)
                     )
                     Text(
                         petInsuranceUiState.errorMessage,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W500),
                     )
                 }
             } else {
