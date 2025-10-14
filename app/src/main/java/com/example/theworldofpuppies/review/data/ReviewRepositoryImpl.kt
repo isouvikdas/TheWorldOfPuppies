@@ -1,12 +1,11 @@
-package com.example.theworldofpuppies.review.data.request
+package com.example.theworldofpuppies.review.data
 
-import android.util.Log
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
-import com.example.theworldofpuppies.review.data.ReviewApi
 import com.example.theworldofpuppies.review.data.mappers.toReview
+import com.example.theworldofpuppies.review.data.request.AddReviewRequest
 import com.example.theworldofpuppies.review.domain.Review
 import com.example.theworldofpuppies.review.domain.ReviewRepository
 import com.example.theworldofpuppies.review.domain.TargetType

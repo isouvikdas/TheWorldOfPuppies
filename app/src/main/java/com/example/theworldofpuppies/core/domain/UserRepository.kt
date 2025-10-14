@@ -15,6 +15,8 @@ class UserRepository(
         private const val PHONE_NUMBER_KEY = "phone_number"
         private const val PET_IDS = "pet_ids"
         private const val FETCH_URL = "fetch_url"
+        private const val WALLET_BALANCE_KEY = "wallet_balance"
+        private const val REFERRAL_CODE_KEY = "referral_code"
     }
 
     fun clearOnInconsistentData() {
@@ -26,34 +28,23 @@ class UserRepository(
         val email = sharedPreferences.getString(EMAIL_KEY, "")
         val petIds = sharedPreferences.getString(PET_IDS, "")
         val fetchUrl = sharedPreferences.getString(FETCH_URL, "")
+        val walletBalance = sharedPreferences.getFloat(WALLET_BALANCE_KEY, -1f)
+        val referralCode = sharedPreferences.getString(REFERRAL_CODE_KEY, "")
 
         val currentTime = System.currentTimeMillis()
-
         val editor = sharedPreferences.edit()
-        if (!token.isNullOrEmpty()) {
-            editor.remove(TOKEN_KEY)
-        }
-        if (!username.isNullOrEmpty()) {
-            editor.remove(USERNAME_KEY)
-        }
-        if (!phoneNumber.isNullOrEmpty()) {
-            editor.remove(PHONE_NUMBER_KEY)
-        }
-        if (expirationTime == 0L || expirationTime < currentTime) {
-            editor.remove(EXPIRATION_TIME_KEY)
-        }
-        if (!email.isNullOrEmpty()) {
-            editor.remove(EMAIL_KEY)
-        }
-        if (!userId.isNullOrEmpty()) {
-            editor.remove(USER_ID_KEY)
-        }
-        if (!petIds.isNullOrEmpty()) {
-            editor.remove(PET_IDS)
-        }
-        if (!fetchUrl.isNullOrEmpty()) {
-            editor.remove(FETCH_URL)
-        }
+
+        if (!token.isNullOrEmpty()) editor.remove(TOKEN_KEY)
+        if (!username.isNullOrEmpty()) editor.remove(USERNAME_KEY)
+        if (!phoneNumber.isNullOrEmpty()) editor.remove(PHONE_NUMBER_KEY)
+        if (expirationTime == 0L || expirationTime < currentTime) editor.remove(EXPIRATION_TIME_KEY)
+        if (!email.isNullOrEmpty()) editor.remove(EMAIL_KEY)
+        if (!userId.isNullOrEmpty()) editor.remove(USER_ID_KEY)
+        if (!petIds.isNullOrEmpty()) editor.remove(PET_IDS)
+        if (!fetchUrl.isNullOrEmpty()) editor.remove(FETCH_URL)
+        if (walletBalance >= 0f) editor.remove(WALLET_BALANCE_KEY)
+        if (!referralCode.isNullOrEmpty()) editor.remove(REFERRAL_CODE_KEY)
+
         editor.apply()
     }
 
@@ -65,71 +56,65 @@ class UserRepository(
         username: String? = null,
         email: String? = null,
         petIds: List<String>? = null,
-        fetchUrl: String? = null
+        fetchUrl: String? = null,
+        walletBalance: Double? = null,
+        referralCode: String? = null
     ) {
         sharedPreferences.edit().apply {
-            token?.let {
-                putString(TOKEN_KEY, it)
-                Log.i("toggle", "savedToken: $token")
-            }
-            expirationTime?.let {
-                putLong(EXPIRATION_TIME_KEY, it)
-                Log.i("toggle", "savedExpirationTime: $expirationTime")
-
-            }
-            userId?.let {
-                putString(USER_ID_KEY, it)
-                Log.i("toggle", "savedUserId: $userId")
-            }
-            phoneNumber?.let {
-                putString(PHONE_NUMBER_KEY, it)
-                Log.i("toggle", "savedPhoneNumber: $phoneNumber")
-            }
-            username?.let {
-                putString(USERNAME_KEY, it)
-                Log.i("toggle", "savedUsername: $username")
-            }
-            email?.let {
-                putString(EMAIL_KEY, it)
-                Log.i("toggle", "savedEmail: $email")
-            }
-            petIds?.filter { it.isNotBlank() }?.let {
-                putString(PET_IDS, it.joinToString(","))
-                Log.i("toggle", "savedPetIds: $it")
-            }
-
-            fetchUrl?.let {
-                putString(FETCH_URL, it)
-                Log.i("toggle", "savedFetchUrl: $it")
-            }
+            token?.let { putString(TOKEN_KEY, it) }
+            expirationTime?.let { putLong(EXPIRATION_TIME_KEY, it) }
+            userId?.let { putString(USER_ID_KEY, it) }
+            phoneNumber?.let { putString(PHONE_NUMBER_KEY, it) }
+            username?.let { putString(USERNAME_KEY, it) }
+            email?.let { putString(EMAIL_KEY, it) }
+            petIds?.filter { it.isNotBlank() }?.let { putString(PET_IDS, it.joinToString(",")) }
+            fetchUrl?.let { putString(FETCH_URL, it) }
+            walletBalance?.let { putFloat(WALLET_BALANCE_KEY, it.toFloat()) }
+            referralCode?.let { putString(REFERRAL_CODE_KEY, it) }
 
             apply()
         }
     }
 
+    fun saveWalletBalance(balance: Double) {
+        sharedPreferences.edit().apply {
+            putFloat(WALLET_BALANCE_KEY, balance.toFloat())
+            apply()
+        }
+    }
+
+    fun getWalletBalance(): Double {
+        return sharedPreferences.getFloat(WALLET_BALANCE_KEY, 0f).toDouble()
+    }
+
+    fun saveReferralCode(code: String) {
+        sharedPreferences.edit().apply {
+            putString(REFERRAL_CODE_KEY, code)
+            apply()
+        }
+    }
+
+    fun getReferralCode(): String? {
+        return sharedPreferences.getString(REFERRAL_CODE_KEY, "")
+    }
+
     fun saveUserEmail(email: String? = null) {
         sharedPreferences.edit().apply {
-            email?.let {
-                putString(EMAIL_KEY, it)
-            }
+            email?.let { putString(EMAIL_KEY, it) }
             apply()
         }
     }
 
     fun saveUserFetchUrl(fetchUrl: String? = null) {
         sharedPreferences.edit().apply {
-            fetchUrl?.let {
-                putString(FETCH_URL, it)
-            }
+            fetchUrl?.let { putString(FETCH_URL, it) }
             apply()
         }
     }
 
     fun saveUsername(username: String? = null) {
         sharedPreferences.edit().apply {
-            username?.let {
-                putString(USERNAME_KEY, it)
-            }
+            username?.let { putString(USERNAME_KEY, it) }
             apply()
         }
     }
@@ -138,29 +123,23 @@ class UserRepository(
         sharedPreferences.edit().apply {
             petId?.takeIf { it.isNotBlank() }?.let {
                 val currentPetIds = getPetIds().toMutableList()
-                if (!currentPetIds.contains(it)) { // avoid duplicates
-                    currentPetIds.add(it)
-                }
+                if (!currentPetIds.contains(it)) currentPetIds.add(it)
                 putString(PET_IDS, currentPetIds.joinToString(","))
-                Log.i("toggle", "Updated PetIds: $currentPetIds")
-            }
-            apply()
-        }
-    }
-    fun removePetId(petId: String? = null) {
-        sharedPreferences.edit().apply {
-            petId?.takeIf { it.isNotBlank() }?.let {
-                val currentPetIds = getPetIds().toMutableList()
-                if (currentPetIds.contains(it)) {
-                    currentPetIds.remove(it) // ✅ remove instead of add
-                }
-                putString(PET_IDS, currentPetIds.joinToString(","))
-                Log.i("toggle", "Updated PetIds after removal: $currentPetIds")
             }
             apply()
         }
     }
 
+    fun removePetId(petId: String? = null) {
+        sharedPreferences.edit().apply {
+            petId?.takeIf { it.isNotBlank() }?.let {
+                val currentPetIds = getPetIds().toMutableList()
+                if (currentPetIds.contains(it)) currentPetIds.remove(it)
+                putString(PET_IDS, currentPetIds.joinToString(","))
+            }
+            apply()
+        }
+    }
 
     fun getUserId(): String? = sharedPreferences.getString(USER_ID_KEY, "")
     fun getUserName(): String? = sharedPreferences.getString(USERNAME_KEY, "")
@@ -168,11 +147,10 @@ class UserRepository(
     fun getUserPhoneNumber(): String? = sharedPreferences.getString(PHONE_NUMBER_KEY, "")
     fun getPetIds(): List<String> {
         val petIdsString = sharedPreferences.getString(PET_IDS, "")
-        return petIdsString?.split(",") ?: emptyList()
+        return petIdsString?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
     }
 
     fun getFetchUrl(): String? = sharedPreferences.getString(FETCH_URL, "")
-
     fun getToken(): String? = sharedPreferences.getString(TOKEN_KEY, "")
     private fun getExpirationTime(): Long = sharedPreferences.getLong(EXPIRATION_TIME_KEY, 0)
 
@@ -192,6 +170,8 @@ class UserRepository(
                 .remove(USERNAME_KEY)
                 .remove(PHONE_NUMBER_KEY)
                 .remove(PET_IDS)
+                .remove(WALLET_BALANCE_KEY)
+                .remove(REFERRAL_CODE_KEY)
                 .commit()
             Result.success(isSuccess)
         } catch (e: Exception) {

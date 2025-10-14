@@ -111,6 +111,8 @@ class RegistrationViewModel(
                             val number = userResponse.phoneNumber
                             val username = userResponse.username
                             val email = userResponse.email
+                            val referralCode = userResponse.referralCode
+                            val walletBalance = userResponse.walletBalance
                             Log.i("toggle", "token: $token")
                             Log.i("toggle", "expirationTime: $expirationTime")
                             Log.i("toggle", "userId: $userId")
@@ -123,7 +125,9 @@ class RegistrationViewModel(
                                 userId = userResponse.userId,
                                 phoneNumber = phoneNumber,
                                 username = userResponse.username,
-                                email = userResponse.email
+                                email = userResponse.email,
+                                walletBalance = walletBalance,
+                                referralCode = referralCode
                             )
                         }
                         authEventManager.sendEvent(Event.LoggedIn)
