@@ -30,6 +30,7 @@ fun ServiceTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     title: String,
     containerColor: Color = Color.Transparent,
+    tint: Color = Color.Black,
     icon: @Composable () -> Unit
 ) {
     TopAppBar(
@@ -56,7 +57,9 @@ fun ServiceTopAppBar(
                         contentDescription = "Back",
                         modifier = Modifier
                             .bounceClick { navController.popBackStack() }
-                            .padding(horizontal = MaterialTheme.dimens.small1)
+                            .padding(horizontal = MaterialTheme.dimens.small1),
+                        tint = tint
+
                     )
                     Text(
                         text = title,

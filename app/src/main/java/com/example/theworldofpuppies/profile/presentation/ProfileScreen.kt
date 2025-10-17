@@ -97,7 +97,9 @@ fun ProfileScreen(
             }
             item {
                 AccountAndMembershipSection(
-                    onMembershipClick = {},
+                    onMembershipClick = {
+                        profileViewModel.onMembershipClick(navController)
+                    },
                     onAddressClick = { profileViewModel.onAddressClick(navController) }
                 )
             }
