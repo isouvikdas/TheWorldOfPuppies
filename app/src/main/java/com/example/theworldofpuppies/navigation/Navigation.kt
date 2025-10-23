@@ -44,6 +44,7 @@ import com.example.theworldofpuppies.services.grooming.presentation.GroomingView
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryScreen
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
 import com.example.theworldofpuppies.membership.presentation.MembershipScreen
+import com.example.theworldofpuppies.membership.presentation.PremiumOptionViewModel
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserScreen
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
 import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnScreen
@@ -184,6 +185,9 @@ fun AppNavigation(
 
     val referEarnViewModel = koinViewModel<ReferEarnViewModel>()
     val referEarnUiState by referEarnViewModel.referEarnUiState.collectAsStateWithLifecycle()
+
+    val premiumOptionViewModel = koinViewModel<PremiumOptionViewModel>()
+    val premiumOptionUiState by premiumOptionViewModel.premiumOptionUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -710,7 +714,9 @@ fun AppNavigation(
                 searchIconVisibilityChanged
             )
             MembershipScreen(
-                navController = navController
+                navController = navController,
+                premiumOptionViewModel = premiumOptionViewModel,
+                premiumOptionUiState = premiumOptionUiState
             )
         }
 

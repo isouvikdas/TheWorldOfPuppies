@@ -1,15 +1,18 @@
 package com.example.theworldofpuppies.membership.presentation
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +28,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,14 +54,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.membership.domain.PremiumOption
+import com.example.theworldofpuppies.membership.domain.PremiumOptionUiState
+import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
 import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnScreenHeader
 import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.delay
@@ -64,7 +77,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun MembershipScreen(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    premiumOptionViewModel: PremiumOptionViewModel,
+    premiumOptionUiState: PremiumOptionUiState
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = rememberTopAppBarState()
@@ -72,29 +87,18 @@ fun MembershipScreen(
 
     val context = LocalContext.current
 
-    var isRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing = premiumOptionUiState.isRefreshing
     val pullToRefreshState = rememberPullToRefreshState()
 
-    val scope = rememberCoroutineScope()
+    val premiumOptions = premiumOptionUiState.premiumOptions
 
-    val premiumOptions = listOf(
-        PremiumOption(
-            name = "Silver Plan",
-            description = "Standard Membership Plan valid for 6 months.",
-            price = 499.00,
-            discountedPrice = 149.0,
-            validity = 6
-        ),
-        PremiumOption(
-            name = "Gold Plan",
-            description = "Premium Membership Plan valid for 12 months.",
-            price = 999.00,
-            discountedPrice = 249.0,
-            validity = 6
-        )
-    )
+    val selectedOption = premiumOptionUiState.selectedOption
 
-    var selectedOption by remember { mutableStateOf(premiumOptions.first()) }
+    LaunchedEffect(Unit) {
+        if (!premiumOptionUiState.isAlreadyLoaded && premiumOptions.isEmpty()) {
+            premiumOptionViewModel.getPremium()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -117,11 +121,7 @@ fun MembershipScreen(
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = {
-                        scope.launch {
-                            isRefreshing = true
-                            delay(2000)
-                            isRefreshing = false
-                        }
+                        premiumOptionViewModel.forceLoad()
                     },
                     state = pullToRefreshState
                 ) {
@@ -202,31 +202,63 @@ fun MembershipScreen(
                                 }
                             }
                         }
-
-
                     }
-
                 }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .offset(y = 260.dp),
-                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    premiumOptions.forEach { option ->
-                        val isSelected = option == selectedOption
-                        PremiumOptionField(
-                            name = option.name,
-                            description = option.description,
-                            price = option.price,
-                            discountedPrice = option.discountedPrice,
-                            isSelected = isSelected,
-                            onSelect = {
-                                selectedOption = option
-                            }
-                        )
+                    if (premiumOptions.isNotEmpty()) {
+                        premiumOptions.forEach { option ->
+                            val isSelected = option == selectedOption
+                            PremiumOptionField(
+                                name = option.name,
+                                description = option.description,
+                                price = option.price,
+                                discountedPrice = option.discountedPrice,
+                                isSelected = isSelected,
+                                onSelect = {
+                                    premiumOptionViewModel.selectOption(option)
+                                }
+                            )
+                        }
+                    } else if (premiumOptionUiState.isLoading && !premiumOptionUiState.isRefreshing) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (premiumOptionUiState.errorMessage != null) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(MaterialTheme.dimens.small1),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            Image(
+                                painterResource(R.drawable.dog_sad),
+                                contentDescription = "dog",
+                                modifier = Modifier.size(60.dp)
+                            )
+                            Text(
+                                premiumOptionUiState.errorMessage.toString(context),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W500),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
+
+                MembershipScreenBottomSection(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    context = context,
+                    navController = navController
+                )
 
             }
         }
@@ -278,7 +310,7 @@ fun PremiumOptionField(
             .padding(horizontal = MaterialTheme.dimens.small1),
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
-        shadowElevation = if (isSelected) 8.dp else 0.dp,
+        shadowElevation = if (isSelected) 5.dp else 0.dp,
         border = if (isSelected)
             BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary)
         else
@@ -359,6 +391,58 @@ fun PremiumOptionField(
                     tint = MaterialTheme.colorScheme.tertiary
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun MembershipScreenBottomSection(
+    modifier: Modifier = Modifier,
+    context: Context,
+    navController: NavController
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .zIndex(1f),
+        color = Color.White,
+        shape = RoundedCornerShape(
+            topStart = MaterialTheme.dimens.small3,
+            topEnd = MaterialTheme.dimens.small3
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(Color.LightGray.copy(0.55f)),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+            Button(
+                onClick = {
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(MaterialTheme.dimens.buttonHeight)
+                    .padding(horizontal = MaterialTheme.dimens.small1),
+                shape = RoundedCornerShape(MaterialTheme.dimens.small1),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    disabledContainerColor = Color.LightGray,
+                    disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                ),
+            ) {
+                Text(
+                    text = "Join Now",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
         }
     }
 

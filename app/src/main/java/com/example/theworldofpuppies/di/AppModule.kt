@@ -38,6 +38,10 @@ import com.example.theworldofpuppies.core.data.local.Database
 import com.example.theworldofpuppies.core.data.networking.HttpClientFactory
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
+import com.example.theworldofpuppies.membership.data.PremiumOptionApi
+import com.example.theworldofpuppies.membership.data.PremiumOptionRepositoryImpl
+import com.example.theworldofpuppies.membership.domain.PremiumOptionRepository
+import com.example.theworldofpuppies.membership.presentation.PremiumOptionViewModel
 import com.example.theworldofpuppies.pet_insurance.data.PetInsuranceRepositoryImpl
 import com.example.theworldofpuppies.pet_insurance.data.remote.PetInsuranceBookingApi
 import com.example.theworldofpuppies.pet_insurance.domain.PetInsuranceRepository
@@ -148,6 +152,7 @@ val appModule = module {
     singleOf(::CartApi)
     singleOf(::ReviewApi)
     singleOf(::UpdateUserApi)
+    singleOf(::PremiumOptionApi)
     singleOf(::CartRepositoryImpl).bind<CartRepository>()
     singleOf(::OrderRepositoryImpl).bind<OrderRepository>()
     singleOf(::PaymentRepositoryImpl).bind<PaymentRepository>()
@@ -166,6 +171,7 @@ val appModule = module {
     singleOf(::BookingHistoryRepositoryImpl).bind<BookingHistoryRepository>()
     singleOf(::UpdateUserRepositoryImpl).bind<UpdateUserRepository>()
     singleOf(::ReferEarnRepositoryImpl).bind<ReferEarnRepository>()
+    singleOf(::PremiumOptionRepositoryImpl).bind<PremiumOptionRepository>()
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::ProductViewModel)
@@ -189,4 +195,5 @@ val appModule = module {
     viewModelOf(::BookingHistoryViewModel)
     viewModelOf(::UpdateUserViewModel)
     viewModelOf(::ReferEarnViewModel)
+    viewModelOf(::PremiumOptionViewModel)
 }
