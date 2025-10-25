@@ -106,7 +106,7 @@ class LoginViewModel(
                             val email = userResponse.email
                             val petIds = userResponse.petIds
                             val fetchUrl = userResponse.fetchUrl
-                            val membershipId = userResponse.membershipId
+                            val membershipId = userResponse.activePremiumOptionOrderId
                             Log.i("toggle", "token: $token")
                             Log.i("toggle", "expirationTime: $expirationTime")
                             Log.i("toggle", "userId: $userId")

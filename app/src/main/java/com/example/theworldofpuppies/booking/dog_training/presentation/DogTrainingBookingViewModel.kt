@@ -10,6 +10,7 @@ import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEven
 import com.example.theworldofpuppies.booking.core.presentation.utils.BookingEventManager
 import com.example.theworldofpuppies.booking.dog_training.domain.DogTrainingBookingRepository
 import com.example.theworldofpuppies.booking.dog_training.domain.DogTrainingBookingUIState
+import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 
 class DogTrainingBookingViewModel(
     private val dogTrainingBookingRepository: DogTrainingBookingRepository,
-    private val bookingEventManager: BookingEventManager
+    private val bookingEventManager: BookingEventManager,
 ) : ViewModel() {
 
     private val _dogTrainingBookingUiState = MutableStateFlow(DogTrainingBookingUIState())
@@ -53,7 +54,7 @@ class DogTrainingBookingViewModel(
                     notes = notes,
                     dogTrainingOption = dogTrainingOption,
                     dogTrainingFeatures = dogTrainingFeatures,
-                    )
+                )
                 ) {
                     is Result.Success -> {
                         Log.i("booking1", result.data.toString())
