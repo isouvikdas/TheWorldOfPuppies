@@ -42,11 +42,13 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
+import com.example.theworldofpuppies.booking.core.presentation.WalletBalanceRow
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.util.calculateSession
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.profile.pet.domain.Pet
+import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkDateRange
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkingUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.enums.Days
@@ -64,7 +66,8 @@ fun BookingPetWalkScreen(
     addressUiState: AddressUiState,
     addressViewModel: AddressViewModel,
     bookingPetWalkViewModel: BookingPetWalkViewModel,
-    selectedPetForBooking: Pet?
+    selectedPetForBooking: Pet?,
+    referEarnUiState: ReferEarnUiState
 ) {
 
     val context = LocalContext.current
@@ -161,7 +164,8 @@ fun BookingPetWalkScreen(
                     serviceDate = singleDate,
                     bookingPetWalkViewModel = bookingPetWalkViewModel,
                     context = context,
-                    petId = selectedPetForBooking?.id ?: ""
+                    petId = selectedPetForBooking?.id ?: "",
+                    walletBalance = referEarnUiState.walletBalance
                 )
             }
         }
@@ -195,7 +199,8 @@ fun BookingPetWalkBottomSection(
     serviceDate: LocalDateTime? = null,
     bookingPetWalkViewModel: BookingPetWalkViewModel,
     context: Context,
-    petId: String
+    petId: String,
+    walletBalance: Double = 0.0
 ) {
 
     val discountedPrice = basePrice.times(100 - discount).div(100)
@@ -211,7 +216,14 @@ fun BookingPetWalkBottomSection(
             )
         }
     }
-    val totalPrice = discountedPrice.times(sessionCount)
+    val subTotal = discountedPrice.times(sessionCount)
+    val subTotalWithoutDiscount = basePrice.times(sessionCount)
+    val finalWalletBalance = if (walletBalance <= subTotal) {
+        walletBalance
+    } else {
+        subTotal
+    }
+    val totalPrice = subTotal - finalWalletBalance
 
     Surface(
         modifier = modifier
@@ -246,10 +258,22 @@ fun BookingPetWalkBottomSection(
             Spacer(modifier = Modifier.height(6.dp))
             PriceRowSection(
                 priceTitle = "Sessions ($sessionCount)",
-                price2 = totalPrice
+                price1 = subTotalWithoutDiscount,
+                price2 = subTotal
             )
             Spacer(modifier = Modifier.height(6.dp))
 
+            if (finalWalletBalance > 0) {
+                WalletBalanceRow(walletBalance = finalWalletBalance)
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            PriceRowSection(
+                priceTitle = "",
+                price2 = totalPrice
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             Button(
                 onClick = {
                     selectedFrequency?.let {

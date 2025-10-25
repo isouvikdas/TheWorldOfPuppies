@@ -70,8 +70,9 @@ import com.example.theworldofpuppies.address.domain.AddressUiState
 import com.example.theworldofpuppies.address.presentation.AddressViewModel
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.core.domain.toString
-import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
 import com.example.theworldofpuppies.booking.core.presentation.BookingSuccessDialog
+import com.example.theworldofpuppies.booking.core.presentation.WalletBalanceRow
+import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
@@ -82,9 +83,10 @@ import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.profile.pet.domain.Pet
+import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
+import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.grooming.domain.GroomingSubService
 import com.example.theworldofpuppies.services.grooming.domain.GroomingUiState
-import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
 import java.time.LocalDateTime
@@ -98,7 +100,8 @@ fun BookingGroomingScreen(
     addressUiState: AddressUiState,
     groomingBookingViewModel: GroomingBookingViewModel,
     groomingUiState: GroomingUiState,
-    selectedPetForBooking: Pet?
+    selectedPetForBooking: Pet?,
+    referEarnUiState: ReferEarnUiState
 ) {
     val context = LocalContext.current
 
@@ -257,7 +260,8 @@ fun BookingGroomingScreen(
                         context = context,
                         groomingBookingViewModel = groomingBookingViewModel,
                         serviceId = serviceId,
-                        petId = selectedPetForBooking?.id ?: ""
+                        petId = selectedPetForBooking?.id ?: "",
+                        walletBalance = referEarnUiState.walletBalance
                     )
                 }
             }
@@ -556,23 +560,33 @@ fun DatePickerModal(
 @Composable
 fun ServiceSummaryCard(
     modifier: Modifier = Modifier,
-    subService: GroomingSubService?,
-    context: Context
+    subService: GroomingSubService,
+    context: Context,
+    walletBalance: Double = 0.0
 ) {
+    val price = subService.price
+    val subTotal = subService.discountedPrice
+    val finalWalletBalance = if (walletBalance <= subTotal) {
+        walletBalance
+    } else {
+        subTotal
+    }
+    val totalPrice = subTotal - finalWalletBalance
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(MaterialTheme.dimens.small1),
+            .padding(vertical = MaterialTheme.dimens.small1),
         horizontalAlignment = Alignment.Start
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.dimens.small1),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                "Service",
+                "Service Session (1)",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.W500
             )
@@ -582,16 +596,15 @@ fun ServiceSummaryCard(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
-                subService?.name?.let {
-                    Text(
-                        "($it)",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
 
-                }
+                Text(
+                    "(${subService.name})",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+
 
             }
 
@@ -599,62 +612,64 @@ fun ServiceSummaryCard(
         Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.dimens.small1),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                "Session (1)",
-                style = MaterialTheme.typography.titleMedium,
+                "Service Fee",
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.W500
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                subService?.price?.let {
-                    Text(
-                        formatCurrency(it),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.W500,
-                        textDecoration = TextDecoration.LineThrough,
-                        fontStyle = FontStyle.Italic,
-                        color = Color.Gray.copy(0.9f),
-                        modifier = Modifier.padding(end = 10.dp)
-                    )
+                Text(
+                    formatCurrency(price),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.W500,
+                    textDecoration = TextDecoration.LineThrough,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray.copy(0.9f),
+                    modifier = Modifier.padding(end = 10.dp)
+                )
 
-                }
-                subService?.discountedPrice?.let {
-                    Text(
-                        formatCurrency(it),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
+                Text(
+                    formatCurrency(subTotal),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
 
             }
+        }
+        if (walletBalance > 0) {
+            WalletBalanceRow(
+                walletBalance = finalWalletBalance
+            )
         }
         Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.dimens.small1),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
 
             Text(
                 "Total",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier.padding(end = 5.dp)
             )
-            subService?.discountedPrice?.let {
                 Text(
-                    formatCurrency(it),
-                    style = MaterialTheme.typography.titleLarge,
+                    formatCurrency(totalPrice),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
-            }
+
         }
     }
 }
@@ -668,7 +683,8 @@ fun BookingGroomingBottomSection(
     groomingBookingViewModel: GroomingBookingViewModel,
     context: Context,
     serviceId: String,
-    petId: String
+    petId: String,
+    walletBalance: Double = 0.0
 ) {
     Surface(
         modifier = modifier
@@ -690,7 +706,13 @@ fun BookingGroomingBottomSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ServiceSummaryCard(subService = subService, context = context)
+            subService?.let {
+                ServiceSummaryCard(
+                    subService = subService,
+                    context = context,
+                    walletBalance = walletBalance
+                )
+            }
             Button(
                 onClick = {
                     groomingBookingViewModel.placeBooking(

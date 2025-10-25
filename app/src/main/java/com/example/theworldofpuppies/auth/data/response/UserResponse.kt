@@ -11,5 +11,6 @@ data class UserResponse(
     val image: PetImage? = null,
     val fetchUrl: String? = null,
     val referralCode: String? = null,
-    val walletBalance: Double = 0.0
+    val walletBalance: Double = 0.0,
+    val membershipId: String? = null
 )

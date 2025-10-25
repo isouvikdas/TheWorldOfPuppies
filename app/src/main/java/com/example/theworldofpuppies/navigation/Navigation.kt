@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.navigation
 
-import android.util.Log
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +28,6 @@ import com.example.theworldofpuppies.booking.vet.presentation.VetBookingViewMode
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.home.presentation.HomeScreen
-import com.example.theworldofpuppies.messages.presentation.MessageScreen
 import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceScreen
 import com.example.theworldofpuppies.pet_insurance.presentation.PetInsuranceViewModel
 import com.example.theworldofpuppies.profile.pet.presentation.PetListScreen
@@ -45,11 +43,13 @@ import com.example.theworldofpuppies.services.grooming.presentation.GroomingScre
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryScreen
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
+import com.example.theworldofpuppies.membership.presentation.MembershipCheckoutScreen
+import com.example.theworldofpuppies.membership.presentation.MembershipScreen
+import com.example.theworldofpuppies.membership.presentation.PremiumOptionViewModel
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserScreen
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
 import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnScreen
 import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnViewModel
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingScreen
 import com.example.theworldofpuppies.services.pet_walking.presentation.PetWalkingViewModel
 import com.example.theworldofpuppies.services.vet.presentation.VetIssuesScreen
@@ -94,6 +94,8 @@ sealed class Screen(val route: String) {
     data object ReviewScreen : Screen("ReviewScreen")
     data object UpdateUserScreen: Screen("UpdateUserScreen")
     data object ReferEarnScreen: Screen("ReferEarnScreen")
+    data object MembershipScreen: Screen("MembershipScreen")
+    data object MembershipCheckoutScreen: Screen("MembershipCheckoutScreen")
 }
 
 @Composable
@@ -107,7 +109,8 @@ fun AppNavigation(
     isLoggedIn: Boolean,
     onGesturesChanged: (Boolean) -> Unit,
     searchIconVisibilityChanged: (Boolean) -> Unit,
-    orderViewModel: OrderViewModel
+    orderViewModel: OrderViewModel,
+    premiumOptionViewModel: PremiumOptionViewModel
 ) {
 
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
@@ -185,6 +188,8 @@ fun AppNavigation(
 
     val referEarnViewModel = koinViewModel<ReferEarnViewModel>()
     val referEarnUiState by referEarnViewModel.referEarnUiState.collectAsStateWithLifecycle()
+
+    val premiumOptionUiState by premiumOptionViewModel.premiumOptionUiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -491,7 +496,8 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 groomingUiState = groomingUiState,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
 
@@ -528,7 +534,8 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 bookingPetWalkViewModel = bookingPetWalkViewModel,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
         composable(route = Screen.VetScreen.route) {
@@ -578,7 +585,8 @@ fun AppNavigation(
                 vetUiState = vetUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
 
@@ -620,7 +628,8 @@ fun AppNavigation(
                 dogTrainingBookingUiState = dogTrainingBookingUiState,
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
-                selectedPetForBooking = selectedPetForService
+                selectedPetForBooking = selectedPetForService,
+                referEarnUiState = referEarnUiState
             )
         }
         composable(route = Screen.PetInsuranceScreen.route) {
@@ -695,6 +704,37 @@ fun AppNavigation(
                 navController = navController,
                 referEarnViewModel = referEarnViewModel,
                 referEarnUiState = referEarnUiState
+            )
+        }
+
+        composable(route = Screen.MembershipScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            MembershipScreen(
+                navController = navController,
+                premiumOptionViewModel = premiumOptionViewModel,
+                premiumOptionUiState = premiumOptionUiState
+            )
+        }
+        composable(route = Screen.MembershipCheckoutScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            MembershipCheckoutScreen(
+                navController = navController,
+                premiumOptionViewModel = premiumOptionViewModel,
+                premiumOptionUiState = premiumOptionUiState,
+                addressViewModel = addressViewModel,
+                addressUiState = addressUiState
             )
         }
 

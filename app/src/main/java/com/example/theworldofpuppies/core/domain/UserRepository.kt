@@ -17,6 +17,7 @@ class UserRepository(
         private const val FETCH_URL = "fetch_url"
         private const val WALLET_BALANCE_KEY = "wallet_balance"
         private const val REFERRAL_CODE_KEY = "referral_code"
+        private const val MEMBERSHIP_ID_KEY = "membership_id"
     }
 
     fun clearOnInconsistentData() {
@@ -30,6 +31,7 @@ class UserRepository(
         val fetchUrl = sharedPreferences.getString(FETCH_URL, "")
         val walletBalance = sharedPreferences.getFloat(WALLET_BALANCE_KEY, -1f)
         val referralCode = sharedPreferences.getString(REFERRAL_CODE_KEY, "")
+        val membershipId = sharedPreferences.getString(MEMBERSHIP_ID_KEY, "")
 
         val currentTime = System.currentTimeMillis()
         val editor = sharedPreferences.edit()
@@ -44,6 +46,7 @@ class UserRepository(
         if (!fetchUrl.isNullOrEmpty()) editor.remove(FETCH_URL)
         if (walletBalance >= 0f) editor.remove(WALLET_BALANCE_KEY)
         if (!referralCode.isNullOrEmpty()) editor.remove(REFERRAL_CODE_KEY)
+        if (!membershipId.isNullOrEmpty()) editor.remove(MEMBERSHIP_ID_KEY)
 
         editor.apply()
     }
@@ -58,7 +61,8 @@ class UserRepository(
         petIds: List<String>? = null,
         fetchUrl: String? = null,
         walletBalance: Double? = null,
-        referralCode: String? = null
+        referralCode: String? = null,
+        membershipId: String? = null
     ) {
         sharedPreferences.edit().apply {
             token?.let { putString(TOKEN_KEY, it) }
@@ -71,6 +75,7 @@ class UserRepository(
             fetchUrl?.let { putString(FETCH_URL, it) }
             walletBalance?.let { putFloat(WALLET_BALANCE_KEY, it.toFloat()) }
             referralCode?.let { putString(REFERRAL_CODE_KEY, it) }
+            membershipId?.let { putString(MEMBERSHIP_ID_KEY, it) }
 
             apply()
         }
@@ -79,6 +84,17 @@ class UserRepository(
     fun saveWalletBalance(balance: Double) {
         sharedPreferences.edit().apply {
             putFloat(WALLET_BALANCE_KEY, balance.toFloat())
+            apply()
+        }
+    }
+
+    fun getMembershipId() : String? {
+        return sharedPreferences.getString(MEMBERSHIP_ID_KEY, "")
+    }
+
+    fun saveMembershipId(membershipId: String) {
+        sharedPreferences.edit().apply {
+            putString(MEMBERSHIP_ID_KEY, membershipId)
             apply()
         }
     }

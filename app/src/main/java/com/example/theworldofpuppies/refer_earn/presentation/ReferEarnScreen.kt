@@ -414,6 +414,7 @@ fun ReferEarnScreenHeader(
         navController = navController,
         title = "",
         icon = {},
-        containerColor = MaterialTheme.colorScheme.tertiary
+        containerColor = MaterialTheme.colorScheme.tertiary,
+        tint = Color.White
     )
 }

@@ -1,24 +1,18 @@
 package com.example.theworldofpuppies.shop.order.data
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.unit.dp
-import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentRequest
 import com.example.theworldofpuppies.shop.order.data.requests.PaymentVerificationRequest
 import com.example.theworldofpuppies.shop.order.data.response.PaymentResponse
-import com.example.theworldofpuppies.shop.order.domain.PaymentMethod
 import com.example.theworldofpuppies.shop.order.domain.PaymentRepository
-import com.example.theworldofpuppies.shop.order.presentation.PaymentMethods
-import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class PaymentRepositoryImpl(
     private val paymentApi: PaymentApi
-): PaymentRepository {
-   override suspend fun createPaymentOrder(paymentRequest: PaymentRequest): Result<PaymentResponse, NetworkError> {
+) : PaymentRepository {
+    override suspend fun createPaymentOrder(paymentRequest: PaymentRequest): Result<PaymentResponse, NetworkError> {
         return withContext(Dispatchers.IO) {
             when (val result = paymentApi.createPaymentOrder(paymentRequest)) {
                 is Result.Success -> {
@@ -36,7 +30,9 @@ class PaymentRepositoryImpl(
             }
         }
     }
-    override suspend fun verifyPaymentOrder(paymentVerificationRequest: PaymentVerificationRequest): Result<Boolean, NetworkError> {
+
+    override suspend fun verifyPaymentOrder(paymentVerificationRequest: PaymentVerificationRequest)
+            : Result<Boolean, NetworkError> {
         return withContext(Dispatchers.IO) {
             when (val result = paymentApi.verifyPayment(paymentVerificationRequest)) {
                 is Result.Success -> {

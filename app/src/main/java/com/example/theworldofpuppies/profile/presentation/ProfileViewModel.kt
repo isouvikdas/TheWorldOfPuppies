@@ -41,6 +41,12 @@ class ProfileViewModel(
         }
     }
 
+    fun onMembershipClick(navController: NavController) {
+        viewModelScope.launch {
+            navController.navigate(Screen.MembershipScreen.route)
+        }
+    }
+
     fun onBookingClick(navController: NavController) {
         viewModelScope.launch {
             navController.navigate(BottomNavigationItems.Booking.route) {

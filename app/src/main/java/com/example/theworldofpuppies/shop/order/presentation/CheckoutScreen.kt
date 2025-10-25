@@ -184,7 +184,7 @@ fun CheckoutScreen(
                     item {
                         OrderSection(
                             modifier = Modifier
-                                .padding(top = MaterialTheme.dimens.extraSmall.times(2))
+                                .padding(top = 10.dp)
                                 .padding(horizontal = MaterialTheme.dimens.small1),
                             selectedPaymentMethod = selectedPaymentMethod,
                             orderViewModel = orderViewModel

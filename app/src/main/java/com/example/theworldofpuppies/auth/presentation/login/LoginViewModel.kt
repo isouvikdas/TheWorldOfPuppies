@@ -106,6 +106,7 @@ class LoginViewModel(
                             val email = userResponse.email
                             val petIds = userResponse.petIds
                             val fetchUrl = userResponse.fetchUrl
+                            val membershipId = userResponse.membershipId
                             Log.i("toggle", "token: $token")
                             Log.i("toggle", "expirationTime: $expirationTime")
                             Log.i("toggle", "userId: $userId")
@@ -122,7 +123,8 @@ class LoginViewModel(
                                 petIds = petIds,
                                 fetchUrl = fetchUrl,
                                 walletBalance = userResponse.walletBalance,
-                                referralCode = userResponse.referralCode
+                                referralCode = userResponse.referralCode,
+                                membershipId = membershipId
                             )
                         }
                         authEventManager.sendEvent(Event.LoggedIn)
