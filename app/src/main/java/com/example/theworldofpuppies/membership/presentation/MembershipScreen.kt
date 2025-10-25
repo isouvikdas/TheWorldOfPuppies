@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.membership.presentation
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -46,7 +45,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,14 +62,12 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.core.presentation.util.toString
-import com.example.theworldofpuppies.membership.domain.PremiumOption
 import com.example.theworldofpuppies.membership.domain.PremiumOptionUiState
-import com.example.theworldofpuppies.profile.user.presentation.UpdateUserViewModel
 import com.example.theworldofpuppies.refer_earn.presentation.ReferEarnScreenHeader
 import com.example.theworldofpuppies.ui.theme.dimens
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +89,13 @@ fun MembershipScreen(
     val premiumOptions = premiumOptionUiState.premiumOptions
 
     val selectedOption = premiumOptionUiState.selectedOption
+
+    val optionOrder = premiumOptionUiState.premiumOptionOrder
+
+    val optionOrderVisibility =
+        optionOrder?.isPaymentVerified == true && optionOrder.endDate.isAfter(
+            LocalDateTime.now()
+        )
 
     LaunchedEffect(Unit) {
         if (!premiumOptionUiState.isAlreadyLoaded && premiumOptions.isEmpty()) {
@@ -211,7 +214,15 @@ fun MembershipScreen(
                     verticalArrangement = Arrangement.spacedBy(15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (premiumOptions.isNotEmpty()) {
+                    if (optionOrderVisibility) {
+                        ActivePlanCard(
+                            name = optionOrder.premiumOption.name,
+                            price = optionOrder.premiumOption.price,
+                            discountedPrice = optionOrder.premiumOption.discountedPrice,
+                            description = optionOrder.premiumOption.description,
+                            endDateTime = optionOrder.endDate
+                        )
+                    } else if (premiumOptions.isNotEmpty()) {
                         premiumOptions.forEach { option ->
                             val isSelected = option == selectedOption
                             PremiumOptionField(
@@ -225,6 +236,8 @@ fun MembershipScreen(
                                 }
                             )
                         }
+
+
                     } else if (premiumOptionUiState.isLoading && !premiumOptionUiState.isRefreshing) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -235,7 +248,9 @@ fun MembershipScreen(
                         }
                     } else if (premiumOptionUiState.errorMessage != null) {
                         Column(
-                            modifier = Modifier.fillMaxSize().padding(MaterialTheme.dimens.small1),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(MaterialTheme.dimens.small1),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Top
                         ) {
@@ -253,12 +268,17 @@ fun MembershipScreen(
                         }
                     }
                 }
+                if (!optionOrderVisibility){
+                    MembershipScreenBottomSection(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        onJoinClick = {
+                            selectedOption?.let {
+                                premiumOptionViewModel.onJoinNowClick(navController)
+                            }
+                        }
+                    )
 
-                MembershipScreenBottomSection(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    context = context,
-                    navController = navController
-                )
+                }
 
             }
         }
@@ -396,10 +416,129 @@ fun PremiumOptionField(
 }
 
 @Composable
+fun ActivePlanCard(
+    modifier: Modifier = Modifier,
+    name: String?,
+    price: Double?,
+    description: String?,
+    discountedPrice: Double?,
+    endDateTime: LocalDateTime?
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(horizontal = MaterialTheme.dimens.small1),
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        border =
+            BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary)
+
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize(),
+            color = Color.LightGray.copy(0.4f)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = MaterialTheme.dimens.small1),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.65f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier,
+                            text = "Active",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                        name?.let {
+                            Text(
+                                modifier = Modifier,
+                                text = "(${it})",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        }
+
+                    }
+                    description?.let {
+                        Text(
+                            modifier = Modifier,
+                            text = "Standard Membership Plan valid for 6 months.",
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.W500),
+                            color = MaterialTheme.colorScheme.tertiary
+
+                        )
+                    }
+
+                    endDateTime?.let {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "End Date: ",
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.W500)
+                            )
+
+                            Text(
+                                text = formatDateTime(endDateTime, "dd/MM/yyyy"),
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.W500),
+                            )
+                        }
+
+                    }
+
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    price?.let {
+                        Text(
+                            modifier = Modifier,
+                            text = formatCurrency(it),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = Color.Gray,
+                            fontStyle = FontStyle.Italic,
+                            textDecoration = TextDecoration.LineThrough
+                        )
+                    }
+                    discountedPrice?.let {
+                        Text(
+                            modifier = Modifier,
+                            text = formatCurrency(discountedPrice),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
 fun MembershipScreenBottomSection(
     modifier: Modifier = Modifier,
-    context: Context,
-    navController: NavController
+    onJoinClick: () -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -423,6 +562,7 @@ fun MembershipScreenBottomSection(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
             Button(
                 onClick = {
+                    onJoinClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()

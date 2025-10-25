@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -24,12 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.theworldofpuppies.auth.presentation.signOut.SignOutDialog
+import com.example.theworldofpuppies.core.domain.PayingFor
 import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomAppbar
 import com.example.theworldofpuppies.core.presentation.nav_items.sideNav.NavigationDrawer
+import com.example.theworldofpuppies.membership.presentation.PremiumOptionViewModel
 import com.example.theworldofpuppies.navigation.AppNavigation
 import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
 import com.example.theworldofpuppies.ui.theme.AppTheme
@@ -42,6 +47,9 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
     private lateinit var orderViewModel: OrderViewModel
+    private lateinit var premiumOptionViewModel: PremiumOptionViewModel
+    private var payingFor: PayingFor? = null
+    private lateinit var navController: NavHostController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -57,9 +65,22 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
 
             AppTheme {
                 orderViewModel = koinViewModel<OrderViewModel>()
+                premiumOptionViewModel = koinViewModel<PremiumOptionViewModel>()
                 val authViewModel = koinViewModel<AuthViewModel>()
                 val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
                 val resetKey by authViewModel.resetKey.collectAsStateWithLifecycle()
+
+                LaunchedEffect(Unit) {
+                    orderViewModel.payingForEvent.collect {
+                        payingFor = it
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    premiumOptionViewModel.payingForEvent.collect {
+                        payingFor = it
+                    }
+                }
 
                 key(resetKey) {
                     val navController = rememberNavController()
@@ -118,7 +139,8 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                     isLoggedIn = isLoggedIn,
                                     onGesturesChanged = { gesturesEnabled = it },
                                     searchIconVisibilityChanged = { searchIconVisibility = it },
-                                    orderViewModel = orderViewModel
+                                    orderViewModel = orderViewModel,
+                                    premiumOptionViewModel = premiumOptionViewModel
                                 )
                                 if (bottomBarVisible) {
                                     BottomAppbar(
@@ -151,16 +173,44 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
 
     override fun onPaymentSuccess(razorpayPaymentId: String?, paymentData: PaymentData) {
         if (!razorpayPaymentId.isNullOrEmpty()) {
-            orderViewModel.verifyPayment(
-                razorpayOrderId = paymentData.orderId,
-                signature = paymentData.signature,
-                paymentId = razorpayPaymentId,
-            )
+            when (payingFor) {
+                PayingFor.ORDER -> {
+                    orderViewModel.verifyPayment(
+                        razorpayOrderId = paymentData.orderId,
+                        signature = paymentData.signature,
+                        paymentId = razorpayPaymentId
+                    )
+                }
+                PayingFor.MEMBERSHIP -> {
+                    premiumOptionViewModel.verifyPayment(
+                        razorpayOrderId = paymentData.orderId,
+                        signature = paymentData.signature,
+                        paymentId = razorpayPaymentId,
+                        navController = navController
+                    )
+                }
+                null -> {
+                    Log.e("PAYMENT", "Payment purpose not set before success callback")
+                }
+            }
+
+            payingFor = null
         }
     }
 
     override fun onPaymentError(code: Int, message: String?, p2: PaymentData?) {
-        orderViewModel.handlePaymentError(code, message ?: "")
+        when (payingFor) {
+            PayingFor.ORDER -> {
+                orderViewModel.handlePaymentError(code, message ?: "")
+            }
+            PayingFor.MEMBERSHIP -> {
+                premiumOptionViewModel.handlePaymentError(code, message ?: "")
+            }
+            null -> {
+                Log.e("PAYMENT", "Payment purpose not set before success callback")
+            }
+        }
+        payingFor = null
     }
 }
 

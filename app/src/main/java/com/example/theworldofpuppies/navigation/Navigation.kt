@@ -43,6 +43,7 @@ import com.example.theworldofpuppies.services.grooming.presentation.GroomingScre
 import com.example.theworldofpuppies.services.grooming.presentation.GroomingViewModel
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryScreen
 import com.example.theworldofpuppies.booking.history.presentation.BookingHistoryViewModel
+import com.example.theworldofpuppies.membership.presentation.MembershipCheckoutScreen
 import com.example.theworldofpuppies.membership.presentation.MembershipScreen
 import com.example.theworldofpuppies.membership.presentation.PremiumOptionViewModel
 import com.example.theworldofpuppies.profile.user.presentation.UpdateUserScreen
@@ -94,6 +95,7 @@ sealed class Screen(val route: String) {
     data object UpdateUserScreen: Screen("UpdateUserScreen")
     data object ReferEarnScreen: Screen("ReferEarnScreen")
     data object MembershipScreen: Screen("MembershipScreen")
+    data object MembershipCheckoutScreen: Screen("MembershipCheckoutScreen")
 }
 
 @Composable
@@ -107,7 +109,8 @@ fun AppNavigation(
     isLoggedIn: Boolean,
     onGesturesChanged: (Boolean) -> Unit,
     searchIconVisibilityChanged: (Boolean) -> Unit,
-    orderViewModel: OrderViewModel
+    orderViewModel: OrderViewModel,
+    premiumOptionViewModel: PremiumOptionViewModel
 ) {
 
     val registrationViewModel = koinViewModel<RegistrationViewModel>()
@@ -186,7 +189,6 @@ fun AppNavigation(
     val referEarnViewModel = koinViewModel<ReferEarnViewModel>()
     val referEarnUiState by referEarnViewModel.referEarnUiState.collectAsStateWithLifecycle()
 
-    val premiumOptionViewModel = koinViewModel<PremiumOptionViewModel>()
     val premiumOptionUiState by premiumOptionViewModel.premiumOptionUiState.collectAsStateWithLifecycle()
 
     NavHost(
@@ -717,6 +719,22 @@ fun AppNavigation(
                 navController = navController,
                 premiumOptionViewModel = premiumOptionViewModel,
                 premiumOptionUiState = premiumOptionUiState
+            )
+        }
+        composable(route = Screen.MembershipCheckoutScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            MembershipCheckoutScreen(
+                navController = navController,
+                premiumOptionViewModel = premiumOptionViewModel,
+                premiumOptionUiState = premiumOptionUiState,
+                addressViewModel = addressViewModel,
+                addressUiState = addressUiState
             )
         }
 

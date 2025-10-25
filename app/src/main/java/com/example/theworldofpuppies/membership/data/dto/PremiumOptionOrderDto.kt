@@ -1,8 +1,10 @@
-package com.example.theworldofpuppies.membership.domain
+package com.example.theworldofpuppies.membership.data.dto
 
-import java.time.LocalDateTime
+import com.example.theworldofpuppies.membership.domain.PremiumOption
+import kotlinx.serialization.Serializable
 
-data class PremiumOptionOrder(
+@Serializable
+data class PremiumOptionOrderDto(
     val id: String,
     val userId: String,
     val razorpayPaymentId: String = "",
@@ -12,6 +14,6 @@ data class PremiumOptionOrder(
     val amount: Int,
     val premiumOption: PremiumOption,
     val paymentStatus: String,
-    val createdDate: LocalDateTime,
-    val endDate: LocalDateTime
+    val createdDate: Long,
+    val endDate: Long
 )

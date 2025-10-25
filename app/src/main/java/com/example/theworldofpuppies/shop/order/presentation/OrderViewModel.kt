@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.domain.Address
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
+import com.example.theworldofpuppies.core.domain.PayingFor
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,6 +50,9 @@ class OrderViewModel(
 
     private val _orderUiState = MutableStateFlow(OrderUiState())
     val orderUiState: StateFlow<OrderUiState> = _orderUiState.asStateFlow()
+
+    private val _payingForEvent = MutableSharedFlow<PayingFor>()
+    val payingForEvent: SharedFlow<PayingFor> = _payingForEvent.asSharedFlow()
 
     private val _orderHistoryUiState = MutableStateFlow(OrderHistoryUiState())
     val orderHistoryUiState: StateFlow<OrderHistoryUiState> = _orderHistoryUiState.asStateFlow()
@@ -238,6 +243,7 @@ class OrderViewModel(
                                     context = context,
                                     email = userRepository.getUserEmail() ?: ""
                                 )
+                                _payingForEvent.emit(PayingFor.ORDER)
                             }
 
                             is Result.Error -> {
