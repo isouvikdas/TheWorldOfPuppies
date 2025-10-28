@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class CategoryDto(
     val id: String,
     val name: String,
-    val productIds: List<String> = emptyList()
+    val productIds: List<String> = emptyList(),
+    val image: ImageDto? = null,
 )

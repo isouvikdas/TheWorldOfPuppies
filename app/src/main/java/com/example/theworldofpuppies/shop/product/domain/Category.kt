@@ -4,5 +4,6 @@ data class Category(
     val id: String,
     val name: String,
     val productIds: List<String> = emptyList(),
+    val image : Image? = null,
     val localId: Long = 0
 )

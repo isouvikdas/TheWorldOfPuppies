@@ -3,6 +3,7 @@ package com.example.theworldofpuppies.shop.product.presentation.product_list
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.SearchUiState
 import com.example.theworldofpuppies.shop.product.data.mappers.toCategory
@@ -14,9 +15,9 @@ import com.example.theworldofpuppies.shop.product.domain.ProductRepository
 import com.example.theworldofpuppies.shop.product.domain.util.ListType
 import com.example.theworldofpuppies.shop.product.domain.util.SortProduct
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,12 +31,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 @OptIn(FlowPreview::class)
 class ProductViewModel(
     private val productRepository: ProductRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _productListState = MutableStateFlow(ProductListState())
@@ -48,6 +51,15 @@ class ProductViewModel(
     val featuredProductListState: StateFlow<FeaturedProductListState> =
         _featuredProductListState.asStateFlow()
 
+    private val _isShopHomeRefreshing = MutableStateFlow(false)
+    val isShopHomeRefreshing = _isShopHomeRefreshing.asStateFlow()
+
+    private val _isCategoryRefreshing = MutableStateFlow(false)
+    val isCategoryRefreshing = _isCategoryRefreshing.asStateFlow()
+
+    private val _isProductRefreshing = MutableStateFlow(false)
+    val isProductRefreshing = _isProductRefreshing.asStateFlow()
+
     private val _productDetailState = MutableStateFlow(ProductDetailState())
     val productDetailState: StateFlow<ProductDetailState> = _productDetailState.asStateFlow()
 
@@ -59,6 +71,39 @@ class ProductViewModel(
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
+
+    fun forceLoadShopHomeScreen() {
+        viewModelScope.launch {
+            _isShopHomeRefreshing.value = true
+            clearCachedData()
+            fetchCategories()
+            fetchNextPage(isForceRefresh = true)
+            fetchFeaturedProducts()
+            delay(1000)
+            _isShopHomeRefreshing.value = false
+        }
+    }
+
+    fun forceLoadCategoryScreen() {
+        viewModelScope.launch {
+            _isCategoryRefreshing.value = true
+            clearCategory()
+            fetchCategories()
+            delay(1000)
+            _isCategoryRefreshing.value = false
+        }
+    }
+
+    fun forceLoadProductScreen() {
+        viewModelScope.launch {
+            _isProductRefreshing.value = true
+            clearProducts()
+            fetchNextPage(true)
+            fetchFeaturedProducts()
+            delay(1000)
+            _isProductRefreshing.value = false
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val searchedProductFlow = searchText
@@ -123,10 +168,14 @@ class ProductViewModel(
     }
 
     init {
-        clearCachedData()
-        fetchCategories()
-        fetchNextPage()
-        fetchFeaturedProducts()
+        viewModelScope.launch {
+            clearCachedData()
+            if (userRepository.isLoggedIn()) {
+                fetchCategories()
+                fetchNextPage()
+                fetchFeaturedProducts()
+            }
+        }
     }
 
     fun setListType(type: ListType) {
@@ -176,12 +225,22 @@ class ProductViewModel(
         _productDetailState.value = ProductDetailState(product = product)
     }
 
-    private fun clearCachedData() {
-        viewModelScope.launch {
-            async {
-                categoryRepository.clearAllCategories()
-                productRepository.clearAllProducts()
-            }.await()
+    private suspend fun clearCachedData() {
+        withContext(Dispatchers.IO) {
+            categoryRepository.clearAllCategories()
+            productRepository.clearAllProducts()
+        }
+    }
+
+    private suspend fun clearCategory() {
+        withContext(Dispatchers.IO) {
+            categoryRepository.clearAllCategories()
+        }
+    }
+
+    private suspend fun clearProducts() {
+        withContext(Dispatchers.IO) {
+            productRepository.clearAllProducts()
         }
     }
 
@@ -226,7 +285,7 @@ class ProductViewModel(
                         _featuredProductListState.update { it.copy(productList = productList) }
                     }
 
-                    is Result.Error -> _featuredProductListState.update { it.copy(errorMessage = result.error.toString()) }
+                    is Result.Error -> _featuredProductListState.update { it.copy(errorMessage = result.error) }
                 }
             } catch (e: Exception) {
                 Timber.Forest.e(e, "Error fetching Featured Products.")
@@ -243,23 +302,23 @@ class ProductViewModel(
             try {
                 _categoryListState.update { it.copy(isLoading = true, errorMessage = null) }
 
-                val isListReceived = categoryRepository.fetchAndStoreCategories()
-                Log.i("category in viewmodel", isListReceived.toString())
-                if (isListReceived) {
-                    val categories = categoryRepository.fetchAllCategories()
-                    categories.forEach {
-                        Log.i("category in viewmodel", it.name)
+                when (val result = categoryRepository.fetchAndStoreCategories()) {
+                    is Result.Success -> {
+                        val categories = categoryRepository.fetchAllCategories()
+                        categories.forEach {
+                            Log.i("category in viewmodel", it.name)
+                        }
+                        _categoryListState.update {
+                            it.copy(
+                                categoryList = categories.map { categoryEntity ->
+                                    categoryEntity.toCategory()
+                                },
+                            )
+                        }
                     }
-                    _categoryListState.update {
-                        it.copy(
-                            categoryList = it.categoryList + categories.map { categoryEntity ->
-                                categoryEntity.toCategory()
-                            },
-                        )
-                    }
-                } else {
-                    _categoryListState.update {
-                        it.copy(errorMessage = "Failed to fetch categories")
+
+                    is Result.Error -> {
+                        _categoryListState.update { it.copy(errorMessage = result.error) }
                     }
                 }
             } catch (e: Exception) {
@@ -270,7 +329,7 @@ class ProductViewModel(
         }
     }
 
-    fun fetchNextPage() {
+    fun fetchNextPage(isForceRefresh: Boolean = false) {
         if (_productListState.value.endOfPaginationReached || _productListState.value.isLoading) return
         viewModelScope.launch {
             try {
@@ -286,8 +345,14 @@ class ProductViewModel(
                 if (newProducts.isNotEmpty()) {
                     _productListState.update {
                         it.copy(
-                            productList = it.productList + newProducts.map { productEntity ->
-                                productEntity.toProduct()
+                            productList = if (!isForceRefresh) {
+                                it.productList + newProducts.map { productEntity ->
+                                    productEntity.toProduct()
+                                }
+                            } else {
+                                newProducts.map { productEntity ->
+                                    productEntity.toProduct()
+                                }
                             },
                             currentCursor = nextCursor,
                             localCursor = newProducts.last().localId,

@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.shop.product.presentation.product_list
 
+import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.domain.util.ListType
 
@@ -11,5 +12,5 @@ data class ProductListState(
     val selectedProduct: Product? = null,
     val currentCursor: String? = null,
     val localCursor: Long = 0,
-    val errorMessage: String? = null
+    val errorMessage: NetworkError? = null
 )

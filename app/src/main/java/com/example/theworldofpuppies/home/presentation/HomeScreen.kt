@@ -105,17 +105,16 @@ fun PetProfileSection(
 ) {
     Column(
         modifier = modifier
-            .height(MaterialTheme.dimens.extraLarge3)
+            .height(200.dp)
             .fillMaxWidth()
     ) {
         Text(
             modifier = Modifier.padding(start = MaterialTheme.dimens.small1),
             text = "Your Pets",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(modifier = Modifier.fillMaxHeight(.04f))
         if (pets.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -207,13 +206,13 @@ fun ServiceSection(
 ) {
     Column(
         modifier = modifier
-            .height(MaterialTheme.dimens.large3)
+            .height(140.dp)
             .fillMaxWidth()
     ) {
         Text(
             modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1),
             text = "Services",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
 

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +37,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,7 +61,7 @@ import com.example.theworldofpuppies.shop.product.presentation.ProductItem
 import com.example.theworldofpuppies.shop.product.presentation.util.toString
 import com.example.theworldofpuppies.ui.theme.dimens
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProductListScreen(
     onProductSelect: (Product) -> Unit,
@@ -76,8 +79,10 @@ fun ProductListScreen(
     val selectedCategory by productViewModel.selectedCategory.collectAsStateWithLifecycle(null)
     val sortOption by productViewModel.sortOption.collectAsStateWithLifecycle()
 
-    val categoryList =
-        remember(categoryListState.categoryList) { categoryListState.categoryList }
+    val categoryList = categoryListState.categoryList
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isRefreshing by productViewModel.isProductRefreshing.collectAsStateWithLifecycle()
 
     val sortOptions = listOf(
         SortProduct.RECOMMENDED,
@@ -95,90 +100,97 @@ fun ProductListScreen(
             .fillMaxSize(),
         color = Color.Transparent
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            state = lazyGridState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(5.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.extraSmall)
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { productViewModel.forceLoadProductScreen() },
+            state = pullToRefreshState
         ) {
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = productTypeLabel.toString(context),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(start = MaterialTheme.dimens.extraSmall)
-                        )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                state = lazyGridState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 10.dp, horizontal = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.extraSmall)
+            ) {
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    Column {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Sort By:",
-                                style = MaterialTheme.typography.bodySmall,
+                                text = productTypeLabel.toString(context),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center,
                                 modifier = Modifier
-                                    .align(Alignment.CenterVertically),
-                                fontWeight = FontWeight.W500
+                                    .padding(start = MaterialTheme.dimens.extraSmall)
                             )
-                            DropDownDemo(
-                                sortOptions = sortOptions,
-                                selectedIndex = sortOptions.indexOf(sortOption),
-                                onOptionSelected = { index ->
-                                    productViewModel.setSortOption(sortOptions[index])
-                                },
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Text(
+                                    text = "Sort By:",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically),
+                                    fontWeight = FontWeight.W500
+                                )
+                                DropDownDemo(
+                                    sortOptions = sortOptions,
+                                    selectedIndex = sortOptions.indexOf(sortOption),
+                                    onOptionSelected = { index ->
+                                        productViewModel.setSortOption(sortOptions[index])
+                                    },
+                                )
+                            }
                         }
                     }
                 }
-            }
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(categoryList) { category ->
-                        val isSelected = selectedCategory == category
-                        FilterChip(
-                            onClick = {
-                                productViewModel.setSelectedCategory(if (isSelected) null else category)
-                            },
-                            label = { Text(category.name) },
-                            selected = isSelected,
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier
-                                .padding(end = MaterialTheme.dimens.small1.div(2))
-                                .padding(start = if (category == categoryList.first()) 6.dp else 0.dp,
-                                    end = if (category == categoryList.last()) 6.dp else 0.dp)
-                                .animateItem(),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = Color.White
-                            ),
-                            border = BorderStroke(1.0.dp, color = MaterialTheme.colorScheme.primary)
-                        )
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(categoryList) { category ->
+                            val isSelected = selectedCategory == category
+                            FilterChip(
+                                onClick = {
+                                    productViewModel.setSelectedCategory(if (isSelected) null else category)
+                                },
+                                label = { Text(category.name) },
+                                selected = isSelected,
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier
+                                    .padding(end = MaterialTheme.dimens.small1.div(2))
+                                    .padding(start = if (category == categoryList.first()) 6.dp else 0.dp,
+                                        end = if (category == categoryList.last()) 6.dp else 0.dp)
+                                    .animateItem(),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = Color.White
+                                ),
+                                border = BorderStroke(1.0.dp, color = MaterialTheme.colorScheme.primary)
+                            )
+                        }
                     }
-                }
 
+                }
+                items(filteredSortedProducts) { product ->
+                    ProductItem(
+                        product = product,
+                        onProductSelect = {
+                            onProductSelect(product)
+                        },
+                        cartViewModel = cartViewModel
+                    )
+                }
             }
-            items(filteredSortedProducts) { product ->
-                ProductItem(
-                    product = product,
-                    onProductSelect = {
-                        onProductSelect(product)
-                    },
-                    cartViewModel = cartViewModel
-                )
-            }
+
         }
     }
 
