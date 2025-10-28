@@ -46,6 +46,7 @@ import com.example.theworldofpuppies.booking.vet.presentation.VetBookingNameSect
 import com.example.theworldofpuppies.booking.vet.presentation.VetBookingViewModel
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.calculateDiscountedPrice
+import com.example.theworldofpuppies.membership.domain.PremiumOptionUiState
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFeature
@@ -58,6 +59,7 @@ import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
 import com.example.theworldofpuppies.services.vet.domain.toString
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +72,8 @@ fun DogTrainingBookingScreen(
     addressUiState: AddressUiState,
     addressViewModel: AddressViewModel,
     selectedPetForBooking: Pet?,
-    referEarnUiState: ReferEarnUiState
+    referEarnUiState: ReferEarnUiState,
+    premiumOptionUiState: PremiumOptionUiState
 ) {
 
     val context = LocalContext.current
@@ -81,11 +84,15 @@ fun DogTrainingBookingScreen(
 
     val id = dogTrainingUiState.id
     val name = dogTrainingUiState.name
-    val discount = dogTrainingUiState.discount
+    var discount = dogTrainingUiState.discount
     val dogTrainingOption = dogTrainingUiState.selectedDogTrainingOption
     val dogTrainingFeatures = dogTrainingUiState.selectedDogTrainingFeatures
 
     val selectedAddress = addressUiState.addresses.find { it.isSelected }
+
+    if (premiumOptionUiState.premiumOptionOrder?.endDate?.isAfter(LocalDateTime.now()) == true) {
+        discount = discount?.plus(15)
+    }
 
     if (dogTrainingBookingUiState.showSuccessDialog && dogTrainingBookingUiState.dogTrainingBooking != null) {
         BookingSuccessDialog(

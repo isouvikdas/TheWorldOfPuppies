@@ -47,6 +47,7 @@ import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.util.calculateSession
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.membership.domain.PremiumOptionUiState
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.pet_walking.domain.PetWalkDateRange
@@ -67,7 +68,8 @@ fun BookingPetWalkScreen(
     addressViewModel: AddressViewModel,
     bookingPetWalkViewModel: BookingPetWalkViewModel,
     selectedPetForBooking: Pet?,
-    referEarnUiState: ReferEarnUiState
+    referEarnUiState: ReferEarnUiState,
+    premiumOptionUiState: PremiumOptionUiState
 ) {
 
     val context = LocalContext.current
@@ -80,7 +82,10 @@ fun BookingPetWalkScreen(
 
     val id = petWalkingUiState.id
     val price = petWalkingUiState.basePrice
-    val discount = petWalkingUiState.discount
+    var discount = petWalkingUiState.discount
+    if (premiumOptionUiState.premiumOptionOrder?.endDate?.isAfter(LocalDateTime.now()) == true) {
+        discount = discount?.plus(15)
+    }
     val name = petWalkingUiState.name
     val startDate = petWalkingUiState.dateRange?.startDate
     val endDate = petWalkingUiState.dateRange?.endDate

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,8 +37,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,13 +55,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.domain.Category
@@ -78,7 +82,7 @@ fun ShopHomeScreen(
     productListState: ProductListState,
     categoryListState: CategoryListState,
     featuredProductListState: FeaturedProductListState,
-    productViewModel: ProductViewModel? = null,
+    productViewModel: ProductViewModel,
     onProductSelect: () -> Unit,
     getCategories: () -> Unit,
     getProducts: () -> Unit,
@@ -86,127 +90,155 @@ fun ShopHomeScreen(
     navController: NavController,
     cartViewModel: CartViewModel
 ) {
+
+    val context = LocalContext.current
+
     val lazyListState = rememberLazyListState()
     val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
-    val productList =
-        remember(productListState.productList) { productListState.productList.take(4) }
-    val categoryList =
-        remember(categoryListState.categoryList) { categoryListState.categoryList.take(6) }
-    val featuredProductList =
-        remember(featuredProductListState.productList) { featuredProductListState.productList.take(4) }
+    val productList = productListState.productList.take(4)
+    val categoryList = categoryListState.categoryList.take(6)
+    val featuredProductList = featuredProductListState.productList.take(4)
+    val isRefreshing by productViewModel.isShopHomeRefreshing.collectAsStateWithLifecycle()
+    val pullToRefreshState = rememberPullToRefreshState()
+
 
     Surface(
         modifier = modifier
             .fillMaxSize(),
         color = Color.Transparent
     ) {
-        when (productListState.isLoading && categoryListState.isLoading && featuredProductListState.isLoading) {
-            true -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-
-            false -> LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { productViewModel.forceLoadShopHomeScreen() },
+            state = pullToRefreshState
+        ) {
+            LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 state = lazyListState
             ) {
-                item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                if (featuredProductListState.isLoading
+                    && productListState.isLoading
+                    && categoryListState.isLoading
+                    && !isRefreshing
+                ) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                } else {
+                    item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                    }
+
+                    item {
+                        ProductBannerSection(modifier = Modifier, imageList = imageList)
+                    }
+
+
+                    item {
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                    }
+
+                    item {
+                        ProductCategorySection(
+                            modifier = Modifier,
+                            categories = categoryList,
+                            isLoading = categoryListState.isLoading,
+                            getCategories = { getCategories() },
+                            errorMessage = categoryListState.errorMessage?.toString(context),
+                            onCategoryClick = { category ->
+                                productViewModel.setSelectedCategory(category)
+                                productViewModel.setListType(ListType.ALL)
+                                navController.navigate(Screen.ProductListScreen.route)
+                            },
+                            onSeeAllClick = {
+                                navController.navigate(Screen.CategoryListScreen.route)
+                            }
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        ProductRowSection(
+                            modifier = Modifier,
+                            productListType = ListType.FEATURED,
+                            products = featuredProductList,
+                            isLoading = featuredProductListState.isLoading,
+                            errorMessage = featuredProductListState.errorMessage?.toString(context),
+                            getProducts = { getFeaturedProducts() },
+                            onProductSelect = { onProductSelect() },
+                            productViewModel = productViewModel,
+                            onSeeAllClick = {
+                                productViewModel.setListType(ListType.FEATURED)
+                                navController.navigate(Screen.ProductListScreen.route)
+                            },
+                            cartViewModel = cartViewModel
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    item {
+                        ProductRowSection(
+                            modifier = Modifier,
+                            productListType = ListType.NEW,
+                            products = productList,
+                            isLoading = productListState.isLoading,
+                            getProducts = { getProducts() },
+                            errorMessage = productListState.errorMessage?.toString(context),
+                            onProductSelect = { onProductSelect() },
+                            productViewModel = productViewModel,
+                            onSeeAllClick = {
+                                productViewModel.setListType(ListType.NEW)
+                                navController.navigate(Screen.ProductListScreen.route)
+                            },
+                            cartViewModel = cartViewModel
+
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    item {
+                        ProductRowSection(
+                            modifier = Modifier,
+                            productListType = ListType.ALL,
+                            products = productList,
+                            isLoading = productListState.isLoading,
+                            getProducts = { getProducts() },
+                            errorMessage = productListState.errorMessage?.toString(context),
+                            onProductSelect = { onProductSelect() },
+                            productViewModel = productViewModel,
+                            onSeeAllClick = {
+                                productViewModel.setListType(ListType.ALL)
+                                navController.navigate(Screen.ProductListScreen.route)
+                            },
+                            cartViewModel = cartViewModel
+
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(100.dp))
+                    }
                 }
 
-                item {
-                    ProductBannerSection(modifier = Modifier, imageList = imageList)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-                }
-
-                item {
-                    ProductCategorySection(
-                        modifier = Modifier,
-                        categories = categoryList,
-                        isLoading = categoryListState.isLoading,
-                        getCategories = { getCategories() },
-                        errorMessage = categoryListState.errorMessage ?: ""
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                item {
-                    ProductRowSection(
-                        modifier = Modifier,
-                        productListType = ListType.FEATURED,
-                        products = featuredProductList,
-                        isLoading = featuredProductListState.isLoading,
-                        errorMessage = featuredProductListState.errorMessage ?: "",
-                        getProducts = { getFeaturedProducts() },
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            productViewModel?.setListType(ListType.FEATURED)
-                            navController.navigate(Screen.ProductListScreen.route)
-                        },
-                        cartViewModel = cartViewModel
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                item {
-                    ProductRowSection(
-                        modifier = Modifier,
-                        productListType = ListType.NEW,
-                        products = productList,
-                        isLoading = productListState.isLoading,
-                        getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            productViewModel?.setListType(ListType.NEW)
-                            navController.navigate(Screen.ProductListScreen.route)
-                        },
-                        cartViewModel = cartViewModel
-
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                item {
-                    ProductRowSection(
-                        modifier = Modifier,
-                        productListType = ListType.ALL,
-                        products = productList,
-                        isLoading = productListState.isLoading,
-                        getProducts = { getProducts() },
-                        errorMessage = productListState.errorMessage ?: "",
-                        onProductSelect = { onProductSelect() },
-                        productViewModel = productViewModel,
-                        onSeeAllClick = {
-                            productViewModel?.setListType(ListType.ALL)
-                            navController.navigate(Screen.ProductListScreen.route)
-                        },
-                        cartViewModel = cartViewModel
-
-                    )
-                }
-                item {
-                    Spacer(modifier = Modifier.height(100.dp))
-                }
             }
+
         }
+
     }
 }
 
@@ -221,7 +253,7 @@ fun ProductRowSection(
     onProductSelect: () -> Unit,
     productViewModel: ProductViewModel? = null,
     onSeeAllClick: () -> Unit,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
 ) {
 
     val context = LocalContext.current
@@ -240,14 +272,14 @@ fun ProductRowSection(
         ) {
             Text(
                 text = productListType.toString(context),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
 
             Text(
                 text = stringResource(R.string.see_all),
                 color = Color.Black.copy(0.5f),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.bodySmall,
                 textDecoration = if (products.isEmpty()) TextDecoration.LineThrough else TextDecoration.None,
                 fontStyle = if (products.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
@@ -435,7 +467,7 @@ fun ProductItem(
                                 modifier = Modifier,
                                 fontWeight = FontWeight.W500
                             )
-                            Text (
+                            Text(
                                 " ~ (${product.totalReviews})",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.W500,
@@ -509,12 +541,16 @@ fun ProductCategorySection(
     categories: List<Category>,
     getCategories: () -> Unit,
     isLoading: Boolean? = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    onCategoryClick: (Category) -> Unit,
+    onSeeAllClick: () -> Unit
+
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.large2 + MaterialTheme.dimens.small2),
+            .wrapContentHeight(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier
@@ -526,18 +562,20 @@ fun ProductCategorySection(
         ) {
             Text(
                 text = "Categories",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = stringResource(R.string.see_all),
                 color = Color.Black.copy(0.5f),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.bodySmall,
                 textDecoration = if (categories.isEmpty()) TextDecoration.LineThrough else TextDecoration.None,
                 fontStyle = if (categories.isEmpty()) FontStyle.Italic else FontStyle.Normal,
                 fontWeight = FontWeight.W500,
                 modifier = Modifier
-                    .bounceClick {}
+                    .bounceClick {
+                        onSeeAllClick()
+                    }
             )
         }
         Box(
@@ -546,12 +584,15 @@ fun ProductCategorySection(
             contentAlignment = Alignment.Center
         ) {
             when {
-                categories.isEmpty() && isLoading == true -> {
+                isLoading == true -> {
                     CircularProgressIndicator()
                 }
 
                 categories.isEmpty() && !errorMessage.isNullOrBlank() -> {
-                    ErrorSection(modifier = Modifier.fillMaxSize(), errorMessage = errorMessage) {
+                    ErrorSection(
+                        modifier = Modifier.fillMaxSize(),
+                        errorMessage = errorMessage
+                    ) {
                         getCategories()
                     }
                 }
@@ -565,34 +606,16 @@ fun ProductCategorySection(
                         horizontalArrangement = Arrangement.Start
                     ) {
                         items(categories) { category ->
-                            Column(
+                            CategoryItem(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(
                                         start = MaterialTheme.dimens.small1,
                                         end = if (category == categories.last()) MaterialTheme.dimens.small1 else 0.dp
                                     ),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Surface(
-                                    modifier = Modifier
-                                        .size(MaterialTheme.dimens.medium2)
-                                        .clip(CircleShape),
-                                    color = Color.Gray.copy(0.3f)
-
-                                ) {
-                                    // Put your Image/Icon here
-                                }
-
-                                Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
-
-                                Text(
-                                    text = category.name,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.W500
-                                )
-                            }
+                                category = category,
+                                onCategoryClick = { onCategoryClick(category) }
+                            )
                         }
 
                     }
@@ -601,6 +624,56 @@ fun ProductCategorySection(
         }
 
     }
+
+}
+
+@Composable
+fun CategoryItem(
+    modifier: Modifier = Modifier,
+    onCategoryClick: (Category) -> Unit,
+    category: Category,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            modifier = Modifier
+                .size(70.dp)
+                .clip(CircleShape)
+                .border(
+                    0.8.dp,
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    CircleShape
+                )
+                .clickable {
+                    onCategoryClick(category)
+                },
+            color = Color.Gray.copy(0.3f)
+
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .padding(1.dp)
+                    .size(70.dp)
+                    .clip(CircleShape),
+                model = category.image?.fetchUrl?.toUri(),
+                contentDescription = "Pet Profile Pic",
+                contentScale = ContentScale.Crop,
+                error = painterResource(R.drawable.pet_profile)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))
+
+        Text(
+            text = category.name,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+
 
 }
 
@@ -618,7 +691,6 @@ fun ErrorSection(
     ) {
         Text(
             text = errorMessage,
-            color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraSmall))

@@ -43,6 +43,7 @@ import com.example.theworldofpuppies.booking.core.presentation.WalletBalanceRow
 import com.example.theworldofpuppies.booking.grooming.presentation.BookingHeader
 import com.example.theworldofpuppies.booking.pet_walk.presentation.PriceRowSection
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
+import com.example.theworldofpuppies.membership.domain.PremiumOptionUiState
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.vet.domain.HealthIssue
@@ -52,6 +53,7 @@ import com.example.theworldofpuppies.services.vet.domain.VetUiState
 import com.example.theworldofpuppies.services.vet.domain.toString
 import com.example.theworldofpuppies.shop.order.presentation.AddressSection
 import com.example.theworldofpuppies.ui.theme.dimens
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +65,8 @@ fun VetBookingScreen(
     addressViewModel: AddressViewModel,
     vetBookingViewModel: VetBookingViewModel,
     selectedPetForBooking: Pet?,
-    referEarnUiState: ReferEarnUiState
+    referEarnUiState: ReferEarnUiState,
+    premiumOptionUiState: PremiumOptionUiState
 ) {
 
     val context = LocalContext.current
@@ -77,7 +80,10 @@ fun VetBookingScreen(
     val id = vetUiState.id
     val vetOption = vetUiState.selectedVetOption
     val price = vetOption?.price
-    val discount = vetUiState.discount
+    var discount = vetUiState.discount
+    if (premiumOptionUiState.premiumOptionOrder?.endDate?.isAfter(LocalDateTime.now()) == true) {
+        discount = discount?.plus(15)
+    }
     val name = vetUiState.name
     val selectedVetOption = vetUiState.selectedVetOption
     val selectedVetTimeSlot = vetUiState.selectedSlot

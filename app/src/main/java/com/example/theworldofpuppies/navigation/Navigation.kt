@@ -62,6 +62,7 @@ import com.example.theworldofpuppies.shop.order.presentation.OrderViewModel
 import com.example.theworldofpuppies.shop.order.presentation.order_history.OrderHistoryScreen
 import com.example.theworldofpuppies.shop.product.presentation.SearchScreen
 import com.example.theworldofpuppies.shop.product.presentation.ShopHomeScreen
+import com.example.theworldofpuppies.shop.product.presentation.category_list.CategoryListScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
@@ -96,6 +97,7 @@ sealed class Screen(val route: String) {
     data object ReferEarnScreen: Screen("ReferEarnScreen")
     data object MembershipScreen: Screen("MembershipScreen")
     data object MembershipCheckoutScreen: Screen("MembershipCheckoutScreen")
+    data object CategoryListScreen: Screen("CategoryListScreen")
 }
 
 @Composable
@@ -497,7 +499,8 @@ fun AppNavigation(
                 addressViewModel = addressViewModel,
                 groomingUiState = groomingUiState,
                 selectedPetForBooking = selectedPetForService,
-                referEarnUiState = referEarnUiState
+                referEarnUiState = referEarnUiState,
+                premiumOptionUiState = premiumOptionUiState
             )
         }
 
@@ -535,7 +538,8 @@ fun AppNavigation(
                 addressViewModel = addressViewModel,
                 bookingPetWalkViewModel = bookingPetWalkViewModel,
                 selectedPetForBooking = selectedPetForService,
-                referEarnUiState = referEarnUiState
+                referEarnUiState = referEarnUiState,
+                premiumOptionUiState = premiumOptionUiState
             )
         }
         composable(route = Screen.VetScreen.route) {
@@ -586,7 +590,8 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 selectedPetForBooking = selectedPetForService,
-                referEarnUiState = referEarnUiState
+                referEarnUiState = referEarnUiState,
+                premiumOptionUiState = premiumOptionUiState
             )
         }
 
@@ -629,7 +634,8 @@ fun AppNavigation(
                 addressUiState = addressUiState,
                 addressViewModel = addressViewModel,
                 selectedPetForBooking = selectedPetForService,
-                referEarnUiState = referEarnUiState
+                referEarnUiState = referEarnUiState,
+                premiumOptionUiState = premiumOptionUiState
             )
         }
         composable(route = Screen.PetInsuranceScreen.route) {
@@ -735,6 +741,19 @@ fun AppNavigation(
                 premiumOptionUiState = premiumOptionUiState,
                 addressViewModel = addressViewModel,
                 addressUiState = addressUiState
+            )
+        }
+
+        composable(route = Screen.CategoryListScreen.route) {
+            onBottomBarVisibilityChanged(false)
+            onProfileButtonVisibilityChanged(true)
+            onTopBarVisibilityChanged(true)
+            searchIconVisibilityChanged(true)
+            onGesturesChanged(true)
+            CategoryListScreen(
+                navController = navController,
+                productViewModel = productViewModel,
+                categoryListState = categoryListState
             )
         }
 

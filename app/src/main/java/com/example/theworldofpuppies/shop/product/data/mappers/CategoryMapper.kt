@@ -8,7 +8,8 @@ fun CategoryDto.toCategoryEntity(): CategoryEntity {
     return CategoryEntity(
         id = id,
         name = name,
-        productIds = productIds
+        productIds = productIds,
+        image = image?.toImage()
     )
 }
 
@@ -17,6 +18,7 @@ fun CategoryEntity.toCategory(): Category {
         id = id,
         name = name,
         productIds = productIds,
+        image = image,
         localId = localId
     )
 }

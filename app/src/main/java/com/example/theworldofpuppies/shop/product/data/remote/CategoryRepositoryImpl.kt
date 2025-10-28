@@ -1,16 +1,14 @@
 package com.example.theworldofpuppies.shop.product.data.remote
 
 import androidx.room.withTransaction
+import com.example.theworldofpuppies.core.data.local.Database
+import com.example.theworldofpuppies.core.domain.util.NetworkError
+import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.shop.product.data.local.CategoryEntity
 import com.example.theworldofpuppies.shop.product.data.mappers.toCategoryEntity
-import com.example.theworldofpuppies.core.data.local.Database
-import com.example.theworldofpuppies.core.domain.util.onError
-import com.example.theworldofpuppies.core.domain.util.onSuccess
 import com.example.theworldofpuppies.shop.product.domain.CategoryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import timber.log.Timber
-import java.io.IOException
 
 class CategoryRepositoryImpl(
     private val db: Database,
@@ -22,34 +20,39 @@ class CategoryRepositoryImpl(
     }
 
 
-    override suspend fun fetchAndStoreCategories(): Boolean {
-        var isListReceived = false
-        try {
-            val result = productApi.getAllCategories()
-            result.onSuccess { apiResponse ->
-                if (!apiResponse.success) {
-                    throw IOException(apiResponse.message)
-                }
-                val categories = apiResponse.data?.map { it.toCategoryEntity() } ?: emptyList()
-                if (categories.isNotEmpty()) {
-                    withContext(Dispatchers.IO) {
-                        db.withTransaction {
-                            db.categoryDao.upsertAll(categories)
-                            isListReceived = true
-
+    override suspend fun fetchAndStoreCategories(): Result<Boolean, NetworkError> {
+        return when (val result = productApi.getAllCategories()) {
+            is Result.Success -> {
+                val apiResponse = result.data
+                when {
+                    apiResponse.success && apiResponse.data != null -> {
+                        val categories =
+                            apiResponse.data.map { it.toCategoryEntity() } ?: emptyList()
+                        if (categories.isNotEmpty()) {
+                            withContext(Dispatchers.IO) {
+                                db.withTransaction {
+                                    db.categoryDao.upsertAll(categories)
+                                    Result.Success(true)
+                                }
+                            }
+                        } else {
+                            Result.Error(NetworkError.SERVER_ERROR)
                         }
                     }
+
+                    apiResponse.success && apiResponse.data == null -> {
+                        Result.Error(NetworkError.SERIALIZATION)
+                    }
+
+                    else -> {
+                        Result.Error(NetworkError.SERVER_ERROR)
+                    }
                 }
-            }.onError { error ->
-                throw IOException("Api Error: $error")
             }
-        } catch (e: IOException) {
-            Timber.e(e, "Network or API error occurred.")
-        } catch (e: Exception) {
-            Timber.e(e, "Unexpected error occurred.")
+            is Result.Error -> Result.Error(result.error)
         }
-        return isListReceived
     }
+
 
     override suspend fun clearAllCategories() {
         withContext(Dispatchers.IO) {

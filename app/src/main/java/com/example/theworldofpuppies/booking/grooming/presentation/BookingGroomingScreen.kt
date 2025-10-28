@@ -75,12 +75,14 @@ import com.example.theworldofpuppies.booking.core.presentation.WalletBalanceRow
 import com.example.theworldofpuppies.booking.grooming.domain.GroomingSlot
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
+import com.example.theworldofpuppies.core.presentation.util.calculateDiscountedPrice
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatDateTime
 import com.example.theworldofpuppies.core.presentation.util.formatDayOfMonth
 import com.example.theworldofpuppies.core.presentation.util.formatDayOfWeek
 import com.example.theworldofpuppies.core.presentation.util.toEpochMillis
 import com.example.theworldofpuppies.core.presentation.util.toLocalDateTime
+import com.example.theworldofpuppies.membership.domain.PremiumOptionUiState
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
@@ -101,7 +103,8 @@ fun BookingGroomingScreen(
     groomingBookingViewModel: GroomingBookingViewModel,
     groomingUiState: GroomingUiState,
     selectedPetForBooking: Pet?,
-    referEarnUiState: ReferEarnUiState
+    referEarnUiState: ReferEarnUiState,
+    premiumOptionUiState: PremiumOptionUiState
 ) {
     val context = LocalContext.current
 
@@ -114,6 +117,11 @@ fun BookingGroomingScreen(
     val selectedAddress = addressUiState.addresses.find { it.isSelected }
 
     val bookingTimeUiState by groomingBookingViewModel.bookingTimeUiState.collectAsStateWithLifecycle()
+
+    var discount = groomingUiState.grooming?.discount
+    if (premiumOptionUiState.premiumOptionOrder?.endDate?.isAfter(LocalDateTime.now()) == true) {
+        discount = discount?.plus(15)
+    }
 
     val selectedDate = bookingTimeUiState.selectedDate
 
@@ -261,7 +269,8 @@ fun BookingGroomingScreen(
                         groomingBookingViewModel = groomingBookingViewModel,
                         serviceId = serviceId,
                         petId = selectedPetForBooking?.id ?: "",
-                        walletBalance = referEarnUiState.walletBalance
+                        walletBalance = referEarnUiState.walletBalance,
+                        discount = discount
                     )
                 }
             }
@@ -562,10 +571,11 @@ fun ServiceSummaryCard(
     modifier: Modifier = Modifier,
     subService: GroomingSubService,
     context: Context,
-    walletBalance: Double = 0.0
+    walletBalance: Double = 0.0,
+    discount: Int?
 ) {
     val price = subService.price
-    val subTotal = subService.discountedPrice
+    val subTotal = calculateDiscountedPrice(discount ?: 0, price)
     val finalWalletBalance = if (walletBalance <= subTotal) {
         walletBalance
     } else {
@@ -581,7 +591,9 @@ fun ServiceSummaryCard(
         horizontalAlignment = Alignment.Start
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.dimens.small1),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.dimens.small1),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -664,11 +676,11 @@ fun ServiceSummaryCard(
                 fontWeight = FontWeight.W500,
                 modifier = Modifier.padding(end = 5.dp)
             )
-                Text(
-                    formatCurrency(totalPrice),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
+            Text(
+                formatCurrency(totalPrice),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
 
         }
     }
@@ -677,6 +689,7 @@ fun ServiceSummaryCard(
 @Composable
 fun BookingGroomingBottomSection(
     modifier: Modifier = Modifier,
+    discount: Int? = 0,
     subService: GroomingSubService? = null,
     selectedSlot: GroomingSlot? = null,
     selectedAddress: Address? = null,
@@ -710,7 +723,8 @@ fun BookingGroomingBottomSection(
                 ServiceSummaryCard(
                     subService = subService,
                     context = context,
-                    walletBalance = walletBalance
+                    walletBalance = walletBalance,
+                    discount = discount
                 )
             }
             Button(

@@ -12,5 +12,5 @@ data class UserResponse(
     val fetchUrl: String? = null,
     val referralCode: String? = null,
     val walletBalance: Double = 0.0,
-    val membershipId: String? = null
+    val activePremiumOptionOrderId: String? = null
 )
