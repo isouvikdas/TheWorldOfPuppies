@@ -39,9 +39,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,10 +57,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.navigation.Screen
@@ -70,7 +75,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun CartScreen(
     modifier: Modifier = Modifier,
     cartUiState: CartUiState,
-    cartViewModel: CartViewModel? = null,
+    cartViewModel: CartViewModel,
     navController: NavController
 ) {
     val cartItems = cartUiState.cartItems
@@ -80,9 +85,12 @@ fun CartScreen(
         state = rememberTopAppBarState()
     )
 
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isRefreshing by cartViewModel.isRefreshing.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        cartViewModel?.toastEvent?.collectLatest { message ->
+        cartViewModel.toastEvent.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
@@ -106,33 +114,43 @@ fun CartScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     cartItems.isNotEmpty() -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(
-                                MaterialTheme.dimens.small1.div(4).times(5)
-                            ),
-                            state = lazyListSTate
+                        PullToRefreshBox(
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
+                                cartViewModel.forceLoad()
+                            },
+                            state = pullToRefreshState
                         ) {
-                            items(cartItems, key = { it.id }) { cartItem ->
-                                val cartItemId = remember(cartItem.id) { cartItem.id }
-                                val isSelected = remember(cartItem.isSelected) { cartItem.isSelected }
-                                val productName =
-                                    remember(cartItem.product?.name) { cartItem.product?.name }
-                                val quantity = remember(cartItem.quantity) { cartItem.quantity }
-                                val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
-                                val productId = remember(cartItem.productId) { cartItem.productId }
-                                CartItemSection(
-                                    cartViewModel = cartViewModel,
-                                    cartItemId = cartItemId,
-                                    isSelected = isSelected,
-                                    productName = productName,
-                                    totalPrice = totalPrice,
-                                    productId = productId,
-                                    quantity = quantity
-                                )
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(
+                                    MaterialTheme.dimens.small1.div(4).times(5)
+                                ),
+                                state = lazyListSTate
+                            ) {
+                                items(cartItems, key = { it.id }) { cartItem ->
+                                    val cartItemId = remember(cartItem.id) { cartItem.id }
+                                    val isSelected = remember(cartItem.isSelected) { cartItem.isSelected }
+                                    val productName =
+                                        remember(cartItem.product?.name) { cartItem.product?.name }
+                                    val quantity = remember(cartItem.quantity) { cartItem.quantity }
+                                    val totalPrice = remember(cartItem.totalPrice) { cartItem.totalPrice }
+                                    val productId = remember(cartItem.productId) { cartItem.productId }
+                                    CartItemSection(
+                                        cartViewModel = cartViewModel,
+                                        cartItemId = cartItemId,
+                                        isSelected = isSelected,
+                                        productName = productName,
+                                        totalPrice = totalPrice,
+                                        productId = productId,
+                                        quantity = quantity
+                                    )
+                                }
                             }
+
                         }
                     }
+
                 }
 
                 CartBottomSection(

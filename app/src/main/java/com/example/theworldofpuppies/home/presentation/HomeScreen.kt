@@ -17,18 +17,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -56,6 +61,7 @@ import com.example.theworldofpuppies.profile.pet.presentation.PetProfileCard
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -72,26 +78,32 @@ fun HomeScreen(
         modifier = modifier.fillMaxSize(),
         color = Color.Transparent
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ScrollableBanner(imageList = imageList)
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ServiceSection(
-                serviceList = Category.entries,
-                context = context,
-                navController = navController
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
-            PetProfileSection(
-                pets = pets,
-                navController = navController,
-                petProfileViewModel = petProfileViewModel
-            )
+            item {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                ScrollableBanner(imageList = imageList)
+            }
+            item {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                ServiceSection(
+                    serviceList = Category.entries,
+                    context = context,
+                    navController = navController
+                )
+            }
 
+            item {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+                PetProfileSection(
+                    pets = pets,
+                    navController = navController,
+                    petProfileViewModel = petProfileViewModel
+                )
+            }
         }
     }
 }

@@ -1,9 +1,9 @@
 package com.example.theworldofpuppies.address.domain
 
-import com.example.theworldofpuppies.core.domain.util.Error
+import com.example.theworldofpuppies.core.domain.util.NetworkError
 
 data class AddressUiState(
-    val addresses: MutableList<Address> = mutableListOf(),
+    val addresses: List<Address> = emptyList(),
     val isLoading: Boolean = false,
-    val error: Error? = null,
+    val error: NetworkError? = null,
 )

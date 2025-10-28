@@ -30,6 +30,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,8 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.auth.presentation.signOut.SignOutDialog
+import com.example.theworldofpuppies.core.presentation.AuthViewModel
 import com.example.theworldofpuppies.core.presentation.util.formatPhoneNumber
 import com.example.theworldofpuppies.profile.pet.domain.PetListUiState
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
@@ -56,7 +62,8 @@ fun ProfileScreen(
     profileViewModel: ProfileViewModel,
     petProfileViewModel: PetProfileViewModel,
     updateUserUiState: UpdateUserUiState,
-    petListUiState: PetListUiState
+    petListUiState: PetListUiState,
+    authViewModel: AuthViewModel
 ) {
 
     val pet = if (petListUiState.pets.isNotEmpty()) {
@@ -124,7 +131,9 @@ fun ProfileScreen(
             }
 
             item {
-                SignOutSection()
+                SignOutSection(onSignOutClick = {
+                    authViewModel.signOut()
+                })
             }
 
             item {
@@ -136,14 +145,31 @@ fun ProfileScreen(
 
 
 @Composable
-fun SignOutSection(modifier: Modifier = Modifier) {
+fun SignOutSection(modifier: Modifier = Modifier, onSignOutClick: () -> Unit) {
+
+    var showSignOutDialog by remember { mutableStateOf(false) }
+
+    if (showSignOutDialog) {
+        SignOutDialog(
+            onSignOutConfirm = {
+                onSignOutClick()
+                showSignOutDialog = false
+            },
+            onDismiss = {
+                showSignOutDialog = false
+            }
+        )
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         OutlinedButton(
-            onClick = { },
+            onClick = {
+                showSignOutDialog = true
+            },
             modifier = Modifier
                 .width(MaterialTheme.dimens.large3.times(2))
                 .height(45.dp)
@@ -428,18 +454,18 @@ fun CommunicationAndEngagementSection(
                 .wrapContentHeight(),
             horizontalAlignment = Alignment.Start
         ) {
-            CommunicationAndMembershipItem(
-                image = R.drawable.message,
-                title = "Messages",
-                onClick = {
-                    onMessageClick()
-                },
-                isDisabled = true
-            )
-            HorizontalDivider(
-                thickness = 0.15.dp,
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1)
-            )
+//            CommunicationAndMembershipItem(
+//                image = R.drawable.message,
+//                title = "Messages",
+//                onClick = {
+//                    onMessageClick()
+//                },
+//                isDisabled = true
+//            )
+//            HorizontalDivider(
+//                thickness = 0.15.dp,
+//                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small1)
+//            )
             CommunicationAndMembershipItem(
                 image = R.drawable.refer,
                 title = "Refer & Earn",

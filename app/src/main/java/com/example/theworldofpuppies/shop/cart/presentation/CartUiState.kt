@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.shop.cart.presentation
 
+import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.shop.cart.domain.Cart
 import com.example.theworldofpuppies.shop.cart.domain.CartItem
 
@@ -9,5 +10,5 @@ data class CartUiState(
     var cartTotal: Double = 0.0,
     var totalSelectedItems: Int = 0,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: NetworkError? = null
 )

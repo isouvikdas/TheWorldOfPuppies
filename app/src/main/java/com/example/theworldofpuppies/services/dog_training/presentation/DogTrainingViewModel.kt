@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
@@ -14,6 +15,7 @@ import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingFea
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingOption
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingRepository
 import com.example.theworldofpuppies.services.dog_training.domain.DogTrainingUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -30,6 +32,19 @@ class DogTrainingViewModel(
 
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    fun forceLoad(context: Context) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getDogTraining(context)
+            delay(1000)
+            _isRefreshing.value = false
+        }
+    }
+
 
     suspend fun showToast(message: String) {
         _toastEvent.emit(message)

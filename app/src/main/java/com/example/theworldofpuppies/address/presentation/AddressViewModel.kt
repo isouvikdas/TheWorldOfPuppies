@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.address.presentation
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.navigation.Screen
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,6 +37,18 @@ class AddressViewModel(
 
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent: SharedFlow<String> = _toastEvent
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    fun forceLoad() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getAddresses()
+            delay(1000)
+            _isRefreshing.value = false
+        }
+    }
 
     init {
         if (!userRepository.getUserId().isNullOrEmpty()) { // ✅ user already logged in
@@ -99,9 +113,15 @@ class AddressViewModel(
     fun getAddresses() {
         viewModelScope.launch {
             try {
+                _addressUiState.update { it.copy(isLoading = true, error = null) }
                 when (val addressResult = addressRepository.getAddresses()) {
                     is Result.Success -> {
-                        _addressUiState.update { it.copy(addresses = addressResult.data as MutableList<Address>) }
+                        val addresses = addressResult.data
+                        if (addresses.isNotEmpty()) {
+                            _addressUiState.update { it.copy(addresses = addresses) }
+                        } else {
+                            _addressUiState.update { it.copy(error = NetworkError.NO_ADDRESS_FOUND)}
+                        }
                     }
 
                     is Result.Error -> {
@@ -127,7 +147,7 @@ class AddressViewModel(
                 }
                 when (val result = addressRepository.updateAddressSelection(address.id)) {
                     is Result.Success -> {
-                        _addressUiState.update { it.copy(addresses = result.data as MutableList<Address>) }
+                        _addressUiState.update { it.copy(addresses = result.data) }
                     }
 
                     is Result.Error -> {

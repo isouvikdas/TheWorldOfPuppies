@@ -11,6 +11,7 @@ import com.example.theworldofpuppies.booking.history.domain.BookingHistoryUiStat
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
 import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +27,24 @@ class BookingHistoryViewModel(
     private val _bookingHistoryUiState = MutableStateFlow(BookingHistoryUiState())
     val bookingHistoryUiState: StateFlow<BookingHistoryUiState> =
         _bookingHistoryUiState.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    fun forceLoad(category: Category) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            when(category) {
+                Category.WALKING -> getPetWalkBookings()
+                Category.GROOMING -> getGroomingBookings()
+                Category.DOG_TRAINING -> getDogTrainingBookings()
+                Category.VETERINARY -> getVetBookings()
+                else -> {}
+            }
+            delay(1000)
+            _isRefreshing.value = false
+        }
+    }
 
     init {
         observeBookingEvents()

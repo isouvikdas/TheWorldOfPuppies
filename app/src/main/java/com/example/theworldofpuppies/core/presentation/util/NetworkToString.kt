@@ -19,6 +19,7 @@ fun NetworkError.toString(context: Context): String {
         NetworkError.INVALID_REQUEST -> R.string.invalid_request
         NetworkError.EMPTY_LIST -> R.string.empty_list
         NetworkError.NO_BOOKING_FOUND -> R.string.no_booking_found
+        NetworkError.NO_ADDRESS_FOUND -> R.string.no_address_found
     }
     return context.getString(resId)
 }

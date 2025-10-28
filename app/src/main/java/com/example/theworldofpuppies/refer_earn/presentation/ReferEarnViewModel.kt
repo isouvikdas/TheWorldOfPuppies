@@ -9,7 +9,6 @@ import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnRepository
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +26,9 @@ class ReferEarnViewModel(
 
     init {
         observeAuthEvents()
-        if (!userRepository.getUserId().isNullOrEmpty()) {
-            loadReferralAndWallet()
+        if (userRepository.isLoggedIn()) {
+            getReferralCode()
+            getWalletBalance()
         }
     }
 

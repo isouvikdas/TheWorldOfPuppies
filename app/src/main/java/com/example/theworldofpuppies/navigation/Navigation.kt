@@ -321,7 +321,8 @@ fun AppNavigation(
                 profileViewModel = profileViewModel,
                 petProfileViewModel = petProfileViewModel,
                 updateUserUiState = updateUserUiState,
-                petListUiState = petListUiState
+                petListUiState = petListUiState,
+                authViewModel = authViewModel
             )
         }
 

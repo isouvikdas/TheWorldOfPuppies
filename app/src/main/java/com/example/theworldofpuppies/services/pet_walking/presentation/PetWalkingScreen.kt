@@ -43,6 +43,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +65,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.booking.core.domain.Category
@@ -118,6 +121,10 @@ fun PetWalkingScreen(
     val totalReviews = petWalkingUiState.totalReviews
 
     val reviews = reviewListState.petWalkReviews
+
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isRefreshing by petWalkingViewModel.isRefreshing.collectAsStateWithLifecycle()
 
     LaunchedEffect(isRated) {
         if (isRated) {
@@ -179,192 +186,202 @@ fun PetWalkingScreen(
                         modifier = Modifier
                             .fillMaxSize(), color = Color.Transparent
                     ) {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            item {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.dimens.small1),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    if (totalReviews > 0) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                Icons.Default.Star,
-                                                contentDescription = null,
-                                                tint = Color(0xFFFFC700),
-                                                modifier = Modifier.size(
-                                                    24.dp
+                        PullToRefreshBox(
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
+                                petWalkingViewModel.forceLoad(context)
+                                reviewViewModel.getBookingReviews(Category.WALKING)
+                            },
+                            state = pullToRefreshState
+                        ) {
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                item {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        if (totalReviews > 0) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    Icons.Default.Star,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFFFFC700),
+                                                    modifier = Modifier.size(
+                                                        24.dp
+                                                    )
                                                 )
-                                            )
-                                            Text(
-                                                text = petWalkingUiState.averageReviews.toString(),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = FontWeight.W500
-                                            )
-                                            Text(
-                                                "~",
-                                                style = MaterialTheme.typography.displaySmall,
-                                                fontWeight = FontWeight.W400,
-                                                modifier = Modifier.padding(horizontal = 3.dp)
-                                            )
-                                            Text(
-                                                text = "($totalReviews ratings)",
-                                                style = MaterialTheme.typography.titleSmall,
-                                                color = Color.Gray
-                                            )
+                                                Text(
+                                                    text = petWalkingUiState.averageReviews.toString(),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.W500
+                                                )
+                                                Text(
+                                                    "~",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    fontWeight = FontWeight.W400,
+                                                    modifier = Modifier.padding(horizontal = 3.dp)
+                                                )
+                                                Text(
+                                                    text = "($totalReviews ratings)",
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = Color.Gray
+                                                )
+                                            }
+
                                         }
 
-                                    }
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.End
-                                    ) {
-                                        discount?.let {
-                                            Box(
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.discount_badge),
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.tertiary,
-                                                    modifier = Modifier
-                                                        .size(55.dp)
-                                                )
-                                                Column(
-                                                    modifier = Modifier
-                                                        .padding(
-                                                            9.dp
-                                                        ),
-                                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                                    verticalArrangement = Arrangement.Center
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            discount?.let {
+                                                Box(
+                                                    contentAlignment = Alignment.Center
                                                 ) {
-                                                    Text(
-                                                        text = "$discount%",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.secondary
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.discount_badge),
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.tertiary,
+                                                        modifier = Modifier
+                                                            .size(55.dp)
                                                     )
-                                                    Text(
-                                                        text = "OFF",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.secondary
-                                                    )
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .padding(
+                                                                9.dp
+                                                            ),
+                                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                                        verticalArrangement = Arrangement.Center
+                                                    ) {
+                                                        Text(
+                                                            text = "$discount%",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.secondary
+                                                        )
+                                                        Text(
+                                                            text = "OFF",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.secondary
+                                                        )
+                                                    }
                                                 }
                                             }
+
                                         }
 
                                     }
-
                                 }
-                            }
-                            item {
-                                Text(
-                                    "Book Dog Walking Near You",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(MaterialTheme.dimens.small1),
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    "We provide Background-Checked dog walker and real time GPS track of their walk",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.W500,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.dimens.small1),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-
-
-
-                            item {
-                                FrequencySection(
-                                    frequencies = frequencies,
-                                    selectedFrequency = selectedFrequency ?: frequencies.first(),
-                                    context = context,
-                                    onFrequencySelected = { frequency ->
-                                        petWalkingViewModel.onFrequencySelect(frequency)
-                                    }
-                                )
-                            }
-
-                            item {
-                                if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
-                                    DateRangePickerSection(
-                                        startDate = petWalkingUiState.dateRange?.startDate,
-                                        endDate = petWalkingUiState.dateRange?.endDate,
-                                        onStartDateSelect = { date ->
-                                            petWalkingViewModel.onStartDateSelect(date)
-                                        },
-                                        onEndDateSelect = { date ->
-                                            petWalkingViewModel.onEndDateSelect(date)
-                                        }
-                                    )
-                                } else {
-                                    SingleDatePickerSection(
-                                        singleDate = petWalkingUiState.singleDate,
-                                        onSingleDateSelect = { date ->
-                                            petWalkingViewModel.onSingleDateSelect(date)
-                                        }
-                                    )
-                                }
-                            }
-
-                            item {
-                                if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
-                                    DaysSelectionSection(
-                                        context = context,
-                                        days = days,
-                                        selectedDays = selectedDays,
-                                        onDaysSelected = { day ->
-                                            petWalkingViewModel.onDaySelect(day)
-                                        },
-                                        onEverythingSelect = { petWalkingViewModel.onEverythingSelected() }
-                                    )
-                                }
-                            }
-
-                            if (reviews.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = "What Pet Parents Are Saying",
-                                        style = MaterialTheme.typography.titleSmall.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
+                                        "Book Dog Walking Near You",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.SemiBold,
                                         modifier = Modifier
-                                            .padding(horizontal = MaterialTheme.dimens.small1)
-                                            .padding(top = 20.dp, bottom = 8.dp)
+                                            .fillMaxWidth()
+                                            .padding(MaterialTheme.dimens.small1),
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        "We provide Background-Checked dog walker and real time GPS track of their walk",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.W500,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1),
+                                        textAlign = TextAlign.Center
                                     )
                                 }
+
+
+
                                 item {
-                                    LazyRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        items(reviews) { review ->
-                                            ReviewCard(
-                                                modifier = Modifier.padding(
-                                                    start = if (review == reviews.first()) MaterialTheme.dimens.small1
-                                                    else 0.dp,
-                                                    end = if (review == reviews.last()) MaterialTheme.dimens.small1
-                                                    else 0.dp
-                                                ),
-                                                maxStars = 5,
-                                                stars = review.stars.toDouble(),
-                                                name = review.userName,
-                                                review = review.description,
-                                                date = review.createdAt,
-                                                color = Color.White.copy(0.5f)
-                                            )
+                                    FrequencySection(
+                                        frequencies = frequencies,
+                                        selectedFrequency = selectedFrequency ?: frequencies.first(),
+                                        context = context,
+                                        onFrequencySelected = { frequency ->
+                                            petWalkingViewModel.onFrequencySelect(frequency)
+                                        }
+                                    )
+                                }
+
+                                item {
+                                    if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+                                        DateRangePickerSection(
+                                            startDate = petWalkingUiState.dateRange?.startDate,
+                                            endDate = petWalkingUiState.dateRange?.endDate,
+                                            onStartDateSelect = { date ->
+                                                petWalkingViewModel.onStartDateSelect(date)
+                                            },
+                                            onEndDateSelect = { date ->
+                                                petWalkingViewModel.onEndDateSelect(date)
+                                            }
+                                        )
+                                    } else {
+                                        SingleDatePickerSection(
+                                            singleDate = petWalkingUiState.singleDate,
+                                            onSingleDateSelect = { date ->
+                                                petWalkingViewModel.onSingleDateSelect(date)
+                                            }
+                                        )
+                                    }
+                                }
+
+                                item {
+                                    if (selectedFrequency == Frequency.REPEAT_WEEKLY) {
+                                        DaysSelectionSection(
+                                            context = context,
+                                            days = days,
+                                            selectedDays = selectedDays,
+                                            onDaysSelected = { day ->
+                                                petWalkingViewModel.onDaySelect(day)
+                                            },
+                                            onEverythingSelect = { petWalkingViewModel.onEverythingSelected() }
+                                        )
+                                    }
+                                }
+
+                                if (reviews.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            text = "What Pet Parents Are Saying",
+                                            style = MaterialTheme.typography.titleSmall.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            modifier = Modifier
+                                                .padding(horizontal = MaterialTheme.dimens.small1)
+                                                .padding(top = 20.dp, bottom = 8.dp)
+                                        )
+                                    }
+                                    item {
+                                        LazyRow(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            items(reviews) { review ->
+                                                ReviewCard(
+                                                    modifier = Modifier.padding(
+                                                        start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                                        else 0.dp,
+                                                        end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                                        else 0.dp
+                                                    ),
+                                                    maxStars = 5,
+                                                    stars = review.stars.toDouble(),
+                                                    name = review.userName,
+                                                    review = review.description,
+                                                    date = review.createdAt,
+                                                    color = Color.White.copy(0.5f)
+                                                )
+                                            }
                                         }
                                     }
+
                                 }
 
                             }
