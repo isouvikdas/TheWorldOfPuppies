@@ -66,7 +66,7 @@ class ProductViewModel(
     private val _productDetailState = MutableStateFlow(ProductDetailState())
     val productDetailState: StateFlow<ProductDetailState> = _productDetailState.asStateFlow()
 
-    private val _selectedCategory = MutableStateFlow<Category?>(null)
+    private val _selectedCategory = MutableStateFlow<String?>("")
     val selectedCategory = _selectedCategory.asStateFlow()
 
     private val _searchText = MutableStateFlow("")
@@ -156,7 +156,7 @@ class ProductViewModel(
         _searchText.value = text
     }
 
-    fun setSelectedCategory(category: Category?) {
+    fun setSelectedCategory(category: String?) {
         _selectedCategory.update { category }
     }
 
@@ -214,7 +214,7 @@ class ProductViewModel(
     ) { productListState, selectedCategory, sortOption ->
         var filtered = getProductsByType(productListState.listType)
         if (selectedCategory != null) {
-            filtered = filtered.filter { it.categoryName == selectedCategory.name }
+            filtered = filtered.filter { it.categoryName == selectedCategory }
         }
         when (sortOption) {
             SortProduct.HIGH_TO_LOW -> filtered.sortedByDescending { it.price }

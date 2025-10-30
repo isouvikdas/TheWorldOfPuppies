@@ -68,7 +68,7 @@ fun CategoryListScreen(
                         CategoryItem(
                             category = category,
                             onCategoryClick = {
-                                productViewModel.setSelectedCategory(category)
+                                productViewModel.setSelectedCategory(category.name)
                                 productViewModel.setListType(ListType.ALL)
                                 navController.navigate(Screen.ProductListScreen.route)
                             }
