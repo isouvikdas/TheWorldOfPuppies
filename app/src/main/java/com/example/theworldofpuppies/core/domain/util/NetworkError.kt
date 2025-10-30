@@ -14,6 +14,7 @@ enum class NetworkError : Error {
     INVALID_REQUEST,
     EMPTY_LIST,
     NO_BOOKING_FOUND,
+    NO_ORDER_FOUND,
     NO_ADDRESS_FOUND
 
 }

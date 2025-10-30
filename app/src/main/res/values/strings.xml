@@ -62,7 +62,5 @@ You’ll get ₹150 off your first booking, and I’ll earn ₹150 too!\n\n
 Let’s make our pets happier together! 🐾💚
 </string>
     <string name="no_address_found">Your address list is empty</string>
-
-
-
+    <string name="no_order_found">You haven\'t placed any orders yet</string>
 </resources>

@@ -134,8 +134,13 @@ class OrderViewModel(
                 _orderHistoryUiState.update { it.copy(isLoading = true, error = null) }
                 when (val result = orderRepository.getOrders()) {
                     is Result.Success -> {
+                        val orders = result.data
                         _orderHistoryUiState.update {
-                            it.copy(orderHistory = result.data)
+                            if (orders.isNotEmpty()) {
+                                it.copy(orderHistory = result.data)
+                            } else it.copy(
+                                error = NetworkError.NO_ORDER_FOUND
+                            )
                         }
                     }
 

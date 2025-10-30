@@ -66,6 +66,7 @@ import com.example.theworldofpuppies.shop.product.presentation.category_list.Cat
 import com.example.theworldofpuppies.shop.product.presentation.product_detail.ProductDetailScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductListScreen
 import com.example.theworldofpuppies.shop.product.presentation.product_list.ProductViewModel
+import com.example.theworldofpuppies.support.presentation.SupportScreen
 import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String) {
@@ -98,6 +99,7 @@ sealed class Screen(val route: String) {
     data object MembershipScreen: Screen("MembershipScreen")
     data object MembershipCheckoutScreen: Screen("MembershipCheckoutScreen")
     data object CategoryListScreen: Screen("CategoryListScreen")
+    data object SupportScreen: Screen("SupportScreen")
 }
 
 @Composable
@@ -757,6 +759,20 @@ fun AppNavigation(
                 categoryListState = categoryListState
             )
         }
+
+        composable(route = Screen.SupportScreen.route) {
+            hideAllChrome(
+                onBottomBarVisibilityChanged,
+                onTopBarVisibilityChanged,
+                onProfileButtonVisibilityChanged,
+                onGesturesChanged,
+                searchIconVisibilityChanged
+            )
+            SupportScreen(
+                navController = navController
+            )
+        }
+
 
     }
 }

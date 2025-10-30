@@ -3,7 +3,6 @@ package com.example.theworldofpuppies.shop.order.presentation.order_history
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,13 +43,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.address.presentation.component.TopAppBar
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.formatEpochMillis
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.review.domain.ReviewUiState
 import com.example.theworldofpuppies.review.presentation.RatingCard
@@ -76,6 +75,7 @@ fun OrderHistoryScreen(
     val orders = orderHistoryUiState.orderHistory
 
     val context = LocalContext.current
+    val error = orderHistoryUiState.error
 
     LaunchedEffect(Unit) {
         reviewViewModel.toastEvent.collectLatest { message ->
@@ -101,7 +101,7 @@ fun OrderHistoryScreen(
                 color = Color.Transparent
             ) {
 
-                if (!orderHistoryUiState.isLoading && orders.isEmpty()) {
+                if (!orderHistoryUiState.isLoading && orders.isEmpty() && error != null) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -113,7 +113,7 @@ fun OrderHistoryScreen(
                             modifier = Modifier.size(60.dp)
                         )
                         Text(
-                            "Oops! You haven't placed any orders yet",
+                            error.toString(context),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.W500
                         )

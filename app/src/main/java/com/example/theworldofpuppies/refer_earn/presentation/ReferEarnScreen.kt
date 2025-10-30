@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -59,7 +58,6 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
-import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.refer_earn.domain.ReferEarnUiState
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -141,86 +139,65 @@ fun ReferEarnScreen(
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                     ) {
-                        if (referEarnUiState.referralCode.isEmpty() && referEarnUiState.errorMessage != null) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Image(
-                                    painterResource(R.drawable.dog_sad),
-                                    contentDescription = "dog",
-                                    modifier = Modifier.size(60.dp)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .clip(
+                                    RoundedCornerShape(
+                                        bottomStart = 40.dp,
+                                        bottomEnd = 40.dp
+                                    )
                                 )
-                                Text(
-                                    referEarnUiState.errorMessage.toString(context),
-                                    style = MaterialTheme.typography.bodyMedium
-                                        .copy(fontWeight = FontWeight.W500),
-                                )
+                                .background(MaterialTheme.colorScheme.tertiary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            var visible by remember { mutableStateOf(false) }
+
+                            LaunchedEffect(Unit) {
+                                visible = true
                             }
-                        } else {
-                            Box(
+
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(220.dp)
-                                    .clip(
-                                        RoundedCornerShape(
-                                            bottomStart = 40.dp,
-                                            bottomEnd = 40.dp
-                                        )
-                                    )
-                                    .background(MaterialTheme.colorScheme.tertiary),
-                                contentAlignment = Alignment.Center
+                                    .padding(bottom = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                var visible by remember { mutableStateOf(false) }
+                                val animationDelay = listOf(0, 200, 400, 600)
 
-                                LaunchedEffect(Unit) {
-                                    visible = true
-                                }
+                                val texts = listOf(
+                                    "Your Friends Deserve the Best",
+                                    "Spread the Love,",
+                                    "Share the Care,",
+                                    "Earn Rewards!"
+                                )
 
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    val animationDelay = listOf(0, 200, 400, 600)
-
-                                    val texts = listOf(
-                                        "Your Friends Deserve the Best",
-                                        "Spread the Love,",
-                                        "Share the Care,",
-                                        "Earn Rewards!"
-                                    )
-
-                                    texts.forEachIndexed { index, text ->
-                                        AnimatedVisibility(
-                                            visible = visible,
-                                            enter = fadeIn(
-                                                animationSpec = tween(
-                                                    durationMillis = 600,
-                                                    delayMillis = animationDelay[index]
-                                                )
+                                texts.forEachIndexed { index, text ->
+                                    AnimatedVisibility(
+                                        visible = visible,
+                                        enter = fadeIn(
+                                            animationSpec = tween(
+                                                durationMillis = 600,
+                                                delayMillis = animationDelay[index]
                                             )
-                                        ) {
-                                            Text(
-                                                text = text,
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                    fontWeight = FontWeight.Bold
-                                                ),
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(vertical = 2.dp),
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
+                                        )
+                                    ) {
+                                        Text(
+                                            text = text,
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp),
+                                            textAlign = TextAlign.Center
+                                        )
                                     }
                                 }
                             }
-
                         }
-
                     }
 
                 }

@@ -18,7 +18,7 @@ sealed class DrawerItems(
 ) {
 
     data object Refer : DrawerItems(
-        route = "Refer",
+        route = Screen.ReferEarnScreen.route,
         title = "Refer & Earn",
         icon = { modifier ->
             Icon(
@@ -30,7 +30,7 @@ sealed class DrawerItems(
     )
 
     data object Support : DrawerItems(
-        route = "Support",
+        route = Screen.SupportScreen.route,
         title = "Support",
         icon = { modifier->
             Icon(
