@@ -1,6 +1,7 @@
 package com.example.theworldofpuppies.shop.product.presentation.product_list
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,10 +50,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.shop.cart.presentation.CartViewModel
 import com.example.theworldofpuppies.shop.product.domain.Product
 import com.example.theworldofpuppies.shop.product.domain.util.ListType
@@ -76,7 +80,7 @@ fun ProductListScreen(
     val filteredSortedProducts by productViewModel.filteredSortedProducts.collectAsStateWithLifecycle(
         emptyList()
     )
-    val selectedCategory by productViewModel.selectedCategory.collectAsStateWithLifecycle(null)
+    val selectedCategory by productViewModel.selectedCategory.collectAsStateWithLifecycle()
     val sortOption by productViewModel.sortOption.collectAsStateWithLifecycle()
 
     val categoryList = categoryListState.categoryList
@@ -157,37 +161,63 @@ fun ProductListScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(categoryList) { category ->
-                            val isSelected = selectedCategory == category
+                            val isSelected = selectedCategory == category.name
                             FilterChip(
                                 onClick = {
-                                    productViewModel.setSelectedCategory(if (isSelected) null else category)
+                                    productViewModel.setSelectedCategory(if (isSelected) null else category.name)
                                 },
                                 label = { Text(category.name) },
                                 selected = isSelected,
                                 shape = RoundedCornerShape(16.dp),
                                 modifier = Modifier
                                     .padding(end = MaterialTheme.dimens.small1.div(2))
-                                    .padding(start = if (category == categoryList.first()) 6.dp else 0.dp,
-                                        end = if (category == categoryList.last()) 6.dp else 0.dp)
+                                    .padding(
+                                        start = if (category == categoryList.first()) 6.dp else 0.dp,
+                                        end = if (category == categoryList.last()) 6.dp else 0.dp
+                                    )
                                     .animateItem(),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.primary,
                                     selectedLabelColor = Color.White
                                 ),
-                                border = BorderStroke(1.0.dp, color = MaterialTheme.colorScheme.primary)
+                                border = BorderStroke(
+                                    1.0.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                             )
                         }
                     }
 
                 }
-                items(filteredSortedProducts) { product ->
-                    ProductItem(
-                        product = product,
-                        onProductSelect = {
-                            onProductSelect(product)
-                        },
-                        cartViewModel = cartViewModel
-                    )
+                if (filteredSortedProducts.isEmpty() && !isLoading) {
+                    item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                painterResource(R.drawable.dog_sad),
+                                contentDescription = "dog",
+                                modifier = Modifier.size(60.dp)
+                            )
+                            Text(
+                                text = "No Products Found",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W500),
+                            )
+                        }
+                    }
+                } else {
+                    items(filteredSortedProducts) { product ->
+                        ProductItem(
+                            product = product,
+                            onProductSelect = {
+                                onProductSelect(product)
+                            },
+                            cartViewModel = cartViewModel
+                        )
+                    }
+
                 }
             }
 

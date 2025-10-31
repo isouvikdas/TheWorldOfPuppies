@@ -1,6 +1,5 @@
 package com.example.theworldofpuppies.services.grooming.presentation
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -62,6 +61,7 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
+import com.example.theworldofpuppies.core.presentation.util.toString
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.review.domain.ReviewListState
 import com.example.theworldofpuppies.review.presentation.ReviewCard
@@ -156,7 +156,7 @@ fun GroomingScreen(
                             modifier = Modifier.size(60.dp)
                         )
                         Text(
-                            "Oops! Something went wrong",
+                            text = groomingUiState.error.toString(context),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W500),
                         )
                     }
@@ -164,7 +164,10 @@ fun GroomingScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         PullToRefreshBox(
                             isRefreshing = isRefreshing,
-                            onRefresh = { groomingViewModel.loadGrooming(forceRefresh = true) },
+                            onRefresh = {
+                                groomingViewModel.loadGrooming(forceRefresh = true)
+                                reviewViewModel.getBookingReviews(Category.GROOMING)
+                            },
                             state = pullToRefreshState
                         ) {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {

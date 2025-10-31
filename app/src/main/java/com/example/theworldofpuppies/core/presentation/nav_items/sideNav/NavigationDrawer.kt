@@ -1,5 +1,6 @@
 package com.example.theworldofpuppies.core.presentation.nav_items.sideNav
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,11 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.nav_items.topNav.TopAppbar
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.ui.theme.dimens
@@ -184,7 +188,7 @@ fun DrawerContent(
                     },
                     onClick = { onSignOutClick() },
                     modifier = Modifier.padding(bottom = 16.dp),
-                    selected = true
+                    selected = false
                 )
             }
         }
@@ -197,7 +201,7 @@ fun DrawerHeader() {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(MaterialTheme.dimens.extraLarge1),
+            .height(160.dp),
         color = Color.Transparent
     ) {
         Column(
@@ -207,7 +211,13 @@ fun DrawerHeader() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Pet Care", style = MaterialTheme.typography.displaySmall)
+            Image(
+                painter = painterResource(R.drawable.logo_with_shades),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(180.dp),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }

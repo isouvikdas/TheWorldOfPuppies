@@ -13,6 +13,8 @@ enum class NetworkError : Error {
     SERVICE_NOT_AVAILABLE,
     INVALID_REQUEST,
     EMPTY_LIST,
-    NO_BOOKING_FOUND
+    NO_BOOKING_FOUND,
+    NO_ORDER_FOUND,
+    NO_ADDRESS_FOUND
 
 }

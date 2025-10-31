@@ -1,11 +1,13 @@
 package com.example.theworldofpuppies.shop.cart.presentation
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.core.domain.UserRepository
+import com.example.theworldofpuppies.core.domain.util.NetworkError
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.navigation.Screen
@@ -13,6 +15,7 @@ import com.example.theworldofpuppies.shop.cart.domain.CartItem
 import com.example.theworldofpuppies.shop.cart.domain.CartRepository
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEvent
 import com.example.theworldofpuppies.shop.order.presentation.utils.OrderEventManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -33,6 +36,18 @@ class CartViewModel(
 
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent: SharedFlow<String> = _toastEvent
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    fun forceLoad() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getUserCart()
+            delay(1000)
+            _isRefreshing.value = false
+        }
+    }
 
     init {
         if (!userRepository.getUserId().isNullOrEmpty()) {
@@ -107,11 +122,12 @@ class CartViewModel(
                     }
 
                     is Result.Error -> {
-                        _cartUiState.update { it.copy(errorMessage = cartResult.error.toString()) }
+                        _cartUiState.update { it.copy(errorMessage = cartResult.error) }
                     }
                 }
             } catch (e: Exception) {
-                _cartUiState.update { it.copy(errorMessage = e.message) }
+                Log.e("cart", e.message.toString())
+                _cartUiState.update { it.copy(errorMessage = NetworkError.UNKNOWN) }
             } finally {
                 _cartUiState.update { it.copy(isLoading = false) }
             }
@@ -137,7 +153,7 @@ class CartViewModel(
                                     cart.copy(cartItemIds = updatedIds)
                                 }
 
-                                val totalSelectedItems = updatedCartItems.count { it.isSelected == true }
+                                val totalSelectedItems = updatedCartItems.count { it.isSelected }
                                 val cartTotal = calculateCartTotal(updatedCartItems)
 
                                 _cartUiState.update {
@@ -153,18 +169,18 @@ class CartViewModel(
                         }
                         is Result.Error -> {
                             val errorMessage = result.error.toString()
-                            _cartUiState.update { it.copy(errorMessage = errorMessage) }
+                            _cartUiState.update { it.copy(errorMessage = result.error) }
                             showToast(errorMessage)
 
                         }
                     }
                 } else {
                     val errorMessage = "Item not found in the cart"
-                    _cartUiState.update { it.copy(errorMessage = errorMessage) }
                     showToast(errorMessage)
                 }
             } catch (e: Exception) {
-                _cartUiState.update { it.copy(errorMessage = e.message) }
+                Log.e("cart", e.message.toString())
+                _cartUiState.update { it.copy(errorMessage = NetworkError.UNKNOWN) }
             } finally {
                 _cartUiState.update { it.copy(isLoading = false) }
             }
@@ -214,7 +230,7 @@ class CartViewModel(
 
                             is Result.Error -> {
                                 _cartUiState.update {
-                                    it.copy(cart = cart, errorMessage = itemResult.error.toString())
+                                    it.copy(cart = cart, errorMessage = itemResult.error)
                                 }
                             }
                         }
@@ -222,13 +238,16 @@ class CartViewModel(
 
                     is Result.Error -> {
                         _cartUiState.update {
-                            it.copy(errorMessage = cartResult.error.toString())
+                            it.copy(errorMessage = cartResult.error)
                         }
                     }
                 }
 
             } catch (e: Exception) {
-                _cartUiState.update { it.copy(errorMessage = e.message) }
+                Log.e("cart", e.message.toString())
+                _cartUiState.update {
+                    it.copy(errorMessage = NetworkError.UNKNOWN)
+                }
             } finally {
                 _cartUiState.update { it.copy(isLoading = false) }
             }
@@ -245,7 +264,7 @@ class CartViewModel(
                             if (it.id == cartItemId) it.copy(isSelected = isSelected) else it
                         } ?: emptyList()
 
-                        val totalSelectedItems = updatedItems.count { it.isSelected == true }
+                        val totalSelectedItems = updatedItems.count { it.isSelected }
                         val cartTotal = calculateCartTotal(updatedItems)
 
                         _cartUiState.update {
@@ -258,11 +277,12 @@ class CartViewModel(
                     }
 
                     is Result.Error -> _cartUiState.update {
-                        it.copy(errorMessage = result.error.toString())
+                        it.copy(errorMessage = result.error)
                     }
                 }
             } catch (e: Exception) {
-                _cartUiState.update { it.copy(errorMessage = e.message) }
+                Log.e("cart", e.message.toString())
+                _cartUiState.update { it.copy(errorMessage = NetworkError.UNKNOWN) }
             } finally {
                 _cartUiState.update { it.copy(isLoading = false) }
             }

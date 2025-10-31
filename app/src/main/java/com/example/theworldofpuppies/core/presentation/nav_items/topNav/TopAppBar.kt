@@ -1,6 +1,10 @@
 package com.example.theworldofpuppies.core.presentation.nav_items.topNav
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -14,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -23,6 +28,7 @@ import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.nav_items.bottomNav.BottomNavigationItems
 import com.example.theworldofpuppies.navigation.Screen
+import com.example.theworldofpuppies.ui.theme.dimens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -62,9 +68,13 @@ fun TopAppbar(
             }
         },
         title = {
-            Text(
-                text = "The World of Puppies",
-                color = MaterialTheme.colorScheme.primary
+            Image(
+                painter = painterResource(R.drawable.logo_text_trans),
+                contentDescription = null,
+                modifier = Modifier
+                    .width(MaterialTheme.dimens.extraLarge1)
+                    .height(100.dp),
+                contentScale = ContentScale.Crop
             )
         },
         actions = {

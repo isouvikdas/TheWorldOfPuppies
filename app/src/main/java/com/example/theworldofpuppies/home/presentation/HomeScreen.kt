@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -37,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,6 +50,7 @@ import com.example.theworldofpuppies.booking.core.domain.Category
 import com.example.theworldofpuppies.booking.core.domain.getImageRes
 import com.example.theworldofpuppies.booking.core.domain.getScreenRoute
 import com.example.theworldofpuppies.booking.core.domain.toString
+import com.example.theworldofpuppies.core.domain.Banner
 import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.profile.pet.domain.Pet
 import com.example.theworldofpuppies.profile.pet.domain.PetListUiState
@@ -56,6 +58,7 @@ import com.example.theworldofpuppies.profile.pet.presentation.PetProfileCard
 import com.example.theworldofpuppies.profile.pet.presentation.PetProfileViewModel
 import com.example.theworldofpuppies.ui.theme.dimens
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -65,33 +68,52 @@ fun HomeScreen(
 ) {
 
     val context = LocalContext.current
-    val imageList = List(6) { painterResource(id = R.drawable.pet_banner) }
+    val banners = listOf(
+        Banner(
+            Screen.GroomingScreen,
+            R.drawable.pet_banner
+        ),
+        Banner(
+            Screen.DogTrainingScreen,
+            R.drawable.pet_banner
+        ),
+        Banner(
+            Screen.PetWalkingScreen,
+            R.drawable.pet_banner
+        )
+    )
     val pets = petListUiState.pets
 
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color.Transparent
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ScrollableBanner(imageList = imageList)
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
-            ServiceSection(
-                serviceList = Category.entries,
-                context = context,
-                navController = navController
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
-            PetProfileSection(
-                pets = pets,
-                navController = navController,
-                petProfileViewModel = petProfileViewModel
-            )
+            item {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                ScrollableBanner(banners = banners, navController = navController)
+            }
+            item {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small1))
+                ServiceSection(
+                    serviceList = Category.entries,
+                    context = context,
+                    navController = navController
+                )
+            }
 
+            item {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small2))
+                PetProfileSection(
+                    pets = pets,
+                    navController = navController,
+                    petProfileViewModel = petProfileViewModel
+                )
+            }
         }
     }
 }
@@ -278,8 +300,9 @@ fun ServiceSection(
 
 @Composable
 fun ScrollableBanner(
-    imageList: List<Painter>,
-    modifier: Modifier = Modifier
+    banners: List<Banner>,
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     LazyRow(
         modifier = modifier
@@ -289,21 +312,23 @@ fun ScrollableBanner(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
-        items(imageList) { image ->
+        items(banners) { banner ->
             Surface(
                 modifier = Modifier
                     .fillMaxHeight()
                     .wrapContentWidth()
                     .padding(
                         start = MaterialTheme.dimens.small1,
-                        end = if (image == imageList.last()) MaterialTheme.dimens.small1 else 0.dp
+                        end = if (banner == banners.last()) MaterialTheme.dimens.small1 else 0.dp
                     )
-                    .clickable {},
+                    .clickable {
+                        navController.navigate(banner.targetScreen.route)
+                    },
                 color = Color.White,
                 shape = RoundedCornerShape(MaterialTheme.dimens.small2)
             ) {
                 Image(
-                    painter = image,
+                    painter = painterResource(banner.image),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )

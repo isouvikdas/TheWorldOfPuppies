@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -60,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.theworldofpuppies.R
+import com.example.theworldofpuppies.core.domain.ProductBanner
 import com.example.theworldofpuppies.core.presentation.animation.bounceClick
 import com.example.theworldofpuppies.core.presentation.util.formatCurrency
 import com.example.theworldofpuppies.core.presentation.util.toString
@@ -94,7 +94,23 @@ fun ShopHomeScreen(
     val context = LocalContext.current
 
     val lazyListState = rememberLazyListState()
-    val imageList = List(10) { painterResource(id = R.drawable.pet_banner) }
+    val banners = listOf(
+        ProductBanner(
+            Screen.ProductListScreen,
+            R.drawable.pet_banner,
+            "Toys"
+        ),
+        ProductBanner(
+            Screen.ProductListScreen,
+            R.drawable.pet_banner,
+            "Accessories"
+        ),
+        ProductBanner(
+            Screen.ProductListScreen,
+            R.drawable.pet_banner,
+            "Grooming"
+        )
+    )
     val productList = productListState.productList.take(4)
     val categoryList = categoryListState.categoryList.take(6)
     val featuredProductList = featuredProductListState.productList.take(4)
@@ -137,7 +153,12 @@ fun ShopHomeScreen(
                     }
 
                     item {
-                        ProductBannerSection(modifier = Modifier, imageList = imageList)
+                        ProductBannerSection(
+                            modifier = Modifier,
+                            banners = banners,
+                            navController = navController,
+                            productViewModel = productViewModel
+                        )
                     }
 
 
@@ -153,7 +174,7 @@ fun ShopHomeScreen(
                             getCategories = { getCategories() },
                             errorMessage = categoryListState.errorMessage?.toString(context),
                             onCategoryClick = { category ->
-                                productViewModel.setSelectedCategory(category)
+                                productViewModel.setSelectedCategory(category.name)
                                 productViewModel.setListType(ListType.ALL)
                                 navController.navigate(Screen.ProductListScreen.route)
                             },
@@ -503,7 +524,12 @@ fun ProductItem(
 }
 
 @Composable
-fun ProductBannerSection(modifier: Modifier = Modifier, imageList: List<Painter>) {
+fun ProductBannerSection(
+    modifier: Modifier = Modifier,
+    banners: List<ProductBanner>,
+    navController: NavController,
+    productViewModel: ProductViewModel
+) {
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
@@ -511,21 +537,25 @@ fun ProductBannerSection(modifier: Modifier = Modifier, imageList: List<Painter>
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {
-        items(imageList) { image ->
+        items(banners) { banner ->
             Surface(
                 modifier = Modifier
                     .fillMaxHeight()
                     .wrapContentWidth()
                     .padding(
                         start = MaterialTheme.dimens.small1,
-                        end = if (image == imageList.last()) MaterialTheme.dimens.small1 else 0.dp
+                        end = if (banner == banners.last()) MaterialTheme.dimens.small1 else 0.dp
                     )
-                    .clickable {},
+                    .clickable {
+                        productViewModel.setSelectedCategory(banner.category)
+                        productViewModel.setListType(ListType.ALL)
+                        navController.navigate(banner.targetScreen.route)
+                    },
                 color = Color.White,
                 shape = RoundedCornerShape(MaterialTheme.dimens.small2)
             ) {
                 Image(
-                    painter = image,
+                    painter = painterResource(banner.image),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )

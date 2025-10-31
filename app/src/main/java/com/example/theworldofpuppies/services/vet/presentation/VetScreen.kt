@@ -1,7 +1,6 @@
 package com.example.theworldofpuppies.services.vet.presentation
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -43,6 +42,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +64,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.booking.core.domain.Category
@@ -77,8 +79,6 @@ import com.example.theworldofpuppies.navigation.Screen
 import com.example.theworldofpuppies.review.domain.ReviewListState
 import com.example.theworldofpuppies.review.presentation.ReviewCard
 import com.example.theworldofpuppies.review.presentation.ReviewViewModel
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEvent
-import com.example.theworldofpuppies.review.presentation.utils.ReviewEventManager
 import com.example.theworldofpuppies.services.core.presentation.component.ServiceTopAppBar
 import com.example.theworldofpuppies.services.vet.domain.VetOption
 import com.example.theworldofpuppies.services.vet.domain.VetTimeSlot
@@ -144,6 +144,9 @@ fun VetScreen(
 
     val isRated = vetUiState.isRated
 
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isRefreshing by vetViewModel.isRefreshing.collectAsStateWithLifecycle()
+
     LaunchedEffect(isRated) {
         if (isRated) {
             reviewViewModel.getBookingReviews(Category.VETERINARY)
@@ -204,196 +207,205 @@ fun VetScreen(
                     color = Color.Transparent
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize()
+                        PullToRefreshBox(
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
+                                vetViewModel.forceLoad(context)
+                                reviewViewModel.getBookingReviews(Category.VETERINARY)
+                            },
+                            state = pullToRefreshState
                         ) {
-
-                            item {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.dimens.small1),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    if (vetUiState.totalReviews > 0) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                Icons.Default.Star,
-                                                contentDescription = null,
-                                                tint = Color(0xFFFFC700),
-                                                modifier = Modifier.size(
-                                                    24.dp
-                                                )
-                                            )
-                                            Text(
-                                                text = vetUiState.averageReviews.toString(),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = FontWeight.W500
-                                            )
-                                            Text(
-                                                "~",
-                                                style = MaterialTheme.typography.displaySmall,
-                                                fontWeight = FontWeight.W400,
-                                                modifier = Modifier.padding(horizontal = 3.dp)
-                                            )
-                                            Text(
-                                                text = "(${vetUiState.totalReviews} ratings)",
-                                                style = MaterialTheme.typography.titleSmall,
-                                                color = Color.Gray
-                                            )
-                                        }
-                                    }
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                item {
                                     Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.End
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        discount?.let {
-                                            Box(
-                                                contentAlignment = Alignment.Center
-                                            ) {
+                                        if (vetUiState.totalReviews > 0) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
-                                                    painter = painterResource(R.drawable.discount_badge),
+                                                    Icons.Default.Star,
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.tertiary,
-                                                    modifier = Modifier
-                                                        .size(55.dp)
+                                                    tint = Color(0xFFFFC700),
+                                                    modifier = Modifier.size(
+                                                        24.dp
+                                                    )
                                                 )
-                                                Column(
-                                                    modifier = Modifier
-                                                        .padding(
-                                                            9.dp
-                                                        ),
-                                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                                    verticalArrangement = Arrangement.Center
-                                                ) {
-                                                    Text(
-                                                        text = "$discount%",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.secondary
-                                                    )
-                                                    Text(
-                                                        text = "OFF",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.secondary
-                                                    )
-                                                }
+                                                Text(
+                                                    text = vetUiState.averageReviews.toString(),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.W500
+                                                )
+                                                Text(
+                                                    "~",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    fontWeight = FontWeight.W400,
+                                                    modifier = Modifier.padding(horizontal = 3.dp)
+                                                )
+                                                Text(
+                                                    text = "(${vetUiState.totalReviews} ratings)",
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = Color.Gray
+                                                )
                                             }
                                         }
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            discount?.let {
+                                                Box(
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.discount_badge),
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.tertiary,
+                                                        modifier = Modifier
+                                                            .size(55.dp)
+                                                    )
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .padding(
+                                                                9.dp
+                                                            ),
+                                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                                        verticalArrangement = Arrangement.Center
+                                                    ) {
+                                                        Text(
+                                                            text = "$discount%",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.secondary
+                                                        )
+                                                        Text(
+                                                            text = "OFF",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.secondary
+                                                        )
+                                                    }
+                                                }
+                                            }
 
-                                    }
-                                }
-
-                            }
-                            item {
-                                Text(
-                                    description,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(MaterialTheme.dimens.small1),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-
-                            item {
-                                Text(
-                                    "Choose between instant in-call consultation or a home visit for your pet’s comfort",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.W500,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.dimens.small1),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-
-                            item {
-                                VetOptionSection(
-                                    modifier = Modifier.padding(vertical = 5.dp),
-                                    vetOptions = vetOptions,
-                                    selectedVetOptions = selectedVetOption,
-                                    context = context,
-                                    onVetOptionSelected = { vetOption ->
-                                        vetViewModel.onVetOptionSelect(vetOption)
-                                    },
-                                    discount = discount ?: 0
-                                )
-                            }
-
-                            item {
-                                VetDateSelectionSection(
-                                    modifier = Modifier
-                                        .padding(
-                                            horizontal = MaterialTheme.dimens.small1,
-                                            vertical = MaterialTheme.dimens.extraSmall
-                                        ),
-                                    heading = formatDateTime(
-                                        selectedDate,
-                                        pattern = dateDisplayPattern
-                                    ),
-                                    onShowDateDialogChange = { showDateDialog = it },
-                                    vetViewModel = vetViewModel,
-                                    timeSlots = finalTimeSlots,
-                                    selectedDate = selectedDate,
-                                    error = vetUiState.errorMessage,
-                                    isDateSectionLoading = vetUiState.isDateSectionLoading,
-                                    selectedSlot = vetUiState.selectedSlot,
-                                    onTimeSlotSelection = { slot ->
-                                        vetViewModel.onTimeSlotSelection(
-                                            slot
-                                        )
-                                    },
-                                    context = context
-                                )
-
-                            }
-
-                            if (reviews.isNotEmpty()) {
-                                item {
-                                    Text(
-                                        text = "What Pet Parents Are Saying",
-                                        style = MaterialTheme.typography.titleSmall.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        modifier = Modifier
-                                            .padding(horizontal = MaterialTheme.dimens.small1)
-                                            .padding(top = 20.dp, bottom = 8.dp)
-                                    )
-                                }
-                                item {
-                                    LazyRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        items(reviews) { review ->
-                                            ReviewCard(
-                                                modifier = Modifier.padding(
-                                                    start = if (review == reviews.first()) MaterialTheme.dimens.small1
-                                                    else 0.dp,
-                                                    end = if (review == reviews.last()) MaterialTheme.dimens.small1
-                                                    else 0.dp
-                                                ),
-                                                maxStars = 5,
-                                                stars = review.stars.toDouble(),
-                                                name = review.userName,
-                                                review = review.description,
-                                                date = review.createdAt,
-                                                color = Color.White.copy(0.5f)
-                                            )
                                         }
                                     }
+
+                                }
+                                item {
+                                    Text(
+                                        description,
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(MaterialTheme.dimens.small1),
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
 
-                            }
+                                item {
+                                    Text(
+                                        "Choose between instant in-call consultation or a home visit for your pet’s comfort",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.W500,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+
+                                item {
+                                    VetOptionSection(
+                                        modifier = Modifier.padding(vertical = 5.dp),
+                                        vetOptions = vetOptions,
+                                        selectedVetOptions = selectedVetOption,
+                                        context = context,
+                                        onVetOptionSelected = { vetOption ->
+                                            vetViewModel.onVetOptionSelect(vetOption)
+                                        },
+                                        discount = discount ?: 0
+                                    )
+                                }
+
+                                item {
+                                    VetDateSelectionSection(
+                                        modifier = Modifier
+                                            .padding(
+                                                horizontal = MaterialTheme.dimens.small1,
+                                                vertical = MaterialTheme.dimens.extraSmall
+                                            ),
+                                        heading = formatDateTime(
+                                            selectedDate,
+                                            pattern = dateDisplayPattern
+                                        ),
+                                        onShowDateDialogChange = { showDateDialog = it },
+                                        vetViewModel = vetViewModel,
+                                        timeSlots = finalTimeSlots,
+                                        selectedDate = selectedDate,
+                                        error = vetUiState.errorMessage,
+                                        isDateSectionLoading = vetUiState.isDateSectionLoading,
+                                        selectedSlot = vetUiState.selectedSlot,
+                                        onTimeSlotSelection = { slot ->
+                                            vetViewModel.onTimeSlotSelection(
+                                                slot
+                                            )
+                                        },
+                                        context = context
+                                    )
+
+                                }
+
+                                if (reviews.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            text = "What Pet Parents Are Saying",
+                                            style = MaterialTheme.typography.titleSmall.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            modifier = Modifier
+                                                .padding(horizontal = MaterialTheme.dimens.small1)
+                                                .padding(top = 20.dp, bottom = 8.dp)
+                                        )
+                                    }
+                                    item {
+                                        LazyRow(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            items(reviews) { review ->
+                                                ReviewCard(
+                                                    modifier = Modifier.padding(
+                                                        start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                                        else 0.dp,
+                                                        end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                                        else 0.dp
+                                                    ),
+                                                    maxStars = 5,
+                                                    stars = review.stars.toDouble(),
+                                                    name = review.userName,
+                                                    review = review.description,
+                                                    date = review.createdAt,
+                                                    color = Color.White.copy(0.5f)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                }
 
 
-                            item {
-                                Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
+                                item {
+                                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge1))
+                                }
                             }
+
                         }
 
                         VetBottomSection(

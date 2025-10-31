@@ -3,9 +3,11 @@ package com.example.theworldofpuppies.shop.product.presentation.product_list
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.theworldofpuppies.auth.presentation.login.AuthEventManager
 import com.example.theworldofpuppies.core.domain.UserRepository
 import com.example.theworldofpuppies.core.domain.util.Result
 import com.example.theworldofpuppies.core.presentation.SearchUiState
+import com.example.theworldofpuppies.core.presentation.util.Event
 import com.example.theworldofpuppies.shop.product.data.mappers.toCategory
 import com.example.theworldofpuppies.shop.product.data.mappers.toProduct
 import com.example.theworldofpuppies.shop.product.domain.Category
@@ -38,7 +40,8 @@ import timber.log.Timber
 class ProductViewModel(
     private val productRepository: ProductRepository,
     private val categoryRepository: CategoryRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authEventManager: AuthEventManager
 ) : ViewModel() {
 
     private val _productListState = MutableStateFlow(ProductListState())
@@ -63,7 +66,7 @@ class ProductViewModel(
     private val _productDetailState = MutableStateFlow(ProductDetailState())
     val productDetailState: StateFlow<ProductDetailState> = _productDetailState.asStateFlow()
 
-    private val _selectedCategory = MutableStateFlow<Category?>(null)
+    private val _selectedCategory = MutableStateFlow<String?>("")
     val selectedCategory = _selectedCategory.asStateFlow()
 
     private val _searchText = MutableStateFlow("")
@@ -153,7 +156,7 @@ class ProductViewModel(
         _searchText.value = text
     }
 
-    fun setSelectedCategory(category: Category?) {
+    fun setSelectedCategory(category: String?) {
         _selectedCategory.update { category }
     }
 
@@ -168,6 +171,7 @@ class ProductViewModel(
     }
 
     init {
+        observeAuthEvents()
         viewModelScope.launch {
             clearCachedData()
             if (userRepository.isLoggedIn()) {
@@ -210,7 +214,7 @@ class ProductViewModel(
     ) { productListState, selectedCategory, sortOption ->
         var filtered = getProductsByType(productListState.listType)
         if (selectedCategory != null) {
-            filtered = filtered.filter { it.categoryName == selectedCategory.name }
+            filtered = filtered.filter { it.categoryName == selectedCategory }
         }
         when (sortOption) {
             SortProduct.HIGH_TO_LOW -> filtered.sortedByDescending { it.price }
@@ -369,6 +373,19 @@ class ProductViewModel(
                 Timber.Forest.e(e, "Error fetching products")
             } finally {
                 _productListState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun observeAuthEvents() {
+        viewModelScope.launch {
+            authEventManager.events.collect { event ->
+                if (event is Event.LoggedIn) {
+                    clearCachedData()
+                    fetchCategories()
+                    fetchNextPage()
+                    fetchFeaturedProducts()
+                }
             }
         }
     }

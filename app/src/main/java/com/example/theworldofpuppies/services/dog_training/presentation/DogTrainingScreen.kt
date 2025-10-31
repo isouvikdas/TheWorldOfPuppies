@@ -39,9 +39,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.theworldofpuppies.R
 import com.example.theworldofpuppies.booking.core.domain.Category
@@ -89,6 +93,10 @@ fun DogTrainingScreen(
     val selectedFeatures = dogTrainingUiState.selectedDogTrainingFeatures
     val discount = dogTrainingUiState.discount
     val isRated = dogTrainingUiState.isRated
+
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isRefreshing by dogTrainingViewModel.isRefreshing.collectAsStateWithLifecycle()
 
     LaunchedEffect(isRated) {
         if (isRated) {
@@ -146,223 +154,233 @@ fun DogTrainingScreen(
                         .fillMaxSize()
                         .padding(it)
                 ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = {
+                            dogTrainingViewModel.forceLoad(context)
+                            reviewViewModel.getBookingReviews(Category.DOG_TRAINING)
+                        },
+                        state = pullToRefreshState
                     ) {
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = MaterialTheme.dimens.small1),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                if (dogTrainingUiState.totalReviews > 0) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            Icons.Default.Star,
-                                            contentDescription = null,
-                                            tint = Color(0xFFFFC700),
-                                            modifier = Modifier.size(
-                                                24.dp
-                                            )
-                                        )
-                                        Text(
-                                            text = dogTrainingUiState.averageReviews.toString(),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.W500
-                                        )
-                                        Text(
-                                            "~",
-                                            style = MaterialTheme.typography.displaySmall,
-                                            fontWeight = FontWeight.W400,
-                                            modifier = Modifier.padding(horizontal = 3.dp)
-                                        )
-                                        Text(
-                                            text = "(${dogTrainingUiState.totalReviews} ratings)",
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = Color.Gray
-                                        )
-                                    }
-
-                                }
-
-                                discount?.let {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.End
-                                    ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(R.drawable.discount_badge),
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.tertiary,
-                                                modifier = Modifier
-                                                    .size(55.dp)
-                                            )
-                                            Column(
-                                                modifier = Modifier
-                                                    .padding(
-                                                        9.dp
-                                                    ),
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center
-                                            ) {
-                                                Text(
-                                                    text = "$discount%",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    color = MaterialTheme.colorScheme.secondary
-                                                )
-                                                Text(
-                                                    text = "OFF",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    color = MaterialTheme.colorScheme.secondary
-                                                )
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
-
-                        }
-                        item {
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                Text(
-                                    "Choose the Right Training for Your Dog",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(MaterialTheme.dimens.small1),
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    "Certified Trainers to Build Obedience, Confidence & Bonding",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.W500,
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            item {
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = MaterialTheme.dimens.small1),
-                                    textAlign = TextAlign.Center
-                                )
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    if (dogTrainingUiState.totalReviews > 0) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                Icons.Default.Star,
+                                                contentDescription = null,
+                                                tint = Color(0xFFFFC700),
+                                                modifier = Modifier.size(
+                                                    24.dp
+                                                )
+                                            )
+                                            Text(
+                                                text = dogTrainingUiState.averageReviews.toString(),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.W500
+                                            )
+                                            Text(
+                                                "~",
+                                                style = MaterialTheme.typography.displaySmall,
+                                                fontWeight = FontWeight.W400,
+                                                modifier = Modifier.padding(horizontal = 3.dp)
+                                            )
+                                            Text(
+                                                text = "(${dogTrainingUiState.totalReviews} ratings)",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = Color.Gray
+                                            )
+                                        }
+
+                                    }
+
+                                    discount?.let {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            Box(
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.discount_badge),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.tertiary,
+                                                    modifier = Modifier
+                                                        .size(55.dp)
+                                                )
+                                                Column(
+                                                    modifier = Modifier
+                                                        .padding(
+                                                            9.dp
+                                                        ),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.Center
+                                                ) {
+                                                    Text(
+                                                        text = "$discount%",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                    Text(
+                                                        text = "OFF",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+
                             }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.padding(16.dp))
-                        }
-
-                        item {
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                items(trainingOptions) { option ->
-                                    val isSelected = selectedTrainingOption == option
-                                    DogTrainingOptionCard(
+                            item {
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    Text(
+                                        "Choose the Right Training for Your Dog",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.SemiBold,
                                         modifier = Modifier
-                                            .padding(
-                                                start = if (trainingOptions.first() == option) MaterialTheme.dimens.small1
-                                                else 0.dp,
-                                                end = if (trainingOptions.last() == option) MaterialTheme.dimens.small1
-                                                else 0.dp
-                                            ),
-                                        name = option.name,
-                                        description = option.description,
-                                        onSelect = {
-                                            dogTrainingViewModel.onTrainingOptionSelect(option)
-                                        },
-                                        isSelected = isSelected
+                                            .fillMaxWidth()
+                                            .padding(MaterialTheme.dimens.small1),
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        "Certified Trainers to Build Obedience, Confidence & Bonding",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.W500,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1),
+                                        textAlign = TextAlign.Center
                                     )
                                 }
                             }
-                        }
 
-                        item {
-                            if (selectedTrainingOption != null) {
-                                DogTrainingFeatureSection(
-                                    trainingFeatures = trainingFeatures,
-                                    selectedFeatures = selectedFeatures,
-                                    onSelect = { feature ->
-                                        dogTrainingViewModel.onTrainingFeatureSelect(feature)
-                                    }
-                                )
-                            } else {
-                                Surface(
-                                    modifier = modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.dimens.small1)
-                                        .padding(
-                                            top = 16.dp,
-                                            bottom = 190.dp
-                                        ),
-                                    color = Color.White,
-                                    shape = RoundedCornerShape(16.dp)
+                            item {
+                                Spacer(modifier = Modifier.padding(16.dp))
+                            }
+
+                            item {
+                                LazyRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    items(trainingOptions) { option ->
+                                        val isSelected = selectedTrainingOption == option
+                                        DogTrainingOptionCard(
+                                            modifier = Modifier
+                                                .padding(
+                                                    start = if (trainingOptions.first() == option) MaterialTheme.dimens.small1
+                                                    else 0.dp,
+                                                    end = if (trainingOptions.last() == option) MaterialTheme.dimens.small1
+                                                    else 0.dp
+                                                ),
+                                            name = option.name,
+                                            description = option.description,
+                                            onSelect = {
+                                                dogTrainingViewModel.onTrainingOptionSelect(option)
+                                            },
+                                            isSelected = isSelected
+                                        )
+                                    }
+                                }
+                            }
+
+                            item {
+                                if (selectedTrainingOption != null) {
+                                    DogTrainingFeatureSection(
+                                        trainingFeatures = trainingFeatures,
+                                        selectedFeatures = selectedFeatures,
+                                        onSelect = { feature ->
+                                            dogTrainingViewModel.onTrainingFeatureSelect(feature)
+                                        }
+                                    )
+                                } else {
                                     Surface(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        color = Color.LightGray.copy(0.4f)
+                                        modifier = modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = MaterialTheme.dimens.small1)
+                                            .padding(
+                                                top = 16.dp,
+                                                bottom = 190.dp
+                                            ),
+                                        color = Color.White,
+                                        shape = RoundedCornerShape(16.dp)
                                     ) {
-                                        Column(
-                                            modifier = Modifier.wrapContentSize(),
-                                            verticalArrangement = Arrangement.Center,
-                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        Surface(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = Color.LightGray.copy(0.4f)
                                         ) {
-                                            Text(
-                                                "Please select a package",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = FontWeight.W500,
-                                                modifier = Modifier.padding(
-                                                    vertical = 50.dp,
-                                                    horizontal = MaterialTheme.dimens.small1
+                                            Column(
+                                                modifier = Modifier.wrapContentSize(),
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    "Please select a package",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.W500,
+                                                    modifier = Modifier.padding(
+                                                        vertical = 50.dp,
+                                                        horizontal = MaterialTheme.dimens.small1
+                                                    )
                                                 )
-                                            )
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        if (reviews.isNotEmpty()) {
-                            item {
-                                Text(
-                                    text = "What Pet Parents Are Saying",
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    modifier = Modifier
-                                        .padding(horizontal = MaterialTheme.dimens.small1)
-                                        .padding(top = 20.dp, bottom = 8.dp)
-                                )
-                            }
-                            item {
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    items(reviews) { review ->
-                                        ReviewCard(
-                                            modifier = Modifier.padding(
-                                                start = if (review == reviews.first()) MaterialTheme.dimens.small1
-                                                else 0.dp,
-                                                end = if (review == reviews.last()) MaterialTheme.dimens.small1
-                                                else 0.dp
-                                            ),
-                                            maxStars = 5,
-                                            stars = review.stars.toDouble(),
-                                            name = review.userName,
-                                            review = review.description,
-                                            date = review.createdAt,
-                                            color = Color.White.copy(0.5f)
-                                        )
+                            if (reviews.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        text = "What Pet Parents Are Saying",
+                                        style = MaterialTheme.typography.titleSmall.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier
+                                            .padding(horizontal = MaterialTheme.dimens.small1)
+                                            .padding(top = 20.dp, bottom = 8.dp)
+                                    )
+                                }
+                                item {
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        items(reviews) { review ->
+                                            ReviewCard(
+                                                modifier = Modifier.padding(
+                                                    start = if (review == reviews.first()) MaterialTheme.dimens.small1
+                                                    else 0.dp,
+                                                    end = if (review == reviews.last()) MaterialTheme.dimens.small1
+                                                    else 0.dp
+                                                ),
+                                                maxStars = 5,
+                                                stars = review.stars.toDouble(),
+                                                name = review.userName,
+                                                review = review.description,
+                                                date = review.createdAt,
+                                                color = Color.White.copy(0.5f)
+                                            )
+                                        }
                                     }
                                 }
+
                             }
 
                         }
