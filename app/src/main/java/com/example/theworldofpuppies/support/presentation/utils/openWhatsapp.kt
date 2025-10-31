@@ -19,8 +19,8 @@ fun openWhatsappChatPreferBusiness(context: Context, phoneNumber: String, messag
     val baseLink = "https://api.whatsapp.com/send?phone=$phoneNumber" + (encodedMessage?.let { "&text=$it" } ?: "")
 
     val whatsappPackage = when {
-        isAppInstalled(context, "com.whatsapp.w4b") -> "com.whatsapp.w4b" // WhatsApp Business
-        isAppInstalled(context, "com.whatsapp") -> "com.whatsapp" // regular
+        isAppInstalled(context, "com.whatsapp.w4b") -> "com.whatsapp.w4b"
+        isAppInstalled(context, "com.whatsapp") -> "com.whatsapp"
         else -> null
     }
 
